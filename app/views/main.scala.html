@@ -1,15 +1,62 @@
 @(title: String)(content: Html)
 
 <!DOCTYPE html>
-
 <html>
-    <head>
-        <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-        <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
-    </head>
-    <body>
-        @content
-    </body>
+  <head>
+    <title>@title</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/docs.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+    <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li><a href="javascript:void(0);">Home</a></li>
+              <li><a href="javascript:void(0);">Crawl Stats</a></li>
+              <li><a href="javascript:void(0);">Admin</a></li>
+            </ul>
+            <form class="navbar-form pull-right">
+              <div class="input-append" style="margin-top:7px;">
+                <input class="span3 monitrix-searchfield" style="font-size:12px; height:16px;" type="text" placeholder="Enter Host or URL...">
+                <button type="submit" class="btn btn-small">Go!</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <header class="jumbotron subhead">
+      <div class="container">
+        <h1>monitrix</h1>
+        <p class="lead">Current Crawl <span class="monitrix-crawl-factoid">running since</span></p>
+      </div>
+    </header>
+    
+    <!-- TODO custom subnav styling -->
+    
+    <div class="navbar navbar-fixed-top" style="top:240px;">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li><a href="javascript:void(0);">Crawl Timeline</a></li>
+              <li><a href="javascript:void(0);">Seed Stats</a></li>
+              <li><a href="javascript:void(0);">Crawl Parameters</a></li>
+              <li><a href="javascript:void(0);">Alerts</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="container">
+      @content
+    </div>
+  </body>
 </html>

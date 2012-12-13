@@ -1,0 +1,34 @@
+@import url(http://fonts.googleapis.com/css?family=Prosto+One);
+
+html, body {
+  margin:20px 0px 0px 0px;
+  padding:0px;
+  font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.monitrix-row {
+  width:80%;
+  margin:0px auto;
+  min-width:920px;
+}
+
+.monitrix-header {
+  margin:0px 0px 30px 0px;
+  padding:30px 0px;
+  color:#fff;
+  background:#582828; /* Old browsers */
+  background:-moz-linear-gradient(45deg,  #582828 0%, #351515 100%); /* FF3.6+ */
+  background:-o-linear-gradient(45deg,  #582828 0%,#351515 100%); /* Opera 11.10+ */
+  background:-ms-linear-gradient(45deg,  #582828 0%,#351515 100%); /* IE10+ */
+  background:-webkit-gradient(linear, left bottom, right top, color-stop(0%,#582828), color-stop(100%,#351515)); /* Chrome,Safari4+ */
+  background:linear-gradient(45deg,  #582828 0%,#351515 100%); /* W3C */
+  filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#020031', endColorstr='#6d3353',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+  text-shadow:0 1px 3px rgba(0, 0, 0, .4), 0 0 30px rgba(0, 0, 0, .075);
+  -webkit-box-shadow: inset 0 3px 7px rgba(0, 0, 0, .1), inset 0 -3px 7px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .2);
+  -moz-box-shadow: inset 0 3px 7px rgba(0,0,0,.1), inset 0 -3px 7px rgba(0,0,0,.1), 0 1px 3px rgba(0, 0, 0, .2);
+  box-shadow: inset 0 3px 7px rgba(0, 0, 0, .1), inset 0 -3px 7px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .2); 
+}
+
+.monitrix-header h1 { margin:0px; font-size:50px; font-family:"Prosto One"; }
+.monitrix-header p { margin:0px; padding:5px 0px 5px 2px; font-size:15px; }
+.monitrix-crawl-factoid { color: #d77; font-style:italic; }

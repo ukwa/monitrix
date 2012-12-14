@@ -2,7 +2,7 @@
 
 A monitoring system for Heritrix 3.
 
-## Getting started
+## Getting Started
 
 To start the application in development mode, change into the project root folder and type 
 
@@ -13,3 +13,12 @@ The application will be at [http://localhost:9000](http://localhost:9000). To (p
 To generate an Eclipse project, type
 
     play eclipsify
+    
+## Using MongoDB
+
+monitrix needs access to a [MongoDB](http://www.mongodb.org) NoSQL database server.
+
+* Use the ``mongod`` command to start MongoDB (hint: ``mongod --help``)
+* MongoDB provides a Web admin dashboard  at [http://localhost:28017](http://localhost:28017). Make sure
+  you start MongoDB with the ``--rest`` option (when in dev mode) to enable full dashboard functionality.
+* Use ``mongo <dbname> --eval "db.dropDatabase()"`` to drop a DB 

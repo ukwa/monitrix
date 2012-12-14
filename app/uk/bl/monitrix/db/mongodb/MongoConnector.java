@@ -12,7 +12,6 @@ import play.Play;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 
@@ -32,15 +31,15 @@ public class MongoConnector implements DBConnector {
 	private static final String PROP_KEY_DB_NAME = "mongo.db.name";
 	
 	// String constants - DB collection names
-	private static final String COLLECTION_NAME_GLOBAL_STATS = "global-stats";
-	private static final String COLLECTION_NAME_LOG = "heretrix-log";
+	static final String COLLECTION_NAME_GLOBAL_STATS = "global-stats";
+	static final String COLLECTION_NAME_LOG = "heretrix-log";
 	
 	// String constants - DB column/field keys
-	private static final String FIELD_TIMESTAMP = "timestamp";
-	private static final String FIELD_LOG_LINE = "line";
-	private static final String FIELD_NUMBER_OF_LINES_TOTAL = "lines-total";
-	private static final String FIELD_CRAWL_START = "crawl-started";
-	private static final String FIELD_CRAWL_LAST_ACTIVITIY = "crawl-last-activity";
+	static final String FIELD_TIMESTAMP = "timestamp";
+	static final String FIELD_LOG_LINE = "line";
+	static final String FIELD_NUMBER_OF_LINES_TOTAL = "lines-total";
+	static final String FIELD_CRAWL_START = "crawl-started";
+	static final String FIELD_CRAWL_LAST_ACTIVITIY = "crawl-last-activity";
 	
 	// Bulk insert chunk size
 	private static final int BULK_SIZE = 500000;
@@ -127,31 +126,7 @@ public class MongoConnector implements DBConnector {
 	
 	@Override
 	public CrawlStatistics getCrawlStatistics() {
-		// A temporary hack only!
-		DBObject stats = null;
-		
-		DBCursor cursor = globalStats.find();
-		if (cursor.hasNext())
-			stats = cursor.next();
-		cursor.close();
-		
-		if (stats == null)
-			throw new RuntimeException("Corrupt DB - Global crawl stats missing!");
-			
-		final long crawlStart = (Long) stats.get(FIELD_CRAWL_START);
-		final long crawlLastActivity = (Long) stats.get(FIELD_CRAWL_LAST_ACTIVITIY); 
-				
-		return new CrawlStatistics() {
-			@Override
-			public long getTimeOfLastCrawlActivity() {
-				return crawlLastActivity;
-			}
-			
-			@Override
-			public long getCrawlStartTime() {
-				return crawlStart;
-			}
-		};
+		return new MongoBackedCrawlStatistics(db);
 	}
 
 	@Override

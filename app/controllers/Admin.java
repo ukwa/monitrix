@@ -6,7 +6,7 @@ import play.mvc.Result;
 public class Admin extends Controller{
 
 	public static Result index() {
-		return ok(views.html.admin.render());
+		return ok(views.html.admin.index.render());
 	}
 	
 }

@@ -6,7 +6,7 @@ import play.mvc.Result;
 public class CrawlParameters extends Controller {
 	
 	public static Result index() {
-		return ok(views.html.crawlParams.render());
+		return ok(views.html.crawlParameters.index.render());
 	}
 	
 }

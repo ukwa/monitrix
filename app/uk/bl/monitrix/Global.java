@@ -33,7 +33,7 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public void onStart(Application app) {
-		connectToDB();
+		// 
 	}  
 	
 	@Override
@@ -45,7 +45,7 @@ public class Global extends GlobalSettings {
 	@Override
 	public Result onError(RequestHeader request, Throwable t) {
 		t.printStackTrace();
-		return Results.ok(views.html.error.render(t));
+		return Results.ok(views.html.error.generalServerError.render(t));
 	}
 	
 	@Override
@@ -59,7 +59,7 @@ public class Global extends GlobalSettings {
 				return new Action.Simple() {
 					@Override
 					public Result call(Context arg0) throws Throwable {
-						return ok(views.html.dbNotFound.render());
+						return ok(views.html.error.dbConnectError.render());
 					}
 				};
 			}

@@ -7,7 +7,7 @@ import uk.bl.monitrix.Global;
 public class Timeline extends Controller {
 
 	public static Result index() {
-		return ok(views.html.timeline.render(Global.getCrawlStatistics()));
+		return ok(views.html.timeline.index.render(Global.getCrawlStatistics()));
 	}
 	
 	public static Result getDatavolume() {

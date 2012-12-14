@@ -12,9 +12,11 @@ import play.Play;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 
+import uk.bl.monitrix.db.CrawlStatistics;
 import uk.bl.monitrix.db.DBConnector;
 import uk.bl.monitrix.heritrix.LogEntry;
 
@@ -36,6 +38,9 @@ public class MongoConnector implements DBConnector {
 	// String constants - DB column/field keys
 	private static final String FIELD_TIMESTAMP = "timestamp";
 	private static final String FIELD_LOG_LINE = "line";
+	private static final String FIELD_NUMBER_OF_LINES_TOTAL = "lines-total";
+	private static final String FIELD_CRAWL_START = "crawl-started";
+	private static final String FIELD_CRAWL_LAST_ACTIVITIY = "crawl-last-activity";
 	
 	// Bulk insert chunk size
 	private static final int BULK_SIZE = 500000;
@@ -76,6 +81,11 @@ public class MongoConnector implements DBConnector {
 		Logger.info("Writing log to MongoDB");
 		long start = System.currentTimeMillis();
 		
+		// Keep track of global statistics
+		long numberOfLines = 0;
+		long crawlStart = Long.MAX_VALUE;
+		long crawlLastActivity = 0;
+		
 		while (iterator.hasNext()) {
 			long bulkStart = System.currentTimeMillis();
 			
@@ -85,19 +95,63 @@ public class MongoConnector implements DBConnector {
 			while (iterator.hasNext() & counter < BULK_SIZE) {
 				LogEntry next = iterator.next();
 				
+				long timestamp = next.getTimestamp().getTime();
+				if (timestamp < crawlStart)
+					crawlStart = timestamp;
+				if (timestamp > crawlLastActivity)
+					crawlLastActivity = timestamp;
+
 				BasicDBObject dbo = new BasicDBObject();
-				dbo.put(FIELD_TIMESTAMP, next.getTimestamp().getTime());
+				dbo.put(FIELD_TIMESTAMP, timestamp);
 				dbo.put(FIELD_LOG_LINE, next.toString());
 				bulk.add(dbo);	
 				
 				counter++;
 			}
+			numberOfLines += counter;
 			
 			log.insert(bulk);
 			Logger.info("Wrote " + counter + " log entries to MongoDB - took " + (System.currentTimeMillis() - bulkStart) + " ms");
 		}
 		
+		// TODO update rather than replace!
+		BasicDBObject insertStats = new BasicDBObject();
+		insertStats.put(FIELD_NUMBER_OF_LINES_TOTAL, numberOfLines);
+		insertStats.put(FIELD_CRAWL_START, crawlStart);
+		insertStats.put(FIELD_CRAWL_LAST_ACTIVITIY, crawlLastActivity);
+		globalStats.drop();
+		globalStats.insert(insertStats);
+		
 		Logger.info("Done - took " + (System.currentTimeMillis() - start) + " ms");
+	}
+	
+	@Override
+	public CrawlStatistics getCrawlStatistics() {
+		// A temporary hack only!
+		DBObject stats = null;
+		
+		DBCursor cursor = globalStats.find();
+		if (cursor.hasNext())
+			stats = cursor.next();
+		cursor.close();
+		
+		if (stats == null)
+			throw new RuntimeException("Corrupt DB - Global crawl stats missing!");
+			
+		final long crawlStart = (Long) stats.get(FIELD_CRAWL_START);
+		final long crawlLastActivity = (Long) stats.get(FIELD_CRAWL_LAST_ACTIVITIY); 
+				
+		return new CrawlStatistics() {
+			@Override
+			public long getTimeOfLastCrawlActivity() {
+				return crawlLastActivity;
+			}
+			
+			@Override
+			public long getCrawlStartTime() {
+				return crawlStart;
+			}
+		};
 	}
 
 	@Override

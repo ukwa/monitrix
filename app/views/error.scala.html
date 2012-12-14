@@ -1,0 +1,21 @@
+@(throwable: Throwable)
+
+@main("Monitrix - Error") {
+  <!-- TODO figure out how custom tags work in Play/Java -->
+  <li><a href="/">Home</a></li>
+  <li><a href="timeline">Crawl Timeline</a></li>
+  <li><a href="seed-stats">Seed Stats</a></li>
+  <li><a href="crawl-parameters">Crawl Parameters</a></li>
+  <li><a href="alerts">Alerts</a></li>
+  <li><a href="admin">Admin</a></li>
+}{
+  <div class="row">
+    <div class="span12">
+      <h1>Sorry.</h1>
+      <p>monitrix encountered a fatal error. Here's what the server said:</p>
+      <p>
+        <code>@throwable.getMessage()</code>
+      </p>
+    </div>
+  </div>
+}

@@ -14,6 +14,8 @@ public interface DBConnector {
 	// TODO needs to change eventually, since we want to work in 'tail -f'-like mode
 	public void insert(Iterator<LogEntry> iterator);
 	
+	public CrawlStatistics getCrawlStatistics();
+	
 	public void close();
 
 }

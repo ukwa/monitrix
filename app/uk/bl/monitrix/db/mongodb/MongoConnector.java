@@ -28,6 +28,7 @@ public class MongoConnector implements DBConnector {
 	
 	// String constants - configuration properties
 	private static final String PROP_KEY_MONGO_SERVER = "mongo.host";
+	private static final String PROP_KEY_MONGO_PORT = "mongo.port";
 	private static final String PROP_KEY_DB_NAME = "mongo.db.name";
 	
 	// String constants - DB collection names
@@ -58,15 +59,24 @@ public class MongoConnector implements DBConnector {
 	
 	public MongoConnector() throws IOException {
 		Configuration config = Play.application().configuration();
-		init(config.getString(PROP_KEY_MONGO_SERVER), config.getString(PROP_KEY_DB_NAME));
+		String dbHost = config.getString(PROP_KEY_MONGO_SERVER);
+		String dbName = config.getString(PROP_KEY_DB_NAME);
+		int dbPort;
+		try {
+			dbPort = Integer.parseInt(config.getString(PROP_KEY_MONGO_PORT));
+		} catch (Throwable t) {
+			Logger.warn("Error reading mongo.port from application.conf - defaulting to 27017");
+			dbPort = 27017;
+		}
+		init(dbHost, dbName, dbPort);
 	}
 	
-	public MongoConnector(String hostName, String dbName) throws IOException {
-		init(hostName, dbName);
+	public MongoConnector(String hostName, String dbName, int dbPort) throws IOException {
+		init(hostName, dbName, dbPort);
 	}
 	
-	private void init(String hostName, String dbName) throws IOException {
-		this.mongo = new Mongo(hostName);
+	private void init(String hostName, String dbName, int dbPort) throws IOException {
+		this.mongo = new Mongo(hostName, dbPort);
 		this.db = mongo.getDB(dbName);
 		this.globalStats = db.getCollection(COLLECTION_NAME_GLOBAL_STATS);
 		this.log = db.getCollection(COLLECTION_NAME_LOG);

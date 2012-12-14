@@ -16,7 +16,7 @@ public class LogProcessor {
 	private static final String LOG_FILE = "/home/simonr/Downloads/crawl.log.20120914182409";
 	
 	public static void main(String[] args) throws IOException {
-		MongoConnector mongo = new MongoConnector("localhost", "monitrix");
+		MongoConnector mongo = new MongoConnector("localhost", "monitrix", 27017);
 		LogfileReader reader = new LogfileReader(LOG_FILE);
 		mongo.insert(reader.iterator());
 	}

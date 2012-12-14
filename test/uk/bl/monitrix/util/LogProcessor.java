@@ -1,9 +1,8 @@
 package uk.bl.monitrix.util;
 
-import java.io.FileNotFoundException;
-import java.util.Iterator;
+import java.io.IOException;
 
-import uk.bl.monitrix.heritrix.LogEntry;
+import uk.bl.monitrix.db.mongodb.MongoConnector;
 import uk.bl.monitrix.heritrix.LogfileReader;
 
 /**
@@ -16,13 +15,10 @@ public class LogProcessor {
 	private static final String LOG_FILE = "/home/simonr/Downloads/sample-log-2E6.log";
 	// private static final String LOG_FILE = "/home/simonr/Downloads/crawl.log.20120914182409";
 	
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException {
+		MongoConnector mongo = new MongoConnector("localhost", "monitrix");
 		LogfileReader reader = new LogfileReader(LOG_FILE);
-		Iterator<LogEntry> iterator = reader.iterator();
-		
-		while (iterator.hasNext()) {
-			// TODO write to Mongo
-		}
+		mongo.insert(reader.iterator());
 	}
 
 }

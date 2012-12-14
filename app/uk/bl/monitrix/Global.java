@@ -11,15 +11,21 @@ import play.mvc.Result;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Results;
-import uk.bl.monitrix.db.CrawlStatistics;
 import uk.bl.monitrix.db.DBConnector;
 import uk.bl.monitrix.db.mongodb.MongoConnector;
+import uk.bl.monitrix.stats.CrawlStatistics;
 
+/**
+ * The Play! Global object.
+ * 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class Global extends GlobalSettings {
 	
+	// Storage backend
 	private static DBConnector db = null;
 	
-	private void connectToDB() {
+	private void connectBackend() {
 		try {
 			db = new MongoConnector();
 		} catch (Exception e) {
@@ -32,37 +38,36 @@ public class Global extends GlobalSettings {
 	}
 	
 	@Override
-	public void onStart(Application app) {
-		// 
-	}  
-	
-	@Override
 	public void onStop(Application app) {
 		if (db != null)
 			db.close();
 	}
 	
+	/**
+	 * Redirect all errors (i.e. RuntimeExceptions) to a custom error page.
+	 */
 	@Override
 	public Result onError(RequestHeader request, Throwable t) {
 		t.printStackTrace();
 		return Results.ok(views.html.error.generalServerError.render(t));
 	}
 	
+	/**
+	 * In case the DB is not connected, montrix redirects to a specific error
+	 * page with extra DB conntection instructions.
+	 */
 	@Override
 	@SuppressWarnings("rawtypes")
 	public Action onRequest(Request request, Method actionMethod) {
-		// In case there is no proper DB connection, redirect to specific error page
 		if (db == null) {
-			connectToDB();
-			
-			if (db == null) {
+			connectBackend();
+			if (db == null)
 				return new Action.Simple() {
 					@Override
 					public Result call(Context arg0) throws Throwable {
 						return ok(views.html.error.dbConnectError.render());
 					}
 				};
-			}
 		}
 		
 		return super.onRequest(request, actionMethod);

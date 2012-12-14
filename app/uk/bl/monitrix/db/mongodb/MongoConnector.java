@@ -16,9 +16,9 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 
-import uk.bl.monitrix.db.CrawlStatistics;
 import uk.bl.monitrix.db.DBConnector;
 import uk.bl.monitrix.heritrix.LogEntry;
+import uk.bl.monitrix.stats.CrawlStatistics;
 
 /**
  * An implementation of {@link DBConnector} for MongoDB.

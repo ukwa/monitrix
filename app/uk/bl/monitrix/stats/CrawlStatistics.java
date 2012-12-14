@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db;
+package uk.bl.monitrix.stats;
 
 public interface CrawlStatistics {
 	

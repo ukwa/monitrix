@@ -3,6 +3,7 @@ package uk.bl.monitrix.db;
 import java.util.Iterator;
 
 import uk.bl.monitrix.heritrix.LogEntry;
+import uk.bl.monitrix.stats.CrawlStatistics;
 
 /**
  * A minimal DB connection interface, so we're prepared to switch storage backends.

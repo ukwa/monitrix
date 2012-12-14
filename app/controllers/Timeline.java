@@ -9,4 +9,16 @@ public class Timeline extends Controller {
 		return ok(views.html.timeline.render());
 	}
 	
+	public static Result getDatavolume() {
+		return ok();
+	}
+	
+	public static Result getURLs() {
+		return null;
+	}
+	
+	public static Result getHosts() {
+		return null;
+	}
+	
 }

@@ -7,5 +7,47 @@
   <li><a href="alerts">Alerts</a></li>
   <li><a href="admin">Admin</a></li>
 } {
+  <div class="row">
+    <div class="span3">
+      <span class="label" style="padding:10px 20px;">CRAWL IN PROGRESS</span>
+      <table class="table table-condensed unstyled" style="margin-top:20px;">
+        <tr><td>812.123</td><td>hosts visited</td></tr>
+        <tr><td>2.512.124</td><td>URLs crawled</td></tr>
+        <tr><td>3.2 GB</td><td> data processed</td></tr>
+      </table>
+    </div>
     
+    <div class="span9">
+      <div class="monitrix-timeline" id="graph"></div>
+    </div>
+  </div>
+  
+  <script>
+    $.getJSON('/api/timeline/datavolume', function(data) {
+      if (data) {
+        var graph = new Rickshaw.Graph({
+          element: document.querySelector("#chart"), 
+          width: 500, 
+          height: 300, 
+          renderer: 'line',
+          series: [{
+            color: '#ff0000',
+            data: data,
+            name: 'Download Volume'
+          }]
+        });
+        graph.render();  
+        
+        var hoverDetail = new Rickshaw.Graph.HoverDetail({
+          graph: graph,
+          yFormatter: function(y) { return Math.floor(y / 1048576) + ' MB'; }
+        });
+        
+        var axes = new Rickshaw.Graph.Axis.Time( {
+        	graph: graph
+        } );
+        axes.render();
+      }
+    });
+  </script>
 }

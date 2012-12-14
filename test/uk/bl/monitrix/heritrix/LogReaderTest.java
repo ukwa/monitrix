@@ -12,7 +12,7 @@ import uk.bl.monitrix.heritrix.LogEntry;
 public class LogReaderTest {
 	
 	/** a tiny, 1000-line log file for unit testing **/
-	private static final String PATH_TO_LOGFILE = "test/sample-log-1E3.log";
+	private static final String PATH_TO_LOGFILE = "test/sample-log-1E3.txt";
 
 	@Test
 	public void testLogRead() throws IOException {

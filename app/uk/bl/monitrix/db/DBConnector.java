@@ -2,8 +2,8 @@ package uk.bl.monitrix.db;
 
 import java.util.Iterator;
 
+import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.heritrix.LogEntry;
-import uk.bl.monitrix.stats.CrawlStatistics;
 
 /**
  * A minimal DB connection interface, so we're prepared to switch storage backends.
@@ -12,11 +12,21 @@ import uk.bl.monitrix.stats.CrawlStatistics;
  */
 public interface DBConnector {
 	
-	// TODO needs to change eventually, since we want to work in 'tail -f'-like mode
+	/**
+	 * TODO need to change this, since we want to work in 'tail -f'-like mode
+	 * @param iterator
+	 */
 	public void insert(Iterator<LogEntry> iterator);
 	
+	/**
+	 * Returns crawl statistics.
+	 * @return the crawl statistics
+	 */
 	public CrawlStatistics getCrawlStatistics();
 	
+	/**
+	 * Closes the connection
+	 */
 	public void close();
 
 }

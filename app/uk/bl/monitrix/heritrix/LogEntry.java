@@ -20,7 +20,7 @@ public class LogEntry {
 	
 	private List<String> fields = new ArrayList<String>();
 	
-	LogEntry(String line) {
+	public LogEntry(String line) {
 		this.line = line;
 		for (String field : line.split(" ")) {
 			if (!field.isEmpty())

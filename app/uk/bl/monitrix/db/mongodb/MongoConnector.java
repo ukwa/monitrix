@@ -5,70 +5,45 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import play.Configuration;
 import play.Logger;
-import play.Play;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 
+import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.db.DBConnector;
+import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsCollection;
+import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsDBO;
+import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogCollection;
+import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogDBO;
+import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsCollection;
 import uk.bl.monitrix.heritrix.LogEntry;
-import uk.bl.monitrix.stats.CrawlStatistics;
 
 /**
  * An implementation of {@link DBConnector} for MongoDB.
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class MongoConnector implements DBConnector {
-	
-	// String constants - configuration properties
-	private static final String PROP_KEY_MONGO_SERVER = "mongo.host";
-	private static final String PROP_KEY_MONGO_PORT = "mongo.port";
-	private static final String PROP_KEY_DB_NAME = "mongo.db.name";
-	
-	// String constants - DB collection names
-	static final String COLLECTION_NAME_GLOBAL_STATS = "global-stats";
-	static final String COLLECTION_NAME_LOG = "heretrix-log";
-	
-	// String constants - DB column/field keys
-	static final String FIELD_TIMESTAMP = "timestamp";
-	static final String FIELD_LOG_LINE = "line";
-	static final String FIELD_NUMBER_OF_LINES_TOTAL = "lines-total";
-	static final String FIELD_CRAWL_START = "crawl-started";
-	static final String FIELD_CRAWL_LAST_ACTIVITIY = "crawl-last-activity";
-	
-	// Bulk insert chunk size
-	private static final int BULK_SIZE = 500000;
-	
-	// Mongo DB host
+public class MongoConnector implements DBConnector {	
+
+	/** MongoDB host **/
 	private Mongo mongo;
 	
-	// Monitrix DB
+	/** Monitrix database **/
 	private DB db;
 	
-	// DB collection containing global stats
-	private DBCollection globalStats;
+	/** Global Stats collection **/
+	private GlobalStatsCollection globalStatsCollection;
 	
-	// DB collection containing the raw log file
-	private DBCollection log;
+	/** Pre-Aggregated Stats collection **/
+	private PreAggregatedStatsCollection preAggregatedStatsCollection;
+	
+	/** Heretrix Log collection **/
+	private HeritrixLogCollection heritrixLogCollection;
 	
 	public MongoConnector() throws IOException {
-		Configuration config = Play.application().configuration();
-		String dbHost = config.getString(PROP_KEY_MONGO_SERVER);
-		String dbName = config.getString(PROP_KEY_DB_NAME);
-		int dbPort;
-		try {
-			dbPort = Integer.parseInt(config.getString(PROP_KEY_MONGO_PORT));
-		} catch (Throwable t) {
-			Logger.warn("Error reading mongo.port from application.conf - defaulting to 27017");
-			dbPort = 27017;
-		}
-		init(dbHost, dbName, dbPort);
+		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
 	}
 	
 	public MongoConnector(String hostName, String dbName, int dbPort) throws IOException {
@@ -78,11 +53,9 @@ public class MongoConnector implements DBConnector {
 	private void init(String hostName, String dbName, int dbPort) throws IOException {
 		this.mongo = new Mongo(hostName, dbPort);
 		this.db = mongo.getDB(dbName);
-		this.globalStats = db.getCollection(COLLECTION_NAME_GLOBAL_STATS);
-		this.log = db.getCollection(COLLECTION_NAME_LOG);
-		
-		// Index log collection by timestamp (will be skipped by Mongo if index exists)
-		this.log.createIndex(new BasicDBObject("timestamp", 1));		
+		this.globalStatsCollection = new GlobalStatsCollection(db);
+		this.preAggregatedStatsCollection = new PreAggregatedStatsCollection(db);
+		this.heritrixLogCollection = new HeritrixLogCollection(db);
 	}
 
 	@Override
@@ -90,47 +63,62 @@ public class MongoConnector implements DBConnector {
 		Logger.info("Writing log to MongoDB");
 		long start = System.currentTimeMillis();
 		
-		// Keep track of global statistics
-		long numberOfLines = 0;
-		long crawlStart = Long.MAX_VALUE;
+		// Keep track of import for global stats
+		long crawlStartTime = Long.MAX_VALUE;
 		long crawlLastActivity = 0;
+		long linesTotal = 0;
 		
 		while (iterator.hasNext()) {
 			long bulkStart = System.currentTimeMillis();
 			
-			List<DBObject> bulk = new ArrayList<DBObject>();
+			List<HeritrixLogDBO> bulk = new ArrayList<HeritrixLogDBO>();
 			
-			int counter = 0; // Should be slightly faster than using list size
-			while (iterator.hasNext() & counter < BULK_SIZE) {
+			int counter = 0; // Should be slightly faster than using list.size() to count
+			while (iterator.hasNext() & counter < MongoProperties.BULK_INSERT_CHUNK_SIZE) {
 				LogEntry next = iterator.next();
+				counter++;
 				
+				// Update global stats
 				long timestamp = next.getTimestamp().getTime();
-				if (timestamp < crawlStart)
-					crawlStart = timestamp;
+				if (timestamp < crawlStartTime)
+					crawlStartTime = timestamp;
 				if (timestamp > crawlLastActivity)
 					crawlLastActivity = timestamp;
 
-				BasicDBObject dbo = new BasicDBObject();
-				dbo.put(FIELD_TIMESTAMP, timestamp);
-				dbo.put(FIELD_LOG_LINE, next.toString());
+				// Assemble the log DB entity
+				HeritrixLogDBO dbo = new HeritrixLogDBO(new BasicDBObject());
+				dbo.setTimestamp(timestamp);
+				dbo.setLogLine(next.toString());
 				bulk.add(dbo);	
 				
-				counter++;
+				// Update pre-aggregated stats
+				preAggregatedStatsCollection.update(next);
 			}
-			numberOfLines += counter;
 			
-			log.insert(bulk);
-			Logger.info("Wrote " + counter + " log entries to MongoDB - took " + (System.currentTimeMillis() - bulkStart) + " ms");
+			linesTotal += counter;
+			heritrixLogCollection.insert(bulk);
+			Logger.info("Wrote " + counter + " log entries to MongoDB - took " + (System.currentTimeMillis() - bulkStart) + " ms");			
 		}
+		preAggregatedStatsCollection.commit();
 		
-		// TODO update rather than replace!
-		BasicDBObject insertStats = new BasicDBObject();
-		insertStats.put(FIELD_NUMBER_OF_LINES_TOTAL, numberOfLines);
-		insertStats.put(FIELD_CRAWL_START, crawlStart);
-		insertStats.put(FIELD_CRAWL_LAST_ACTIVITIY, crawlLastActivity);
-		globalStats.drop();
-		globalStats.insert(insertStats);
-		
+		// Update global stats			
+		GlobalStatsDBO stats = globalStatsCollection.getStats();
+		if (stats == null) {
+			stats = new GlobalStatsDBO(new BasicDBObject());
+			stats.setCrawlStartTime(crawlStartTime);
+			stats.setCrawlLastActivity(crawlLastActivity);
+			stats.setLinesTotal(linesTotal);
+		} else {	
+			if (crawlStartTime < stats.getCrawlStartTime())
+				stats.setCrawlStartTime(crawlStartTime);
+			
+			if (crawlLastActivity > stats.getCrawlLastActivity())
+				stats.setCrawlLastActivity(crawlLastActivity);
+			
+			stats.setLinesTotal(stats.getLinesTotal() + linesTotal);
+		}
+		globalStatsCollection.save(stats);
+				
 		Logger.info("Done - took " + (System.currentTimeMillis() - start) + " ms");
 	}
 	
@@ -138,7 +126,7 @@ public class MongoConnector implements DBConnector {
 	public CrawlStatistics getCrawlStatistics() {
 		return new MongoBackedCrawlStatistics(db);
 	}
-
+	
 	@Override
 	public void close() {
 		this.mongo.close();

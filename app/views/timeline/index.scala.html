@@ -1,4 +1,4 @@
-@(crawlStatistics: uk.bl.monitrix.stats.CrawlStatistics)
+@(crawlStatistics: uk.bl.monitrix.CrawlStatistics)
 
 @main("Monitrix - Crawl Timeline") {
   <!-- TODO figure out how custom tags work in Play/Java -->
@@ -22,7 +22,7 @@
     </div>
     
     <div class="span9">
-      <div class="monitrix-timeline" id="graph"></div>
+      <div class="monitrix-timeline" id="chart"></div>
     </div>
   </div>
   
@@ -31,11 +31,10 @@
       if (data) {
         var graph = new Rickshaw.Graph({
           element: document.querySelector("#chart"), 
-          width: 500, 
           height: 300, 
           renderer: 'line',
           series: [{
-            color: '#ff0000',
+            color: '#c05020',
             data: data,
             name: 'Download Volume'
           }]

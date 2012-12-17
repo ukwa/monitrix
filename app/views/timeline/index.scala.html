@@ -21,10 +21,24 @@
       </table>
     </div>
     
-    <div class="span9">
-      <div class="monitrix-timeline" id="chart"></div>
+    <style>
+      #y_axis {
+        display:inline-block;
+        width:80px;
+        height:300px;
+      }
+      
+      #chart {
+        display:inline-block;
+      }
+    </style>
+    
+    <div style="border:1px solid #ccc; padding:30px 0px;" class="span9">
+      <div id="y_axis"></div><div class="monitrix-timeline" id="chart"></div>
     </div>
   </div>
+  
+
   
   <script>
     $.getJSON('/api/timeline/datavolume', function(data) {
@@ -32,6 +46,7 @@
         var graph = new Rickshaw.Graph({
           element: document.querySelector("#chart"), 
           height: 300, 
+          width:600,
           renderer: 'line',
           series: [{
             color: '#c05020',
@@ -39,17 +54,25 @@
             name: 'Download Volume'
           }]
         });
-        graph.render();  
+        // graph.render();  
         
         var hoverDetail = new Rickshaw.Graph.HoverDetail({
           graph: graph,
-          yFormatter: function(y) { return Math.floor(y / 1048576) + ' MB'; }
+          yFormatter: function(y) { return (y / (1024 * 1024 * 1024)).toFixed(2) + ' GB'; }
         });
         
-        var axes = new Rickshaw.Graph.Axis.Time( {
+        var x_axis = new Rickshaw.Graph.Axis.Time({
         	graph: graph
-        } );
-        axes.render();
+        });
+        
+        var y_axis = new Rickshaw.Graph.Axis.Y({
+            graph: graph,
+            orientation: 'left',
+            tickFormat: function(y) { return (y / (1024 * 1024 * 1024)).toFixed(2) + ' GB'; },
+            element: document.getElementById('y_axis'),
+        });
+
+        graph.render();
       }
     });
   </script>

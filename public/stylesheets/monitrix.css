@@ -32,3 +32,13 @@ html, body {
 .monitrix-header h1 { margin:0px; font-size:50px; font-family:"Prosto One"; }
 .monitrix-header p { margin:0px; padding:5px 0px 5px 2px; font-size:15px; }
 .monitrix-crawl-factoid { color: #d77; font-style:italic; }
+
+.graph-thumb {
+  width:320px;
+  height:180px;
+  border:1px solid #ccc;
+  margin-bottom:40px;
+  background-image:url('../img/ajax-spinner.gif');
+  background-repeat:no-repeat;
+  background-position:146px 76px;
+}

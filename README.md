@@ -22,3 +22,12 @@ monitrix needs access to a [MongoDB](http://www.mongodb.org) NoSQL database serv
 * MongoDB provides a Web admin dashboard  at [http://localhost:28017](http://localhost:28017). Make sure
   you start MongoDB with the ``--rest`` option (when in dev mode) to enable full dashboard functionality.
 * Use ``mongo <dbname> --eval "db.dropDatabase()"`` to drop a DB 
+
+## Loading Test Data into MongoDB
+
+monitrix doesn't load data into MongoDB yet. You can load data manually with the the following Java application
+class, located in the /test folder:
+
+    uk.bl.monitrix.util.LogProcessor
+    
+Edit the path to the Heritrix log you want to load, and start the application (preferably) from your IDE.

@@ -14,11 +14,6 @@ import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsCollection;
 import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsCollection;
 import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsDBO;
 
-/**
- * TODO this class needs caching.
- * 
- * @author Rainer Simon <rainer.simon@ait.ac.at>
- */
 public class MongoBackedCrawlStatistics implements CrawlStatistics {
 	
 	/** Duration after which memory-cached stats are considered invalid **/

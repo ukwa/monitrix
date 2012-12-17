@@ -9,7 +9,7 @@ import com.mongodb.DBObject;
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class PreAggregatedStatsDBO {
+public class PreAggregatedStatsDBO implements Comparable<PreAggregatedStatsDBO> {
 	
 	DBObject dbo;
 	
@@ -39,6 +39,11 @@ public class PreAggregatedStatsDBO {
 	
 	public void setNumberOfURLs(long numberOfURLs) {
 		dbo.put(MongoProperties.FIELD_PRE_AGGREGATED_NUMBER_OF_URLS, numberOfURLs);
+	}
+
+	@Override
+	public int compareTo(PreAggregatedStatsDBO other) {
+		return (int) (this.getTimeslot() - other.getTimeslot());
 	}
 
 }

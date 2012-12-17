@@ -17,7 +17,7 @@ public class Timeline extends Controller {
 	}
 	
 	public static Result getDatavolume() {
-		return ok(Json.toJson(TimeseriesValueFilter.map(stats.getDatavolumeHistory())));
+		return ok(Json.toJson(TimeseriesValueFilter.map(stats.getDatavolumeHistory(100))));
 	}
 	
 	public static Result getURLs() {

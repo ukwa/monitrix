@@ -13,8 +13,8 @@ public interface CrawlStatistics {
 	
 	public long getTimeOfLastCrawlActivity();
 	
-	public List<TimeseriesValue> getDatavolumeHistory();
+	public List<TimeseriesValue> getDatavolumeHistory(int maxDatapoints);
 	
-	public List<TimeseriesValue> getCrawledURLsHistory();
+	public List<TimeseriesValue> getCrawledURLsHistory(int maxDatapoints);
 
 }

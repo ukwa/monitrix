@@ -2,6 +2,7 @@ package uk.bl.monitrix.db;
 
 import java.util.Iterator;
 
+import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.heritrix.LogEntry;
 
@@ -17,6 +18,12 @@ public interface DBConnector {
 	 * @param iterator
 	 */
 	public void insert(Iterator<LogEntry> iterator);
+	
+	/**
+	 * Returns the crawl log.
+	 * @return the crawl log
+	 */
+	public CrawlLog getCrawlLog();
 	
 	/**
 	 * Returns crawl statistics.

@@ -5,6 +5,8 @@
 # Home
 GET     /                                  controllers.Home.index()
 
+GET     /api/log/recent                    controllers.Home.getMostRecent()
+
 # Crawl Timeline
 GET     /timeline                          controllers.Timeline.index()
 GET     /api/timeline/datavolume           controllers.Timeline.getDatavolume()

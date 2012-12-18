@@ -1,14 +1,18 @@
 package uk.bl.monitrix.db.mongodb.heritrixlog;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.db.mongodb.MongoProperties;
+import uk.bl.monitrix.heritrix.LogEntry;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 
-public class HeritrixLogCollection {
+public class HeritrixLogCollection implements CrawlLog {
 		
 	private DBCollection collection;
 	
@@ -21,6 +25,17 @@ public class HeritrixLogCollection {
 	
 	public void insert(List<HeritrixLogDBO> log) {
 		collection.insert(HeritrixLogDBO.map(log));
+	}
+	
+	@Override
+	public List<LogEntry> getMostRecentEntries(int n) {
+		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_LOG_TIMESTAMP, -1)).limit(n);
+		
+		List<LogEntry> recent = new ArrayList<LogEntry>();
+		while(cursor.hasNext())
+			recent.add(new LogEntry(new HeritrixLogDBO(cursor.next()).getLogLine()));
+		
+		return recent;
 	}
 
 }

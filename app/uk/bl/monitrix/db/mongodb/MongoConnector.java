@@ -11,6 +11,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 
+import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.db.DBConnector;
 import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsCollection;
@@ -120,6 +121,11 @@ public class MongoConnector implements DBConnector {
 		globalStatsCollection.save(stats);
 				
 		Logger.info("Done - took " + (System.currentTimeMillis() - start) + " ms");
+	}
+	
+	@Override
+	public CrawlLog getCrawlLog() {
+		return heritrixLogCollection;
 	}
 	
 	@Override

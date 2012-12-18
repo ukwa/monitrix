@@ -1,7 +1,7 @@
 package uk.bl.monitrix.db.mongodb.knownhosts;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import uk.bl.monitrix.db.mongodb.MongoProperties;
 
@@ -14,9 +14,7 @@ public class KnownHostsCollection {
 	
 	private DBCollection collection;
 	
-	// .contains() lookups get incredibly slow when the list grows
-	// TODO replace this with Lucene in-memory index!
-	private List<String> knownHostsCache = null;
+	private Set<String> knownHostsCache = null;
 	
 	public KnownHostsCollection(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
@@ -27,7 +25,7 @@ public class KnownHostsCollection {
 	
 	public boolean exists(String hostname) {
 		if (knownHostsCache == null) {
-			List<String> knownHosts = new ArrayList<String>();
+			Set<String> knownHosts = new HashSet<String>();
 			
 			DBCursor cursor = collection.find();
 			while (cursor.hasNext())

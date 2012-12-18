@@ -30,4 +30,4 @@ class, located in the /test folder:
 
     uk.bl.monitrix.util.LogProcessor
     
-Edit the path to the Heritrix log you want to load, and start the application (preferably) from your IDE.
+Edit the path to the Heritrix log you want to load, and start the application e.g. from your IDE.

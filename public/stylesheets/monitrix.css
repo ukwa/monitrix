@@ -52,7 +52,7 @@ html, body {
 .graph-tumb-loading {
   background-image:url('../img/ajax-spinner.gif');
   background-repeat:no-repeat;
-  background-position:146px 76px;
+  background-position:126px 76px;
   border-width:1px;	
 }
 

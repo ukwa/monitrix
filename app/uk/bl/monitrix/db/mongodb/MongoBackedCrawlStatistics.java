@@ -43,23 +43,6 @@ public class MongoBackedCrawlStatistics extends CrawlStatistics {
 		// Sort by time
 		Collections.sort(stats);
 		return stats;
-		
-		/*
-		if (System.currentTimeMillis() > lastStatsCacheAccess + CACHE_TIMEOUT_MILLIS) {
-			// Clear cache
-			statsCache.clear();
-			
-			// Read from DB
-			Iterator<PreAggregatedStatsDBO> iterator = preAggregatedStats.getPreAggregatedStats();
-			while (iterator.hasNext())
-				statsCache.add(iterator.next());
-			
-			// Sort by time
-			Collections.sort(statsCache);
-		}
-		
-		return statsCache;
-		*/
 	}
 
 	@Override
@@ -108,7 +91,25 @@ public class MongoBackedCrawlStatistics extends CrawlStatistics {
 				return aggregatedStats.size();
 			}
 		}, aggregatedStats.size() / maxDatapoints);
-	}	
+	}
+	
+	@Override
+	public List<TimeseriesValue> getNewHostsCrawledHistory(int maxDatapoints) {
+		final List<PreAggregatedStatsDBO> aggregatedStats = getAggregatedStats(maxDatapoints);
+		
+		return resample(new AbstractList<TimeseriesValue>() {
+			@Override
+			public TimeseriesValue get(int index) {
+				PreAggregatedStatsDBO dbo = aggregatedStats.get(index);
+				return new TimeseriesValue(dbo.getTimeslot(), dbo.getNumberOfNewHostsCrawled());
+			}
+
+			@Override
+			public int size() {
+				return aggregatedStats.size();
+			}
+		}, aggregatedStats.size() / maxDatapoints);
+	}
 	
 	private List<TimeseriesValue> resample(List<TimeseriesValue> series, int factor) {
 		Iterator<TimeseriesValue> original = series.iterator();
@@ -131,6 +132,5 @@ public class MongoBackedCrawlStatistics extends CrawlStatistics {
 		
 		return resampled;
 	}
-
 
 }

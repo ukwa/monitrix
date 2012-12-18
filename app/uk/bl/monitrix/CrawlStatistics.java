@@ -20,5 +20,7 @@ public abstract class CrawlStatistics {
 	public abstract List<TimeseriesValue> getDatavolumeHistory(int maxDatapoints);
 	
 	public abstract List<TimeseriesValue> getCrawledURLsHistory(int maxDatapoints);
+	
+	public abstract List<TimeseriesValue> getNewHostsCrawledHistory(int maxDatapoints);
 
 }

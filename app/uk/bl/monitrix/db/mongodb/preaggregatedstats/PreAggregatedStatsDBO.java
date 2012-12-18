@@ -40,6 +40,14 @@ public class PreAggregatedStatsDBO implements Comparable<PreAggregatedStatsDBO> 
 	public void setNumberOfURLs(long numberOfURLs) {
 		dbo.put(MongoProperties.FIELD_PRE_AGGREGATED_NUMBER_OF_URLS, numberOfURLs);
 	}
+	
+	public long getNumberOfNewHostsCrawled() {
+		return (Long) dbo.get(MongoProperties.FIELD_PRE_AGGREGATED_NEW_HOSTS_CRAWLED);
+	}
+	
+	public void setNumberOfNewHostsCrawled(long newHostsCrawled) {
+		dbo.put(MongoProperties.FIELD_PRE_AGGREGATED_NEW_HOSTS_CRAWLED, newHostsCrawled);
+	}
 
 	@Override
 	public int compareTo(PreAggregatedStatsDBO other) {

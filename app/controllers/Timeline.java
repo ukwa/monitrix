@@ -21,11 +21,11 @@ public class Timeline extends Controller {
 	}
 	
 	public static Result getURLs() {
-		return ok(Json.toJson((TimeseriesValueFilter.map(stats.getCrawledURLsHistory(100)))));
+		return ok(Json.toJson(TimeseriesValueFilter.map(stats.getCrawledURLsHistory(100))));
 	}
 	
-	public static Result getHosts() {
-		return null;
+	public static Result getNewHostsCrawled() {
+		return ok(Json.toJson(TimeseriesValueFilter.map(stats.getNewHostsCrawledHistory(100))));
 	}
 	
 }

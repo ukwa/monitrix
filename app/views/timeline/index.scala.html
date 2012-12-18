@@ -49,7 +49,7 @@
         
         <div class="row-fluid">
           <div class="span6">
-            <p>Number of Hosts Visited</p>
+            <p>Number of New Hosts Crawled</p>
             <div class="graph-thumb-container">
               <div class="graph-thumb-y-axis" id="graph-hosts-axis"></div>
               <div class="graph-thumb graph-tumb-loading" id="graph-hosts"></div>
@@ -121,5 +121,7 @@
     loadGraph('/api/timeline/urls-crawled', 'graph-urls', 'URLs', '#c05020', function(total) {
       $('#total-urls-crawled').html(total);
     });  
+    
+    loadGraph('/api/timeline/new-hosts-crawled', 'graph-hosts', 'New Hosts', '#c05020');
   </script>
 }

@@ -3,25 +3,25 @@
 # ~~~~
 
 # Home
-GET     /                           controllers.Home.index()
+GET     /                                  controllers.Home.index()
 
 # Crawl Timeline
-GET     /timeline                   controllers.Timeline.index()
-GET     /api/timeline/datavolume    controllers.Timeline.getDatavolume()
-GET     /api/timeline/urls-crawled  controllers.Timeline.getURLs()
-GET     /api/timeline/hosts         controllers.Timeline.getHosts()
+GET     /timeline                          controllers.Timeline.index()
+GET     /api/timeline/datavolume           controllers.Timeline.getDatavolume()
+GET     /api/timeline/urls-crawled         controllers.Timeline.getURLs()
+GET     /api/timeline/new-hosts-crawled    controllers.Timeline.getNewHostsCrawled()
 
 # Seed Stats
-GET     /seed-stats                 controllers.Seeds.index()
+GET     /seed-stats                        controllers.Seeds.index()
 
 # Crawl Parameters                  
-GET     /crawl-parameters            controllers.CrawlParameters.index()
+GET     /crawl-parameters                  controllers.CrawlParameters.index()
 
 # Alerts
-GET     /alerts                     controllers.Alerts.index()
+GET     /alerts                            controllers.Alerts.index()
 
 # Admin
-GET     /admin                      controllers.Admin.index()
+GET     /admin                             controllers.Admin.index()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /assets/*file                      controllers.Assets.at(path="/public", file)

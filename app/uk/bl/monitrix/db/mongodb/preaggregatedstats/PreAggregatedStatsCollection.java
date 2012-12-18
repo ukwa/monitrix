@@ -11,6 +11,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 import uk.bl.monitrix.db.mongodb.MongoProperties;
+import uk.bl.monitrix.db.mongodb.knownhosts.KnownHostsCollection;
 import uk.bl.monitrix.heritrix.LogEntry;
 
 /**
@@ -23,13 +24,17 @@ public class PreAggregatedStatsCollection {
 	
 	private DBCollection collection;
 	
+	private KnownHostsCollection knownHosts;
+	
 	private Map<Long, PreAggregatedStatsDBO> cache = new HashMap<Long, PreAggregatedStatsDBO>();
 	
 	public PreAggregatedStatsCollection(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_PRE_AGGREGATED_STATS);
 		
 		// Collection is indexed by timeslot (will be skipped automatically if index exists)
-		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_PRE_AGGREGATED_TIMESLOT, 1));		
+		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_PRE_AGGREGATED_TIMESLOT, 1));
+		
+		this.knownHosts = new KnownHostsCollection(db);
 	}
 	
 	public void save(PreAggregatedStatsDBO dbo) {
@@ -60,22 +65,32 @@ public class PreAggregatedStatsCollection {
 		// Step 1 - compute the timeslot
 		long timeslot = (entry.getTimestamp().getTime() / MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) *
 				MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
-		
-		// Step 2 - retrieve pre-aggregated data for this timeslot
+				
+		// Step 2 - update timeline data for this timeslot
 		PreAggregatedStatsDBO dbo = getStatsForTimeslot(timeslot);
 		if (dbo == null) {
 			// Step 3a - init pre-aggregated data for this timeslot
 			dbo = new PreAggregatedStatsDBO(new BasicDBObject());
 			dbo.setTimeslot(timeslot);
 			dbo.setNumberOfURLs(1);
-			dbo.setDownloadVolume(entry.getDownloadSize());
+			dbo.setDownloadVolume(entry.getDownloadSize());	
+			dbo.setNumberOfNewHostsCrawled(0);
 		} else {
 			// Step 3b - add to existing pre-aggregated data for this timeslot
 			dbo.setNumberOfURLs(dbo.getNumberOfURLs() + 1);
 			dbo.setDownloadVolume(dbo.getDownloadVolume() + entry.getDownloadSize());
 		}
 		
-		// Step 4 - save
+		// Step 4 - update known hosts info
+		String hostname = KnownHostsCollection.getHostFromURL(entry.getURL());
+		if (knownHosts.exists(hostname)) {
+			// TODO set last access
+		} else {
+			dbo.setNumberOfNewHostsCrawled(dbo.getNumberOfNewHostsCrawled() + 1);
+			knownHosts.addToList(hostname, entry.getTimestamp().getTime());
+		}
+
+		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable
 		cache.put(timeslot, dbo);
 	}

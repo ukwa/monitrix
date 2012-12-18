@@ -16,7 +16,7 @@ public class Home extends Controller {
 	}
 	
 	public static Result getMostRecent() {
-		return ok(Json.toJson(LogEntryFilter.map(log.getMostRecentEntries(10))));
+		return ok(Json.toJson(LogEntryFilter.map(log.getMostRecentEntries(100))));
 	}
   
 }

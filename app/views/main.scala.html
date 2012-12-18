@@ -41,5 +41,47 @@
     <div class="monitrix-row">
       @content
     </div>
+    
+    <div id="monitrix-flash-panel">
+      
+    </div>
+    
+    <!-- TODO move into separate .js file (and possibly optimize) -->
+    <script>   
+      var maxX = $('#monitrix-flash-panel').width();
+      var maxY = $('#monitrix-flash-panel').height();
+    	  
+      var fade = function(el, opacity, callback) {
+    	  el.animate({ opacity: opacity }, 5000, callback);
+      };
+      
+      var showRandomURL = function() {
+        $.getJSON('/api/log/recent', function(data) {
+          var randomIndex = Math.floor(Math.random() * data.length);
+          
+          var displayURL = data[randomIndex].url;
+          if (displayURL.length > 70)
+        	  displayURL = displayURL.substring(0, 70) + '...';
+          
+          var div = $('<div class="monitrix-flash-url"></div>');
+          div.html('<a href="' + data[randomIndex].url + '" target="_blank">' + displayURL + '</a>');
+          $('#monitrix-flash-panel').append(div);
+          
+          div.css({
+        	'left' : Math.floor(Math.random() * (maxX - div.width())),
+            'top' : Math.floor(Math.random() * (maxY - div.height())),
+          });
+
+          fade(div, 0.4, function() {
+        	  showRandomURL();
+        	  fade(div, 0, function() {
+        	    div.remove();
+        	  }); 
+          });
+        });
+      }
+      
+      showRandomURL();
+    </script>
   </body>
 </html>

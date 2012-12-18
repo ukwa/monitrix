@@ -21,7 +21,7 @@ public class Timeline extends Controller {
 	}
 	
 	public static Result getURLs() {
-		return null;
+		return ok(Json.toJson((TimeseriesValueFilter.map(stats.getCrawledURLsHistory(100)))));
 	}
 	
 	public static Result getHosts() {

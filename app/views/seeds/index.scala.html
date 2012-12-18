@@ -9,51 +9,5 @@
   <li><a href="alerts">Alerts</a></li>
   <li><a href="admin">Admin</a></li>
 } {
-  <div class="container-fluid">
-    <div class="row-fluid">
-      <!-- Content -->
-      <div class="span9">
-        <div class="row-fluid">
-          <div class="span6">
-            <p>Data Volume</p>
-            <div class="graph-thumb" id="graph1">
-            
-            </div>
-          </div>
-            
-          <div class="span6">
-            <p>Number of URLs Crawled</p>
-            <div class="graph-thumb" "id="graph2">
-            
-            </div>
-          </div>  
-        </div>
-        
-        <div class="row-fluid">
-          <div class="span6">
-            <p>Number of Hosts Visited</p>
-            <div class="graph-thumb" id="graph3">
-            
-            </div>
-          </div>
-            
-          <div class="span6">
-            <p>Completed Hosts</p>
-            <div class="graph-thumb" id="graph4">
-            
-            </div>
-          </div>            
-        </div>
-      </div>
-      
-      <!-- Sidebar -->
-      <div class="span3" style="text-align:right;">
-        <span class="label" style="padding:10px 20px;">CRAWL IN PROGRESS</span>
-        <table class="table table-condensed unstyled" style="margin-top:20px;">
-          <tr><td>Started</td><td>@{new Date(crawlStatistics.getCrawlStartTime()).format("dd MMM yy, hh:mm")}</td></tr>
-          <tr><td>Last Activity</td><td>@{new Date(crawlStatistics.getTimeOfLastCrawlActivity()).format("dd MMM yy, hh:mm")}</td></tr>
-        </table>
-      </div>
-    </div>
-  </div>
+
 }

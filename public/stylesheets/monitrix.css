@@ -33,12 +33,35 @@ html, body {
 .monitrix-header p { margin:0px; padding:5px 0px 5px 2px; font-size:15px; }
 .monitrix-crawl-factoid { color: #d77; font-style:italic; }
 
+.graph-thumb-container {
+  position:relative;
+  margin:20px 0px 40px 0px;
+}
+
 .graph-thumb {
-  width:320px;
+  position:absolute;
+  top:0px;
+  left:40px;
+  width:280px;
   height:180px;
-  border:1px solid #ccc;
-  margin-bottom:40px;
+  border-width:0px 1px 0px 0px;
+  border-style: solid;
+  border-color: #ccc;
+}
+
+.graph-tumb-loading {
   background-image:url('../img/ajax-spinner.gif');
   background-repeat:no-repeat;
   background-position:146px 76px;
+  border-width:1px;	
 }
+
+.graph-thumb-y-axis {
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:40px;
+  height:180px;
+}
+
+

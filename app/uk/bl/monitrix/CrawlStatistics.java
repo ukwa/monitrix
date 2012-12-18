@@ -7,14 +7,18 @@ import java.util.List;
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public interface CrawlStatistics {
+public abstract class CrawlStatistics {
 	
-	public long getCrawlStartTime();
+	public abstract long getCrawlStartTime();
 	
-	public long getTimeOfLastCrawlActivity();
+	public abstract long getTimeOfLastCrawlActivity();
 	
-	public List<TimeseriesValue> getDatavolumeHistory(int maxDatapoints);
+	public long getCrawlDuration() {
+		return getTimeOfLastCrawlActivity() - getCrawlStartTime();
+	}
 	
-	public List<TimeseriesValue> getCrawledURLsHistory(int maxDatapoints);
+	public abstract List<TimeseriesValue> getDatavolumeHistory(int maxDatapoints);
+	
+	public abstract List<TimeseriesValue> getCrawledURLsHistory(int maxDatapoints);
 
 }

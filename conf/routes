@@ -8,7 +8,7 @@ GET     /                           controllers.Home.index()
 # Crawl Timeline
 GET     /timeline                   controllers.Timeline.index()
 GET     /api/timeline/datavolume    controllers.Timeline.getDatavolume()
-GET     /api/timeline/urls          controllers.Timeline.getURLs()
+GET     /api/timeline/urls-crawled  controllers.Timeline.getURLs()
 GET     /api/timeline/hosts         controllers.Timeline.getHosts()
 
 # Seed Stats

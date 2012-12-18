@@ -14,18 +14,19 @@ import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsCollection;
 import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsCollection;
 import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsDBO;
 
-public class MongoBackedCrawlStatistics implements CrawlStatistics {
+/**
+ * TODO needs caching!
+ * 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
+public class MongoBackedCrawlStatistics extends CrawlStatistics {
 	
-	/** Duration after which memory-cached stats are considered invalid **/
-	private static final int CACHE_TIMEOUT_MILLIS = 2 * 60 * 1000;
+	// Duration after which memory-cached stats are considered invalid 
+	// private static final int CACHE_TIMEOUT_MILLIS = 2 * 60 * 1000;
 	
 	private GlobalStatsCollection globalStats;
 	
 	private PreAggregatedStatsCollection preAggregatedStats;
-	
-	private List<PreAggregatedStatsDBO> statsCache = new ArrayList<PreAggregatedStatsDBO>();
-	
-	private long lastStatsCacheAccess = 0;
 	
 	MongoBackedCrawlStatistics(DB db) {
 		globalStats = new GlobalStatsCollection(db);
@@ -33,6 +34,17 @@ public class MongoBackedCrawlStatistics implements CrawlStatistics {
 	}
 	
 	private List<PreAggregatedStatsDBO> getAggregatedStats(int maxDatapoints) {
+		List<PreAggregatedStatsDBO> stats = new ArrayList<PreAggregatedStatsDBO>();
+
+		Iterator<PreAggregatedStatsDBO> iterator = preAggregatedStats.getPreAggregatedStats();
+		while (iterator.hasNext())
+			stats.add(iterator.next());
+		
+		// Sort by time
+		Collections.sort(stats);
+		return stats;
+		
+		/*
 		if (System.currentTimeMillis() > lastStatsCacheAccess + CACHE_TIMEOUT_MILLIS) {
 			// Clear cache
 			statsCache.clear();
@@ -47,6 +59,7 @@ public class MongoBackedCrawlStatistics implements CrawlStatistics {
 		}
 		
 		return statsCache;
+		*/
 	}
 
 	@Override

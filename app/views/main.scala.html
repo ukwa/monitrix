@@ -30,7 +30,11 @@
     <div class="monitrix-header">
       <div class="monitrix-row">
         <h1>monitrix</h1>
-        <p>Current Crawl <span class="monitrix-crawl-factoid">running since</span></p>
+        <p>Current Crawl 
+          <span class="monitrix-crawl-factoid">completed since @{
+            (System.currentTimeMillis - global.Global.getCrawlStatistics().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
+          } days</span>
+        </p>
       </div>
     </div>
     

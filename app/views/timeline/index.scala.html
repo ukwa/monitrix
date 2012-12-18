@@ -114,8 +114,8 @@
     }
     
     loadGraph('/api/timeline/datavolume', 'graph-volume', 'Volume', '#c05020', function(total) {
-      total = total / (1024 * 1024 * 1024 * 1024);
-      $('#total-data-volume').html(total.toPrecision(4) + ' TB');	
+      total = total / (1024 * 1024 * 1024);
+      $('#total-data-volume').html(total.toPrecision(4) + ' GB');	
     });
     
     loadGraph('/api/timeline/urls-crawled', 'graph-urls', 'URLs', '#c05020', function(total) {

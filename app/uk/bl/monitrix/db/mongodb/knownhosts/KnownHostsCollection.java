@@ -81,6 +81,9 @@ public class KnownHostsCollection {
 	 * @return the host information
 	 */
 	public KnownHostsDBO getHostInfo(String hostname) {
+		if (knownHostsLookupCache == null)
+			initKnownLookupHostCache();
+			
 		if (knownHostsLookupCache.containsKey(hostname))
 			return knownHostsLookupCache.get(hostname);
 		

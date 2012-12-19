@@ -8,7 +8,7 @@ import uk.bl.monitrix.HostInformation;
 import uk.bl.monitrix.heritrix.LogEntry;
 
 /**
- * A minimal DB connection interface, so we're prepared to switch storage backends.
+ * A minimal DB connection interface.
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
@@ -21,20 +21,20 @@ public interface DBConnector {
 	public void insert(Iterator<LogEntry> iterator);
 	
 	/**
-	 * Returns the crawl log.
+	 * Returns DB-backed crawl log.
 	 * @return the crawl log
 	 */
 	public CrawlLog getCrawlLog();
 	
 	/**
-	 * Returns crawl statistics.
+	 * Returns DB-backed crawl statistics.
 	 * @return the crawl statistics
 	 */
 	public CrawlStatistics getCrawlStatistics();
 	
 	/**
-	 * Returns information about a specific host
-	 * @param hostname the hostname
+	 * Returns DB-backed host information
+	 * @param hostname the host name
 	 * @return the host information
 	 */
 	public HostInformation getHostInfo(String hostname);

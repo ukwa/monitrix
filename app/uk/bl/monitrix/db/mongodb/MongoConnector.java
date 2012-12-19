@@ -31,22 +31,22 @@ import uk.bl.monitrix.heritrix.LogEntry;
  */
 public class MongoConnector implements DBConnector {	
 
-	/** MongoDB host **/
+	// MongoDB host
 	private Mongo mongo;
 	
-	/** Monitrix database **/
+	// Monitrix database
 	private DB db;
 	
-	/** Heretrix Log collection **/
-	private HeritrixLogCollection heritrixLogCollection;
-	
-	/** Global Stats collection **/
+	// Global Stats collection
 	private GlobalStatsCollection globalStatsCollection;
 	
-	/** Known Hosts collection **/
+	// Heretrix Log collection
+	private HeritrixLogCollection heritrixLogCollection;
+	
+	// Known Hosts collection
 	private KnownHostsCollection knownHosts;
 	
-	/** Pre-Aggregated Stats collection **/
+	// Pre-Aggregated Stats collection
 	private PreAggregatedStatsCollection preAggregatedStatsCollection;
 	
 	public MongoConnector() throws IOException {
@@ -60,8 +60,8 @@ public class MongoConnector implements DBConnector {
 	private void init(String hostName, String dbName, int dbPort) throws IOException {
 		this.mongo = new Mongo(hostName, dbPort);
 		this.db = mongo.getDB(dbName);
-		this.heritrixLogCollection = new HeritrixLogCollection(db);
 		this.globalStatsCollection = new GlobalStatsCollection(db);
+		this.heritrixLogCollection = new HeritrixLogCollection(db);
 		this.knownHosts = new KnownHostsCollection(db);
 		this.preAggregatedStatsCollection = new PreAggregatedStatsCollection(db, knownHosts);
 	}

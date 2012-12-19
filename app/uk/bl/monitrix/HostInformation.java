@@ -11,31 +11,31 @@ import java.util.List;
 public interface HostInformation {
 	
 	/**
-	 * The host name.
+	 * Host name.
 	 * @return the host name
 	 */
 	public String getHostname();
 	
 	/**
-	 * The UNIX timestamp of the last recorded access to this host.
+	 * UNIX timestamp of the last recorded access to this host.
 	 * @return the last access to the host
 	 */
 	public long getLastAccess();
 	
 	/**
-	 * The number of URLs that were crawled at this host.
+	 * Number of URLs that were crawled at this host.
 	 * @return the number of crawled URLs
 	 */
 	public long countCrawledURLs();
 	
 	/**
-	 * The list of crawlers that crawled this host.
+	 * List of crawlers that visited this host.
 	 * @return the crawlers that crawled this host
 	 */
 	public List<String> getCrawlers();
 	
 	/**
-	 * The distribution of HTTP/Heritrix return codes for this host.
+	 * Distribution of HTTP/Heritrix return codes for this host.
 	 * @return the distribution of HTTP/Heritrix return codes
 	 */
 	public List<PieChartValue> getHTTPCodes();

@@ -5,7 +5,7 @@ import uk.bl.monitrix.db.mongodb.MongoProperties;
 import com.mongodb.DBObject;
 
 /**
- * Wraps the DBObject contained in the MongoDB 'Global Stats' collection.
+ * Wraps the DBObject stored in the MongoDB 'Global Stats' collection.
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */

@@ -16,6 +16,12 @@ import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogCollection;
 import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogDBO;
 import uk.bl.monitrix.db.mongodb.knownhosts.KnownHostsDBO;
 
+/**
+ * An implementation of the {@link HostInformation} interface backed by the
+ * 'Heritrix Log' MongoDB collection.
+ * 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class MongoBackedHostInformation implements HostInformation {
 	
 	private KnownHostsDBO dbo;

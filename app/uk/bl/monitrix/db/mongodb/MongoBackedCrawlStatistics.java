@@ -19,9 +19,6 @@ import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsDBO;
  */
 public class MongoBackedCrawlStatistics extends CrawlStatistics {
 	
-	// Duration after which memory-cached stats are considered invalid 
-	// private static final int CACHE_TIMEOUT_MILLIS = 2 * 60 * 1000;
-	
 	private GlobalStatsCollection globalStats;
 	
 	private PreAggregatedStatsCollection preAggregatedStats;

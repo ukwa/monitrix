@@ -8,7 +8,7 @@ import uk.bl.monitrix.db.mongodb.MongoProperties;
 import com.mongodb.DBObject;
 
 /**
- * Wraps the DBObject contained in the MongoDB 'Heritrix Log' collection.
+ * Wraps the DBObjects stored in the MongoDB 'Heritrix Log' collection.
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */

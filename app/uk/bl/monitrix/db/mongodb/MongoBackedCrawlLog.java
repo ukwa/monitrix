@@ -9,6 +9,12 @@ import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogCollection;
 import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogDBO;
 import uk.bl.monitrix.heritrix.LogEntry;
 
+/**
+ * An implementation of the {@link CrawlLog} interface backed by the
+ * 'Heritrix Log' MongoDB collection.
+ * 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class MongoBackedCrawlLog implements CrawlLog {
 	
 	private HeritrixLogCollection collection;

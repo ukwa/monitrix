@@ -1,7 +1,12 @@
 package uk.bl.monitrix.db.mongodb.knownhosts;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import play.Logger;
 
 import uk.bl.monitrix.db.mongodb.MongoProperties;
 
@@ -23,7 +28,8 @@ public class KnownHostsCollection {
 	private DBCollection collection;
 	
 	// A simple in-memory buffer for quick host lookups
-	private Set<String> knownHostsLookupCache = null;
+	// private Set<String> knownHostsLookupCache = null;
+	private Map<String, KnownHostsDBO> knownHostsLookupCache = null;
 	
 	public KnownHostsCollection(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
@@ -33,55 +39,102 @@ public class KnownHostsCollection {
 	}
 	
 	private void initKnownLookupHostCache() {
-		Set<String> knownHostLookupCache = new HashSet<String>();
+		// Set<String> knownHostsLookupCache = new HashSet<String>();
+		Map<String, KnownHostsDBO> knownHostsLookupCache = new HashMap<String, KnownHostsDBO>();
 		
 		DBCursor cursor = collection.find();
-		while (cursor.hasNext())
-			knownHostLookupCache.add(new KnownHostsDBO(cursor.next()).getHostname());
+		while (cursor.hasNext()) {
+			KnownHostsDBO dbo = new KnownHostsDBO(cursor.next());
+			knownHostsLookupCache.put(dbo.getHostname(), dbo);
+		}
 		
-		this.knownHostsLookupCache = knownHostLookupCache; 			
+		this.knownHostsLookupCache = knownHostsLookupCache; 			
 	}
 	
+	/**
+	 * Checks if the host is already in the Known Hosts list. To minimize database
+	 * access, this method will first check against an in-memory cache, and only
+	 * against the database if the memory cache yielded no hit.
+	 * @param hostname the host name
+	 * @return <code>true</code> if the host is in the Known Hosts list
+	 */
 	public boolean exists(String hostname) {
 		if (knownHostsLookupCache == null)
 			initKnownLookupHostCache();
 		
-		return knownHostsLookupCache.contains(hostname);
+		if (knownHostsLookupCache.containsKey(hostname))
+			return true;
+		
+		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname));
+		if (dbo == null)
+			return false;
+
+		KnownHostsDBO wrapped = new KnownHostsDBO(dbo);
+		knownHostsLookupCache.put(wrapped.getHostname(), wrapped);
+		return true;
 	}
 	
+	/**
+	 * Returns the information for the specified host or <code>null</code> if the
+	 * host was not found in the database.
+	 * @param hostname the host name
+	 * @return the host information
+	 */
 	public KnownHostsDBO getHostInfo(String hostname) {
+		if (knownHostsLookupCache.containsKey(hostname))
+			return knownHostsLookupCache.get(hostname);
+		
 		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname));
 		if (dbo == null)
 			return null;
 		
-		return new KnownHostsDBO(dbo);
+		KnownHostsDBO wrapped = new KnownHostsDBO(dbo);
+		knownHostsLookupCache.put(hostname, wrapped);
+		return wrapped;
 	}
 	
+	/**
+	 * Adds a new host to the Known Hosts list.  Note that this method ONLY writes to
+	 * the IN-MEMORY CACHE! In order to write to the database, execute the .commit() method
+	 * after your additions are done.
+	 * @param hostname the host name
+	 * @param lastAccess the time of last access
+	 */
 	public void addToList(String hostname, long lastAccess) {	
-		// TODO caching + bulk insert	
-		KnownHostsDBO knownHost = new KnownHostsDBO(new BasicDBObject());
-		knownHost.setHostname(hostname);
-		knownHost.setLastAccess(lastAccess);
-		collection.insert(knownHost.dbo);
+		KnownHostsDBO dbo = new KnownHostsDBO(new BasicDBObject());
+		dbo.setHostname(hostname);
+		dbo.setLastAccess(lastAccess);
+		knownHostsLookupCache.put(hostname, dbo);
+	}
+	
+	public void commit() {
+		// TODO risky - we'll lose updates to the database that haven't been made through this object!
+		final List<KnownHostsDBO> cachedKnownHosts = new ArrayList<KnownHostsDBO>(knownHostsLookupCache.values());
 		
-		knownHostsLookupCache.add(hostname);
+		collection.drop();
+		collection.insert(new AbstractList<DBObject>() {
+
+			@Override
+			public DBObject get(int index) {
+				return cachedKnownHosts.get(index).dbo;
+			}
+
+			@Override
+			public int size() {
+				return cachedKnownHosts.size();
+			}
+			
+		});
 	}
 	
 	public void setLastAccess(String hostname, long lastAccess) {		
-		/*
-		DBObject dbo = 
-				collection.findOne(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname));
-		
-		// TODO maybe we should handle this more gracefully?
-		if (dbo == null)
-			throw new RuntimeException(hostname + " not found in known hosts list");
-		
-		KnownHostsDBO updatedDBO = new KnownHostsDBO(dbo);
-		updatedDBO.setLastAccess(lastAccess);
-		collection.save(updatedDBO.dbo);
-		
-		knownHostsList.add(hostname);
-		*/
+		KnownHostsDBO dbo = getHostInfo(hostname);
+		if (dbo != null) {		
+			dbo.setLastAccess(lastAccess);
+			collection.save(dbo.dbo);
+		} else {
+			Logger.warn("Attempt to write last access info to unknown host: " + hostname);
+		}
 	}
 	
 }

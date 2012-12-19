@@ -120,12 +120,13 @@ public class PreAggregatedStatsCollection {
 			save(dbo);
 		}
 		cache.clear();
+		knownHosts.commit();
 	}
 	
 	/**
-	 * Returns the pre-aggregated stats for a specific timeslot. In order to minimize database
-	 * access, this method will first check against an in-memory cache; and then against the
-	 * database.
+	 * Returns the pre-aggregated stats for a specific timeslot. To minimize database
+	 * access, this method will first check against an in-memory cache, and only against
+	 * the database if the memory cache yielded no hit.
 	 * @param timeslot the timeslot
 	 * @return the pre-aggregated stats
 	 */

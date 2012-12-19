@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 
 /**
- * Provides serial access to a Heritrix log file.
+ * Utility class that provides serial read access to a Heritrix log file.
  *  
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */

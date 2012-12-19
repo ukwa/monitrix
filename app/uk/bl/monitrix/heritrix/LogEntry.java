@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Wraps a single Heretrix log line.
+ * Wraps a single Heritrix log line.
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */

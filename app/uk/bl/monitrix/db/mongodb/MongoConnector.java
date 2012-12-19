@@ -142,6 +142,8 @@ public class MongoConnector implements DBConnector {
 	
 	@Override
 	public CrawlStatistics getCrawlStatistics() {
+		// Note: this means that every object calling this method gets their own copy, including their own cache!
+		// TODO either use a central cache or only create a single MongoBackedCrawlStatistics instance
 		return new MongoBackedCrawlStatistics(globalStatsCollection, preAggregatedStatsCollection);
 	}
 	
@@ -151,6 +153,8 @@ public class MongoConnector implements DBConnector {
 		if (dbo == null)
 			return null;
 		
+		// Note: this means that every object calling this method gets their own copy, including their own cache!
+		// TODO either use a central cache or only create a single MongoBackedHostInformation instance
 		return new MongoBackedHostInformation(dbo, heritrixLogCollection);
 	}
 	

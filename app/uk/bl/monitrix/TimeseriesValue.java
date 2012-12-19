@@ -1,7 +1,7 @@
 package uk.bl.monitrix;
 
 /**
- * A coordinate pair in a time-series graph (timestamp->value).
+ * A coordinate pair in a time-series graph (timestamp -> value).
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */

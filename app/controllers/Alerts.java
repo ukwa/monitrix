@@ -8,4 +8,5 @@ public class Alerts extends Controller {
 	public static Result index() {
 		return ok(views.html.alerts.index.render());
 	}
+	
 }

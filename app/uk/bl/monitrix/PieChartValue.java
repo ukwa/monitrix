@@ -1,5 +1,10 @@
 package uk.bl.monitrix;
 
+/**
+ * A value in a pie chart (name, value).
+ * 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class PieChartValue {
 	
 	private String name;

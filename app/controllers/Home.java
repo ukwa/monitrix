@@ -15,6 +15,7 @@ public class Home extends Controller {
 		return ok(views.html.home.index.render());
 	}
 	
+	// TODO not sure where to put this API method...
 	public static Result getMostRecent() {
 		return ok(Json.toJson(LogEntryFilter.map(log.getMostRecentEntries(100))));
 	}

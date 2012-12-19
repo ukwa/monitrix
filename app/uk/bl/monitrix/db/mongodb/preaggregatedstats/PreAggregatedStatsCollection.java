@@ -28,13 +28,13 @@ public class PreAggregatedStatsCollection {
 	
 	private Map<Long, PreAggregatedStatsDBO> cache = new HashMap<Long, PreAggregatedStatsDBO>();
 	
-	public PreAggregatedStatsCollection(DB db) {
+	public PreAggregatedStatsCollection(DB db, KnownHostsCollection knownHosts) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_PRE_AGGREGATED_STATS);
 		
 		// Collection is indexed by timeslot (will be skipped automatically if index exists)
 		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_PRE_AGGREGATED_TIMESLOT, 1));
 		
-		this.knownHosts = new KnownHostsCollection(db);
+		this.knownHosts = knownHosts;
 	}
 	
 	public void save(PreAggregatedStatsDBO dbo) {
@@ -82,9 +82,9 @@ public class PreAggregatedStatsCollection {
 		}
 		
 		// Step 4 - update known hosts info
-		String hostname = KnownHostsCollection.getHostFromURL(entry.getURL());
+		String hostname = entry.getHost();
 		if (knownHosts.exists(hostname)) {
-			// TODO set last access
+			// knownHosts.setLastAccess(hostname, entry.getTimestamp().getTime());
 		} else {
 			dbo.setNumberOfNewHostsCrawled(dbo.getNumberOfNewHostsCrawled() + 1);
 			knownHosts.addToList(hostname, entry.getTimestamp().getTime());

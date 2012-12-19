@@ -9,12 +9,13 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 public class KnownHostsCollection {
 	
 	private DBCollection collection;
 	
-	private Set<String> knownHostsCache = null;
+	private Set<String> knownHostsList = null;
 	
 	public KnownHostsCollection(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
@@ -23,49 +24,58 @@ public class KnownHostsCollection {
 		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
 	}
 	
-	public boolean exists(String hostname) {
-		if (knownHostsCache == null) {
-			Set<String> knownHosts = new HashSet<String>();
-			
-			DBCursor cursor = collection.find();
-			while (cursor.hasNext())
-				knownHosts.add(new KnownHostsDBO(cursor.next()).getHostname());
-			
-			knownHostsCache = knownHosts;			
+	private void initKnownHostCache() {
+		Set<String> knownHostsList = new HashSet<String>();
+		
+		DBCursor cursor = collection.find();
+		while (cursor.hasNext()) {
+			KnownHostsDBO dbo = new KnownHostsDBO(cursor.next()); 
+			knownHostsList.add(dbo.getHostname());
 		}
 		
-		return knownHostsCache.contains(hostname);
+		this.knownHostsList = knownHostsList; 			
 	}
 	
-	public void addToList(String hostname, long lastAccess) {
-		knownHostsCache.add(hostname);
+	public boolean exists(String hostname) {
+		if (knownHostsList == null)
+			initKnownHostCache();
 		
+		return knownHostsList.contains(hostname);
+	}
+	
+	public KnownHostsDBO getHostInfo(String hostname) {
+		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname));
+		if (dbo == null)
+			return null;
+		
+		return new KnownHostsDBO(dbo);
+	}
+	
+	public void addToList(String hostname, long lastAccess) {	
 		// TODO caching + bulk insert	
 		KnownHostsDBO knownHost = new KnownHostsDBO(new BasicDBObject());
 		knownHost.setHostname(hostname);
 		knownHost.setLastAccess(lastAccess);
 		collection.insert(knownHost.dbo);
+		
+		knownHostsList.add(hostname);
 	}
 	
-	public static String getHostFromURL(String url) {
-		String host;
-		if (url.startsWith("http://")) {
-			host = url.substring(7);
-		} else if (url.startsWith("https://")) {
-			host = url.substring(8);
-		} else if (url.startsWith("dns:")){
-			host = url.substring(4);
-		} else {
-			// Should never happen
-			throw new RuntimeException("Invalid URL: " + url);
-		}
+	public void setLastAccess(String hostname, long lastAccess) {		
+		/*
+		DBObject dbo = 
+				collection.findOne(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname));
 		
-		host = host.substring(host.indexOf('.') + 1);
+		// TODO maybe we should handle this more gracefully?
+		if (dbo == null)
+			throw new RuntimeException(hostname + " not found in known hosts list");
 		
-		if (host.indexOf("/") < 0)
-			return host;
+		KnownHostsDBO updatedDBO = new KnownHostsDBO(dbo);
+		updatedDBO.setLastAccess(lastAccess);
+		collection.save(updatedDBO.dbo);
 		
-		return host.substring(0, host.indexOf("/"));
+		knownHostsList.add(hostname);
+		*/
 	}
-
+	
 }

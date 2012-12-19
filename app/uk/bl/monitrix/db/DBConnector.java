@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlStatistics;
+import uk.bl.monitrix.HostInformation;
 import uk.bl.monitrix.heritrix.LogEntry;
 
 /**
@@ -30,6 +31,13 @@ public interface DBConnector {
 	 * @return the crawl statistics
 	 */
 	public CrawlStatistics getCrawlStatistics();
+	
+	/**
+	 * Returns information about a specific host
+	 * @param hostname the hostname
+	 * @return the host information
+	 */
+	public HostInformation getHostInfo(String hostname);
 	
 	/**
 	 * Closes the connection

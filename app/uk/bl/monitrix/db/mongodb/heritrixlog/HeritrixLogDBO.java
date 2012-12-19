@@ -31,6 +31,30 @@ public class HeritrixLogDBO {
 		dbo.put(MongoProperties.FIELD_LOG_LINE, line);
 	}
 	
+	public String getHost() {
+		return (String) dbo.get(MongoProperties.FIELD_LOG_HOST);
+	}
+	
+	public void setHost(String hostname) {
+		dbo.put(MongoProperties.FIELD_LOG_HOST, hostname);
+	}
+	
+	public String getCrawlerID() {
+		return (String) dbo.get(MongoProperties.FIELD_LOG_CRAWLER_ID);
+	}
+	
+	public void setCrawlerID(String crawlerId) {
+		dbo.put(MongoProperties.FIELD_LOG_CRAWLER_ID, crawlerId);
+	}
+	
+	public int geHTTPCode() {
+		return (Integer) dbo.get(MongoProperties.FIELD_LOG_HTTP_CODE);
+	}
+	
+	public void setHTTPCode(int httpCode) {
+		dbo.put(MongoProperties.FIELD_LOG_HTTP_CODE, httpCode);
+	}
+	
 	/**
 	 * A utility method that lazily maps a list of wrapper objects to a (read-only)
 	 * list of MongoDB DBObjects. Quick'n'dirty replacement for Scala's (very convenient...)

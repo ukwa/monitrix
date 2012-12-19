@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.mongodb.DB;
-
 import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.TimeseriesValue;
 import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsCollection;
@@ -28,9 +26,9 @@ public class MongoBackedCrawlStatistics extends CrawlStatistics {
 	
 	private PreAggregatedStatsCollection preAggregatedStats;
 	
-	MongoBackedCrawlStatistics(DB db) {
-		globalStats = new GlobalStatsCollection(db);
-		preAggregatedStats = new PreAggregatedStatsCollection(db);		
+	MongoBackedCrawlStatistics(GlobalStatsCollection globalStats, PreAggregatedStatsCollection preAggregatedStats) {
+		this.globalStats = globalStats;
+		this.preAggregatedStats = preAggregatedStats;
 	}
 	
 	private List<PreAggregatedStatsDBO> getAggregatedStats(int maxDatapoints) {

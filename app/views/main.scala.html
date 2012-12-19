@@ -19,8 +19,8 @@
           <ul class="nav">
             @navigation
           </ul>
-          <form class="navbar-form pull-right" style="margin-top:1px;">
-            <input type="text" style="font-size:12px;height:16px;" placeholder="Enter Host or URL...">
+          <form class="navbar-form pull-right" action="@routes.Hosts.getHostInfo()" method="GET" style="margin-top:1px;">
+            <input type="text" name="query" style="font-size:12px;height:16px;" placeholder="Enter Host or URL...">
             <button type="submit" class="btn btn-small">Go!</button>
           </form>
         </div>
@@ -32,7 +32,7 @@
         <h1>monitrix</h1>
         <p>Current Crawl 
           <span class="monitrix-crawl-factoid">completed since @{
-            (System.currentTimeMillis - global.Global.getCrawlStatistics().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
+            (System.currentTimeMillis - global.Global.getBackend().getCrawlStatistics().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
           } days</span>
         </p>
       </div>

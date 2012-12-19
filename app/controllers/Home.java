@@ -9,7 +9,7 @@ import uk.bl.monitrix.CrawlLog;
 
 public class Home extends Controller {
 	
-	private static CrawlLog log = Global.getCrawlLog();
+	private static CrawlLog log = Global.getBackend().getCrawlLog();
 	
 	public static Result index() {
 		return ok(views.html.home.index.render());

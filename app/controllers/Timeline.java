@@ -10,7 +10,7 @@ import uk.bl.monitrix.CrawlStatistics;
 
 public class Timeline extends Controller {
 
-	private static CrawlStatistics stats = Global.getCrawlStatistics();
+	private static CrawlStatistics stats = Global.getBackend().getCrawlStatistics();
 	
 	public static Result index() {
 		return ok(views.html.timeline.index.render(stats));

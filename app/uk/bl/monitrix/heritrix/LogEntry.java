@@ -20,6 +20,8 @@ public class LogEntry {
 	
 	private List<String> fields = new ArrayList<String>();
 	
+	private String bufferedHost = null;
+	
 	public LogEntry(String line) {
 		this.line = line;
 		for (String field : line.split(" ")) {
@@ -67,6 +69,18 @@ public class LogEntry {
 		return fields.get(3);
 	}
 	
+	/**
+	 * Extracts the hostname from the URL and returns it. The hostname is
+	 * buffered in memory to avoid multiple parsing.
+	 * @return the hostname
+	 */
+	public String getHost() {
+		if (bufferedHost == null)
+			bufferedHost = getHostFromURL(getURL());
+		
+		return bufferedHost;
+	}
+	
 	// TODO column 5
 	
 	// TODO column 6
@@ -104,6 +118,27 @@ public class LogEntry {
 	@Override
 	public String toString() {
 		return line;
+	}
+	
+	private static String getHostFromURL(String url) {
+		String host;
+		if (url.startsWith("http://")) {
+			host = url.substring(7);
+		} else if (url.startsWith("https://")) {
+			host = url.substring(8);
+		} else if (url.startsWith("dns:")){
+			host = url.substring(4);
+		} else {
+			// Should never happen
+			throw new RuntimeException("Invalid URL: " + url);
+		}
+		
+		host = host.substring(host.indexOf('.') + 1);
+		
+		if (host.indexOf("/") < 0)
+			return host;
+		
+		return host.substring(0, host.indexOf("/"));
 	}
 
 }

@@ -20,7 +20,7 @@ public class MongoProperties {
 	
 	/** Database collection names **/
 	public static final String COLLECTION_GLOBAL_STATS = "global_stats";
-	public static final String COLLECTION_HERETRIX_LOG = "heretrix_log";
+	public static final String COLLECTION_HERITRIX_LOG = "heritrix_log";
 	public static final String COLLECTION_PRE_AGGREGATED_STATS = "pre_aggregated_stats";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
 	
@@ -32,6 +32,9 @@ public class MongoProperties {
 	/** Database field keys (Heretrix Log collection) **/
 	public static final String FIELD_LOG_TIMESTAMP = "timestamp";
 	public static final String FIELD_LOG_LINE = "line";
+	public static final String FIELD_LOG_HOST = "host";
+	public static final String FIELD_LOG_CRAWLER_ID = "crawler_id";
+	public static final String FIELD_LOG_HTTP_CODE = "http_code";
 	
 	/** Database field keys (Pre-Aggregated Stats collection) **/
 	public static final String FIELD_PRE_AGGREGATED_TIMESLOT = "timeslot";

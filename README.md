@@ -22,6 +22,7 @@ monitrix needs access to a [MongoDB](http://www.mongodb.org) NoSQL database serv
 * MongoDB provides a Web admin dashboard  at [http://localhost:28017](http://localhost:28017). Make sure
   you start MongoDB with the ``--rest`` option (when in dev mode) to enable full dashboard functionality.
 * Use ``mongo <dbname> --eval "db.dropDatabase()"`` to drop a DB 
+* Docs of MongoDB's simple REST interface are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface)
 
 ## Loading Test Data into MongoDB
 

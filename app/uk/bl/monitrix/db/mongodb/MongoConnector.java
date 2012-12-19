@@ -13,11 +13,14 @@ import com.mongodb.Mongo;
 
 import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlStatistics;
+import uk.bl.monitrix.HostInformation;
 import uk.bl.monitrix.db.DBConnector;
 import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsCollection;
 import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsDBO;
 import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogCollection;
 import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogDBO;
+import uk.bl.monitrix.db.mongodb.knownhosts.KnownHostsCollection;
+import uk.bl.monitrix.db.mongodb.knownhosts.KnownHostsDBO;
 import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsCollection;
 import uk.bl.monitrix.heritrix.LogEntry;
 
@@ -34,14 +37,17 @@ public class MongoConnector implements DBConnector {
 	/** Monitrix database **/
 	private DB db;
 	
+	/** Heretrix Log collection **/
+	private HeritrixLogCollection heritrixLogCollection;
+	
 	/** Global Stats collection **/
 	private GlobalStatsCollection globalStatsCollection;
 	
+	/** Known Hosts collection **/
+	private KnownHostsCollection knownHosts;
+	
 	/** Pre-Aggregated Stats collection **/
 	private PreAggregatedStatsCollection preAggregatedStatsCollection;
-	
-	/** Heretrix Log collection **/
-	private HeritrixLogCollection heritrixLogCollection;
 	
 	public MongoConnector() throws IOException {
 		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
@@ -54,9 +60,10 @@ public class MongoConnector implements DBConnector {
 	private void init(String hostName, String dbName, int dbPort) throws IOException {
 		this.mongo = new Mongo(hostName, dbPort);
 		this.db = mongo.getDB(dbName);
-		this.globalStatsCollection = new GlobalStatsCollection(db);
-		this.preAggregatedStatsCollection = new PreAggregatedStatsCollection(db);
 		this.heritrixLogCollection = new HeritrixLogCollection(db);
+		this.globalStatsCollection = new GlobalStatsCollection(db);
+		this.knownHosts = new KnownHostsCollection(db);
+		this.preAggregatedStatsCollection = new PreAggregatedStatsCollection(db, knownHosts);
 	}
 
 	@Override
@@ -89,6 +96,9 @@ public class MongoConnector implements DBConnector {
 				// Assemble the log DB entity
 				HeritrixLogDBO dbo = new HeritrixLogDBO(new BasicDBObject());
 				dbo.setTimestamp(timestamp);
+				dbo.setHost(next.getHost());
+				dbo.setCrawlerID(next.getCrawlerID());
+				dbo.setHTTPCode(next.getHTTPCode());
 				dbo.setLogLine(next.toString());
 				bulk.add(dbo);	
 				
@@ -97,8 +107,10 @@ public class MongoConnector implements DBConnector {
 			}
 			
 			linesTotal += counter;
+			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
+			bulkStart = System.currentTimeMillis();
 			heritrixLogCollection.insert(bulk);
-			Logger.info("Wrote " + counter + " log entries to MongoDB - took " + (System.currentTimeMillis() - bulkStart) + " ms");			
+			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}
 		preAggregatedStatsCollection.commit();
 		
@@ -130,7 +142,16 @@ public class MongoConnector implements DBConnector {
 	
 	@Override
 	public CrawlStatistics getCrawlStatistics() {
-		return new MongoBackedCrawlStatistics(db);
+		return new MongoBackedCrawlStatistics(globalStatsCollection, preAggregatedStatsCollection);
+	}
+	
+	@Override
+	public HostInformation getHostInfo(String hostname) {
+		KnownHostsDBO dbo = knownHosts.getHostInfo(hostname);
+		if (dbo == null)
+			return null;
+		
+		return new MongoBackedHostInformation(dbo, heritrixLogCollection);
 	}
 	
 	@Override

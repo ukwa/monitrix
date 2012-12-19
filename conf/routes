@@ -22,6 +22,9 @@ GET     /crawl-parameters                  controllers.CrawlParameters.index()
 # Alerts
 GET     /alerts                            controllers.Alerts.index()
 
+# Hosts
+GET     /hosts                             controllers.Hosts.getHostInfo()
+
 # Admin
 GET     /admin                             controllers.Admin.index()
 

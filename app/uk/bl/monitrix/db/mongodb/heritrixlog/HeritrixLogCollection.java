@@ -1,6 +1,7 @@
 package uk.bl.monitrix.db.mongodb.heritrixlog;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import play.Logger;
@@ -22,14 +23,40 @@ public class HeritrixLogCollection implements CrawlLog {
 	private List<LogEntry> hundredMostRecent = null;
 	
 	public HeritrixLogCollection(DB db) {
-		this.collection = db.getCollection(MongoProperties.COLLECTION_HERETRIX_LOG);
+		this.collection = db.getCollection(MongoProperties.COLLECTION_HERITRIX_LOG);
 		
-		// Heritrix Log collection is indexed by timestamp (will be skipped automatically if index exists)
+		// Heritrix Log collection is indexed by timestamp and hostname (will be skipped automatically if index exists)
 		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_LOG_TIMESTAMP, 1));
+		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_LOG_HOST, 1));
 	}
 	
 	public void insert(List<HeritrixLogDBO> log) {
 		collection.insert(HeritrixLogDBO.map(log));
+	}
+	
+	public long countEntriesForHost(String hostname) {
+		return collection.count(new BasicDBObject(MongoProperties.FIELD_LOG_HOST, hostname));
+	}
+	
+	public Iterator<HeritrixLogDBO> getEntriesForHost(String hostname) {
+		final DBCursor cursor = collection.find(new BasicDBObject(MongoProperties.FIELD_LOG_HOST, hostname));
+
+		return new Iterator<HeritrixLogDBO>() {
+			@Override
+			public boolean hasNext() {
+				return cursor.hasNext();
+			}
+
+			@Override
+			public HeritrixLogDBO next() {
+				return new HeritrixLogDBO(cursor.next());	
+			}
+
+			@Override
+			public void remove() {
+				cursor.remove();
+			}
+		};
 	}
 	
 	@Override

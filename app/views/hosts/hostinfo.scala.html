@@ -1,0 +1,25 @@
+@(hostInfo: uk.bl.monitrix.HostInformation)
+
+@main("Monitrix - Host Information") {
+  <!-- TODO figure out how custom tags work in Play/Java -->
+  <li><a href="/">Home</a></li>
+  <li><a href="timeline">Crawl Timeline</a></li>
+  <li><a href="seed-stats">Seed Stats</a></li>
+  <li><a href="crawl-parameters">Crawl Parameters</a></li>
+  <li><a href="alerts">Alerts</a></li>
+  <li><a href="admin">Admin</a></li>
+}{
+  <h1>@hostInfo.getHostname()</h1>
+  <p>Last Accessed: @{new Date(hostInfo.getLastAccess()).format("dd MMM yy, hh:mm")}</p>
+  <p>Number of URLs crawled: @hostInfo.countCrawledURLs()</p>
+  <p>Crawlers accessing this host:
+    @for(cid <- hostInfo.getCrawlers()) {
+      @cid
+    }
+  </p>
+  <p>HTTP Status Codes:
+    @for(value <- hostInfo.getHTTPCodes()) {
+      @value.getName() - @value.getValue()
+    }
+  </p>
+}

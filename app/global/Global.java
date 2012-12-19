@@ -11,8 +11,6 @@ import play.mvc.Result;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Results;
-import uk.bl.monitrix.CrawlLog;
-import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.db.DBConnector;
 import uk.bl.monitrix.db.mongodb.MongoConnector;
 
@@ -35,12 +33,8 @@ public class Global extends GlobalSettings {
 		}		
 	}
 	
-	public static CrawlStatistics getCrawlStatistics() {
-		return db.getCrawlStatistics();
-	}
-	
-	public static CrawlLog getCrawlLog() {
-		return db.getCrawlLog();
+	public static DBConnector getBackend() {
+		return db;
 	}
 	
 	@Override

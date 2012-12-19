@@ -1,5 +1,6 @@
 package uk.bl.monitrix;
 
+import java.util.Iterator;
 import java.util.List;
 
 import uk.bl.monitrix.heritrix.LogEntry;
@@ -23,12 +24,16 @@ public interface CrawlLog {
 	
 	/**
 	 * Counts the log entries for a specific host.
-	 * @param hostname the hostname
+	 * @param hostname the host name
 	 * @return the number of log entries for the host
 	 */
 	public long countEntriesForHost(String hostname);
 	
-
-	// TODO getEntriesForHost(String) 
+	/**
+	 * Returns the log entries for a specific host. 
+	 * @param hostname the host name
+	 * @return the log entries for the host
+	 */
+	public Iterator<LogEntry> getEntriesForHost(String hostname); 
 	
 }

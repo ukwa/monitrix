@@ -4,40 +4,54 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import play.Logger;
-
-import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.db.mongodb.MongoProperties;
-import uk.bl.monitrix.heritrix.LogEntry;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
-public class HeritrixLogCollection implements CrawlLog {
+/**
+ * Wraps the MongoDB 'Heritrix Log' collection.
+ * 
+ * TODO caching for most recent log entries!
+ * 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
+public class HeritrixLogCollection {
 		
 	private DBCollection collection;
-	
-	// TODO make this dummy cache more flexible
-	private List<LogEntry> hundredMostRecent = null;
 	
 	public HeritrixLogCollection(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_HERITRIX_LOG);
 		
-		// Heritrix Log collection is indexed by timestamp and hostname (will be skipped automatically if index exists)
+		// The Heritrix Log collection is indexed by timestamp and hostname (will be skipped automatically if index exists)
 		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_LOG_TIMESTAMP, 1));
 		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_LOG_HOST, 1));
 	}
 	
+	/**
+	 * Inserts a list of log entries into the collection.
+	 * @param log the log entries
+	 */
 	public void insert(List<HeritrixLogDBO> log) {
 		collection.insert(HeritrixLogDBO.map(log));
 	}
-	
+
+	/**
+	 * Counts the log entries for a specific host.
+	 * @param hostname the host name
+	 * @return the number of log entries for the host
+	 */
 	public long countEntriesForHost(String hostname) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_LOG_HOST, hostname));
 	}
 	
+	/**
+	 * Returns the log entries for a specific host.
+	 * @param hostname the host name
+	 * @return the log entries for the host
+	 */
 	public Iterator<HeritrixLogDBO> getEntriesForHost(String hostname) {
 		final DBCursor cursor = collection.find(new BasicDBObject(MongoProperties.FIELD_LOG_HOST, hostname));
 
@@ -59,20 +73,19 @@ public class HeritrixLogCollection implements CrawlLog {
 		};
 	}
 	
-	@Override
-	public List<LogEntry> getMostRecentEntries(int n) {
-		if (hundredMostRecent == null) {
-			Logger.info("Getting 100 most recent URLs from DB");
-			DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_LOG_TIMESTAMP, -1)).limit(100);
+	/**
+	 * Returns the N most recent log entries. 
+	 * @param n the number of log entries to return
+	 * @return the log entries
+	 */
+	public List<HeritrixLogDBO> getMostRecentEntries(int n) {
+		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_LOG_TIMESTAMP, -1)).limit(n);
 			
-			List<LogEntry> recent = new ArrayList<LogEntry>();
-			while(cursor.hasNext())
-				recent.add(new LogEntry(new HeritrixLogDBO(cursor.next()).getLogLine()));
-			
-			hundredMostRecent = recent;
-		}
+		List<HeritrixLogDBO> recent = new ArrayList<HeritrixLogDBO>();
+		while(cursor.hasNext())
+			recent.add(new HeritrixLogDBO(cursor.next()));
 
-		return hundredMostRecent;
+		return recent;
 	}
 
 }

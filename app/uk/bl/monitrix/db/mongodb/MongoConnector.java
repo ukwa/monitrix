@@ -137,7 +137,9 @@ public class MongoConnector implements DBConnector {
 	
 	@Override
 	public CrawlLog getCrawlLog() {
-		return heritrixLogCollection;
+		// Note: this means that every object calling this method gets their own copy, including their own cache!
+		// TODO either use a central cache or only create a single MongoBackedCrawlStatistics instance
+		return new MongoBackedCrawlLog(heritrixLogCollection);
 	}
 	
 	@Override

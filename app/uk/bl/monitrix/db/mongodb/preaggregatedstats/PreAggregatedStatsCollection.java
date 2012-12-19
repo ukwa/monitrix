@@ -15,10 +15,11 @@ import uk.bl.monitrix.db.mongodb.knownhosts.KnownHostsCollection;
 import uk.bl.monitrix.heritrix.LogEntry;
 
 /**
- * A wrapper around the 'Pre-Aggregated Stats' collection.
+ * Wraps the MongoDB 'Pre-Aggregated Stats' collection.
+ * 
+ * TODO improve caching!
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
- *
  */
 public class PreAggregatedStatsCollection {
 	
@@ -26,21 +27,29 @@ public class PreAggregatedStatsCollection {
 	
 	private KnownHostsCollection knownHosts;
 	
+	// A simple in-memory buffer for quick stats lookups
 	private Map<Long, PreAggregatedStatsDBO> cache = new HashMap<Long, PreAggregatedStatsDBO>();
 	
 	public PreAggregatedStatsCollection(DB db, KnownHostsCollection knownHosts) {
-		this.collection = db.getCollection(MongoProperties.COLLECTION_PRE_AGGREGATED_STATS);
+		this.collection = db.getCollection(MongoProperties.COLLECTION_PRE_AGGREGATED_STATS);		
+		this.knownHosts = knownHosts;
 		
 		// Collection is indexed by timeslot (will be skipped automatically if index exists)
 		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_PRE_AGGREGATED_TIMESLOT, 1));
-		
-		this.knownHosts = knownHosts;
 	}
 	
+	/**
+	 * Saves the wrapped DBObject to the collection.
+	 * @param dbo the wrapped DBObject
+	 */
 	public void save(PreAggregatedStatsDBO dbo) {
-		this.collection.save(dbo.dbo);
+		collection.save(dbo.dbo);
 	}
 	
+	/**
+	 * Returns all pre-aggregated stats from the database.
+	 * @return all pre-aggregated stats
+	 */
 	public Iterator<PreAggregatedStatsDBO> getPreAggregatedStats() {
 		final DBCursor cursor = collection.find();
 		return new Iterator<PreAggregatedStatsDBO>() {
@@ -61,22 +70,28 @@ public class PreAggregatedStatsCollection {
 		};
 	}
 	
+	/**
+	 * Updates the pre-aggregated stats with a single log entry. Note that this method ONLY writes to
+	 * the IN-MEMORY CACHE! In order to write to the database, execute the .commit() method after your
+	 * updates are done.
+	 * @param entry the log entry
+	 */
 	public void update(LogEntry entry) {
 		// Step 1 - compute the timeslot
 		long timeslot = (entry.getTimestamp().getTime() / MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) *
 				MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
 				
-		// Step 2 - update timeline data for this timeslot
+		// Step 2 - update data for this timeslot
 		PreAggregatedStatsDBO dbo = getStatsForTimeslot(timeslot);
 		if (dbo == null) {
-			// Step 3a - init pre-aggregated data for this timeslot
+			// Step 3a - init data for this timeslot
 			dbo = new PreAggregatedStatsDBO(new BasicDBObject());
 			dbo.setTimeslot(timeslot);
 			dbo.setNumberOfURLs(1);
 			dbo.setDownloadVolume(entry.getDownloadSize());	
 			dbo.setNumberOfNewHostsCrawled(0);
 		} else {
-			// Step 3b - add to existing pre-aggregated data for this timeslot
+			// Step 3b - update existing data for this timeslot
 			dbo.setNumberOfURLs(dbo.getNumberOfURLs() + 1);
 			dbo.setDownloadVolume(dbo.getDownloadVolume() + entry.getDownloadSize());
 		}
@@ -84,7 +99,7 @@ public class PreAggregatedStatsCollection {
 		// Step 4 - update known hosts info
 		String hostname = entry.getHost();
 		if (knownHosts.exists(hostname)) {
-			// knownHosts.setLastAccess(hostname, entry.getTimestamp().getTime());
+			knownHosts.setLastAccess(hostname, entry.getTimestamp().getTime());
 		} else {
 			dbo.setNumberOfNewHostsCrawled(dbo.getNumberOfNewHostsCrawled() + 1);
 			knownHosts.addToList(hostname, entry.getTimestamp().getTime());
@@ -95,27 +110,39 @@ public class PreAggregatedStatsCollection {
 		cache.put(timeslot, dbo);
 	}
 	
+	/**
+	 * Writes the contents of the cache to the database.
+	 */
 	public void commit() {
 		// This means we're making individual commits to the DB
-		// TODO optimize - make one query-based delete, followed by bulk insert!
+		// TODO see if we can optimize
 		for (PreAggregatedStatsDBO dbo : cache.values()) {
 			save(dbo);
 		}
 		cache.clear();
 	}
 	
+	/**
+	 * Returns the pre-aggregated stats for a specific timeslot. In order to minimize database
+	 * access, this method will first check against an in-memory cache; and then against the
+	 * database.
+	 * @param timeslot the timeslot
+	 * @return the pre-aggregated stats
+	 */
 	private PreAggregatedStatsDBO getStatsForTimeslot(long timeslot) {
-		if (cache.containsKey(timeslot)) {
+		if (cache.containsKey(timeslot))
 			return cache.get(timeslot);
-		}
 		
 		DBObject query = new BasicDBObject(MongoProperties.FIELD_PRE_AGGREGATED_TIMESLOT, timeslot);
 		DBObject result = collection.findOne(query);
 		
-		if (result == null)
+		if (result == null) {
 			return null;
-		else
-			return new PreAggregatedStatsDBO(result);
+		} else {
+			PreAggregatedStatsDBO dbo = new PreAggregatedStatsDBO(result);
+			cache.put(timeslot, dbo);
+			return dbo;
+		}
 	}
 
 }

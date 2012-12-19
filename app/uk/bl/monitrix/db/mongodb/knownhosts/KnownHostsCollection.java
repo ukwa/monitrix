@@ -11,36 +11,42 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
+/**
+ * Wraps the MongoDB 'Known Hosts' collection.
+ * 
+ * TODO needs real caching!
+ * 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class KnownHostsCollection {
 	
 	private DBCollection collection;
 	
-	private Set<String> knownHostsList = null;
+	// A simple in-memory buffer for quick host lookups
+	private Set<String> knownHostsLookupCache = null;
 	
 	public KnownHostsCollection(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
 		
-		// Known hosts collection is indexed by hostname (will be skipped automatically if index exists)
+		// Known Hosts collection is indexed by hostname (will be skipped automatically if index exists)
 		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
 	}
 	
-	private void initKnownHostCache() {
-		Set<String> knownHostsList = new HashSet<String>();
+	private void initKnownLookupHostCache() {
+		Set<String> knownHostLookupCache = new HashSet<String>();
 		
 		DBCursor cursor = collection.find();
-		while (cursor.hasNext()) {
-			KnownHostsDBO dbo = new KnownHostsDBO(cursor.next()); 
-			knownHostsList.add(dbo.getHostname());
-		}
+		while (cursor.hasNext())
+			knownHostLookupCache.add(new KnownHostsDBO(cursor.next()).getHostname());
 		
-		this.knownHostsList = knownHostsList; 			
+		this.knownHostsLookupCache = knownHostLookupCache; 			
 	}
 	
 	public boolean exists(String hostname) {
-		if (knownHostsList == null)
-			initKnownHostCache();
+		if (knownHostsLookupCache == null)
+			initKnownLookupHostCache();
 		
-		return knownHostsList.contains(hostname);
+		return knownHostsLookupCache.contains(hostname);
 	}
 	
 	public KnownHostsDBO getHostInfo(String hostname) {
@@ -58,7 +64,7 @@ public class KnownHostsCollection {
 		knownHost.setLastAccess(lastAccess);
 		collection.insert(knownHost.dbo);
 		
-		knownHostsList.add(hostname);
+		knownHostsLookupCache.add(hostname);
 	}
 	
 	public void setLastAccess(String hostname, long lastAccess) {		

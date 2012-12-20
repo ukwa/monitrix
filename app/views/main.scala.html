@@ -30,10 +30,15 @@
     <div class="monitrix-header">
       <div class="monitrix-row">
         <h1>monitrix</h1>
-        <p>Current Crawl 
+        <p>
+        @if(global.Global.getBackend() != null) {
+          Current Crawl 
           <span class="monitrix-crawl-factoid">completed since @{
             (System.currentTimeMillis - global.Global.getBackend().getCrawlStatistics().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
           } days</span>
+        } else {
+          Database not connected.
+        }
         </p>
       </div>
     </div>

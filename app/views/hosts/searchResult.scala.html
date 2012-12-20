@@ -1,4 +1,4 @@
-@(results: List[String])
+@(query: String, results: List[String], took: Long)
 
 @main("Monitrix - Host Information") {
   <!-- TODO figure out how custom tags work in Play/Java -->
@@ -9,8 +9,22 @@
   <li><a href="alerts">Alerts</a></li>
   <li><a href="admin">Admin</a></li>
 }{
-  <h1>Results</h1>
-  @for(result <- results) {
-    <p><a href="@routes.Hosts.getHostInfo(result)">@result</a></p>
-  }
+  <div class="container-fluid" style="padding-bottom:40px;">
+    <div class="row-fluid">
+      <!-- Sidebar -->
+      <div class="span2" style="position:relative; left:-15px; padding-right:0px;">
+        <p>
+          @results.size() Results for <strong><em>@query</em></strong><br/>
+          <small><span style="color:#888">Took @took ms</span></small>
+        </p>     
+      </div>
+      
+      <!-- Result list -->
+      <div class="span10">
+        @for(result <- results) {
+          <p><a href="@routes.Hosts.getHostInfo(result)">@result</a></p>
+        }
+      </div>
+    </div>
+  </div>
 }

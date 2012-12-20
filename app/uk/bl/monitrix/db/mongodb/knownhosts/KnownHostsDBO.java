@@ -1,5 +1,7 @@
 package uk.bl.monitrix.db.mongodb.knownhosts;
 
+import java.util.Arrays;
+
 import uk.bl.monitrix.db.mongodb.MongoProperties;
 
 import com.mongodb.DBObject;
@@ -31,6 +33,8 @@ public class KnownHostsDBO {
 	 */
 	public void setHostname(String hostname) {
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname);
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED,
+				Arrays.asList(KnownHostsCollection.tokenizeHostname(hostname)));
 	}
 	
 	/**

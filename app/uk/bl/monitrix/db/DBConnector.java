@@ -1,6 +1,7 @@
 package uk.bl.monitrix.db;
 
 import java.util.Iterator;
+import java.util.List;
 
 import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlStatistics;
@@ -31,6 +32,14 @@ public interface DBConnector {
 	 * @return the crawl statistics
 	 */
 	public CrawlStatistics getCrawlStatistics();
+	
+	/**
+	 * Searches the known hosts list. Supported types of queries depend
+	 * on the type of backend!
+	 * @param query the query
+	 * @return list of host names
+	 */
+	public List<String> searchHosts(String query);
 	
 	/**
 	 * Returns DB-backed host information

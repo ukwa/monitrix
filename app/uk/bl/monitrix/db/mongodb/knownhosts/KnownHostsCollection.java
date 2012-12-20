@@ -2,6 +2,7 @@ package uk.bl.monitrix.db.mongodb.knownhosts;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,9 @@ import com.mongodb.DBObject;
  */
 public class KnownHostsCollection {
 	
+	// MongoDB query operator for selecting documents where the field value equals any value in a list
+	private static final String MONGO_ALL = "$all";
+	
 	private DBCollection collection;
 	
 	// A simple in-memory buffer for quick host lookups
@@ -34,8 +38,9 @@ public class KnownHostsCollection {
 	public KnownHostsCollection(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
 		
-		// Known Hosts collection is indexed by hostname (will be skipped automatically if index exists)
-		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
+		// Known Hosts collection is indexed by hostname and tokenized host name
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 1));
 	}
 	
 	private void initKnownLookupHostCache() {
@@ -96,6 +101,19 @@ public class KnownHostsCollection {
 		return wrapped;
 	}
 	
+	public List<String> searchHost(String query) {
+		List<String> tokens = Arrays.asList(tokenizeHostname(query));
+		DBObject q = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 
+				new BasicDBObject(MONGO_ALL, tokens));
+		
+		List<String> hostnames = new ArrayList<String>();
+		DBCursor cursor = collection.find(q);
+		while (cursor.hasNext())
+			hostnames.add(new KnownHostsDBO(cursor.next()).getHostname());
+		
+		return hostnames;
+	}
+	
 	/**
 	 * Adds a new host to the Known Hosts list.  Note that this method ONLY writes to
 	 * the IN-MEMORY CACHE! In order to write to the database, execute the .commit() method
@@ -138,6 +156,20 @@ public class KnownHostsCollection {
 		} else {
 			Logger.warn("Attempt to write last access info to unknown host: " + hostname);
 		}
+	}
+	
+	/**
+	 * Helper method to split a host name into tokens. Host names
+	 * will be split at the following characters: '.', '-', '_'
+	 * 
+	 * Note: keeping this in a separate method, although it's a
+	 * one-liner. Possibly we want to do more elaborate things in the future.
+	 * 
+	 * @param hostname the host name
+	 * @return the tokens
+	 */
+	public static String[] tokenizeHostname(String hostname) {
+		return hostname.split("-|_|\\.");
 	}
 	
 }

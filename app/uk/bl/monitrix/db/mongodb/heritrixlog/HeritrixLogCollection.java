@@ -26,8 +26,8 @@ public class HeritrixLogCollection {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_HERITRIX_LOG);
 		
 		// The Heritrix Log collection is indexed by timestamp and hostname (will be skipped automatically if index exists)
-		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_LOG_TIMESTAMP, 1));
-		this.collection.createIndex(new BasicDBObject(MongoProperties.FIELD_LOG_HOST, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_LOG_TIMESTAMP, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_LOG_HOST, 1));
 	}
 	
 	/**

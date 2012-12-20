@@ -150,6 +150,11 @@ public class MongoConnector implements DBConnector {
 	}
 	
 	@Override
+	public List<String> searchHosts(String query) {
+		return knownHosts.searchHost(query);
+	}
+	
+	@Override
 	public HostInformation getHostInfo(String hostname) {
 		KnownHostsDBO dbo = knownHosts.getHostInfo(hostname);
 		if (dbo == null)

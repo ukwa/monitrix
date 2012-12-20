@@ -37,6 +37,11 @@ public class MongoBackedHostInformation implements HostInformation {
 	public String getHostname() {
 		return dbo.getHostname();
 	}
+	
+	@Override
+	public long getFirstAccess() {
+		return dbo.getFirstAccess();
+	}
 
 	@Override
 	public long getLastAccess() {

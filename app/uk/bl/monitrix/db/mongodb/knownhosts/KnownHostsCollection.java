@@ -119,12 +119,13 @@ public class KnownHostsCollection {
 	 * the IN-MEMORY CACHE! In order to write to the database, execute the .commit() method
 	 * after your additions are done.
 	 * @param hostname the host name
-	 * @param lastAccess the time of last access
+	 * @param accessTime the access time
 	 */
-	public void addToList(String hostname, long lastAccess) {	
+	public void addToList(String hostname, long accessTime) {	
 		KnownHostsDBO dbo = new KnownHostsDBO(new BasicDBObject());
 		dbo.setHostname(hostname);
-		dbo.setLastAccess(lastAccess);
+		dbo.setFirstAccess(accessTime);
+		dbo.setLastAccess(accessTime);
 		knownHostsLookupCache.put(hostname, dbo);
 	}
 	

@@ -3,23 +3,32 @@
 @main("Monitrix - Host Information") {
   <!-- TODO figure out how custom tags work in Play/Java -->
   <li><a href="/">Home</a></li>
-  <li><a href="timeline">Crawl Timeline</a></li>
-  <li><a href="seed-stats">Seed Stats</a></li>
-  <li><a href="crawl-parameters">Crawl Parameters</a></li>
-  <li><a href="alerts">Alerts</a></li>
-  <li><a href="admin">Admin</a></li>
+  <li><a href="/timeline">Crawl Timeline</a></li>
+  <li><a href="/seed-stats">Seed Stats</a></li>
+  <li><a href="/crawl-parameters">Crawl Parameters</a></li>
+  <li><a href="/alerts">Alerts</a></li>
+  <li><a href="/admin">Admin</a></li>
 }{
-  <h1>@hostInfo.getHostname()</h1>
-  <p>Last Accessed: @{new Date(hostInfo.getLastAccess()).format("dd MMM yy, hh:mm")}</p>
-  <p>Number of URLs crawled: @hostInfo.countCrawledURLs()</p>
-  <p>Crawlers accessing this host:
-    @for(cid <- hostInfo.getCrawlers()) {
-      @cid
+  <h1 style="padding:0px 0px 10px 5px;">@hostInfo.getHostname()</h1>
+  <table class="table monitrix-hostinfo">
+    <tr><td class="monitrix-hostinfo-label">First Accessed</td><td>@{new Date(hostInfo.getFirstAccess()).format("dd MMM yy, HH:mm")}</td></tr>
+    <tr><td class="monitrix-hostinfo-label">Last Accessed</td><td>@{new Date(hostInfo.getLastAccess()).format("dd MMM yy, HH:mm")}</td></tr>
+    <tr><td class="monitrix-hostinfo-label">No. Crawled URLs</td><td>@hostInfo.countCrawledURLs()</td></tr>
+    <tr><td class="monitrix-hostinfo-label">Crawlers (@hostInfo.getCrawlers().size())</td><td>@hostInfo.getCrawlers().mkString(", ")</td></tr>
+    <tr><td class="monitrix-hostinfo-label">HTTP Results</td><td><div id="chart"></div></td></tr>
+  </table>
+  
+  <script src="@routes.Assets.at("javascripts/monitrix-piechart.js")" type="text/javascript"></script>
+  <script>
+    window.onload = function() {
+      new Monitrix.PieChart(
+    		  240, 240, 100,
+    		  [
+    		  @{hostInfo.getHTTPCodes().map(code =>
+    		    "{'label':'" + code.getLabel() + "','value':" + code.getValue()  + "}" 
+    		  ).mkString(", ") }
+    		  ],
+    		  'chart');
     }
-  </p>
-  <p>HTTP Status Codes:
-    @for(value <- hostInfo.getHTTPCodes()) {
-      @value.getName() - @value.getValue()
-    }
-  </p>
+  </script>
 }

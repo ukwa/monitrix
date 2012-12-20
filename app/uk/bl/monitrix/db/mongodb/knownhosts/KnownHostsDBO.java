@@ -52,5 +52,21 @@ public class KnownHostsDBO {
 	public void setLastAccess(long lastAccess) {
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, lastAccess);
 	}
-
+	
+	/**
+	 * UNIX timestamp of the first recorded access to this host.
+	 * @return the first recorded access
+	 */	
+	public long getFirstAccess() {
+		return (Long) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS);
+	}
+	
+	/**
+	 * Sets the UNIX timestamp of the first recorded access to this host.
+	 * @param firstAccess the first recorded access
+	 */
+	public void setFirstAccess(long firstAccess) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS, firstAccess);
+	}
+	
 }

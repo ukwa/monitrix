@@ -85,4 +85,9 @@ html, body {
   height:180px;
 }
 
+.monitrix-hostinfo-label {
+  white-space:nowrap;
+  font-weight:bold;
+}
+
 

@@ -17,6 +17,12 @@ public interface HostInformation {
 	public String getHostname();
 	
 	/**
+	 * UNIX timestamp of the first recorded access to this host.
+	 * @return
+	 */
+	public long getFirstAccess();
+	
+	/**
 	 * UNIX timestamp of the last recorded access to this host.
 	 * @return the last access to the host
 	 */

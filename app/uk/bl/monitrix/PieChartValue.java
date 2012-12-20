@@ -7,17 +7,17 @@ package uk.bl.monitrix;
  */
 public class PieChartValue {
 	
-	private String name;
+	private String label;
 	
 	private long value;
 	
-	public PieChartValue(String name, long value) {
-		this.name = name;
+	public PieChartValue(String label, long value) {
+		this.label = label;
 		this.value = value;
 	}
 	
-	public String getName() {
-		return name;
+	public String getLabel() {
+		return label;
 	}
 	
 	public long getValue() {

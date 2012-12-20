@@ -20,15 +20,18 @@ monitrix needs access to a [MongoDB](http://www.mongodb.org) NoSQL database serv
 
 * Use the ``mongod`` command to start MongoDB (hint: ``mongod --help``)
 * MongoDB provides a Web admin dashboard  at [http://localhost:28017](http://localhost:28017). Make sure
-  you start MongoDB with the ``--rest`` option (when in dev mode) to enable full dashboard functionality.
+  you start MongoDB with the ``--rest`` option (when in dev mode) to enable full dashboard functionality. (Note: on my system
+  ``sudo mongod --dbpath /var/lib/mongodb --rest`` works fine.)
 * Use ``mongo <dbname> --eval "db.dropDatabase()"`` to drop a DB 
-* Docs of MongoDB's simple REST interface are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface)
+* Docs of MongoDB's simple REST interface are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface).
 
 ## Loading Test Data into MongoDB
 
-monitrix doesn't load data into MongoDB yet. You can load data manually with the the following Java application
+monitrix doesn't load data into MongoDB by itself yet. You need to load data manually with the the following Java application
 class, located in the /test folder:
 
     uk.bl.monitrix.util.LogProcessor
     
-Edit the path to the Heritrix log you want to load, and start the application e.g. from your IDE.
+Edit the path to the Heritrix log you want to load, and start the application (e.g. from your IDE). Warning: Loading data takes time! On
+my machine, a 10 GB log sample currently takes about 30 minutes to process. There will be just enough log output to show you whether things
+are progressing. 

@@ -39,8 +39,10 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public void onStop(Application app) {
-		if (db != null)
+		if (db != null) {
+			Logger.info("Database disconnected");
 			db.close();
+		}
 	}
 	
 	/**

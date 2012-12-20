@@ -1,5 +1,7 @@
 package controllers;
 
+import java.util.List;
+
 import global.Global;
 import play.mvc.Result;
 import play.mvc.Controller;
@@ -19,7 +21,11 @@ public class Hosts extends Controller {
 			// TODO error handling
 			return notFound();
 		} else {
-			return ok(views.html.hosts.searchResult.render(db.searchHosts(query)));
+			List<String> hosts = db.searchHosts(query);
+			if (hosts.size() == 1)
+				return redirect(routes.Hosts.getHostInfo(hosts.get(0)));
+			else
+				return ok(views.html.hosts.searchResult.render(db.searchHosts(query)));
 		}
 	}
 	

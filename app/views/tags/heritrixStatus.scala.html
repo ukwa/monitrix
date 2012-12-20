@@ -1,0 +1,61 @@
+@(status: String)
+ 
+@status match {
+
+  case "1" => { <span>Successful DNS lookup</span> }
+
+  case "0" => { <span>Fetch never tried (perhaps protocol unsupported or illegal URI)</span> }
+  
+  case "-1" => { <span>DNS lookup failed </span> }
+  
+  case "-2" => { <span>HTTP connect lookup failed</span> }
+  
+  case "-3" => { <span>HTTP connect broken</span> }
+  
+  case "-4" => { <span>HTTP timeout</span> }
+  
+  case "-5" => { <span>Unexpected runtime exception -  see runtime-errors.log</span> }
+  
+  case "-6" => { <span>Prerequisite domain-lookup failed, precluding fetch attempt</span> }
+  
+  case "-7" => { <span>URI recognized as unsupported or illegal</span> }
+  
+  case "-8" => { <span>Multiple retries failed, retry limit reached</span> }
+  
+  case "-50" => { <span>Temporary status assigned to URIs awaiting preconditions - appearance in logs may be a bug</span> }
+      
+  case "-60" => { <span>URIs assigned a failure status - they could not be queued by the Frontier and may be unfetchable</span> }
+  
+  case "-61" => { <span>Prerequisite robots.txt fetch failed, precluding a fetch attempt</span> }
+  
+  case "-62" => { <span>Some other prerequisite failed, precluding a fetch attempt</span> }
+    
+  case "-63" => { <span>A prerequisite (of any type) could not be scheduled, precluding a fetch attempt</span> }
+  
+  case "-3000" => { <span>Severe Java Error condition occured such as OutOfMemoryError or StackOverflowError during URI processing</span> }
+  
+  case "-4000" => { <span>&quot;Chaff&quot; detection of traps/content with negligible value applied</span> }
+  
+  case "-4001" => { <span>The URI is too many link hops away from the seed</span> }
+  
+  case "-4002" => { <span>The URI is too many embed/transitive hops away from the last URI in scope</span> }
+  
+  case "-5000" => { <span>The URI is out of scope upon reexamination - this only happens if the scope changes during the crawl</span> }
+  
+  case "-5001" => { <span>Blocked from fetch by user setting</span> }
+  
+  case "-5002" => { <span>Blocked by a custom processor</span> }
+  
+  case "-5003" => { <span>Blocked due to exceeding an established quota</span> }
+  
+  case "-5004" => { <span>Blocked due to exceeding an established runtime</span> }
+  
+  case "-6000" => { <span>Deleted from Frontier by user</span> }
+  
+  case "-7000" => { <span>Processing thread was killed by the operator - this could happen if a thread is an a non-responsive condition</span> }
+  
+  case "-9998" => { <span>Robots.txt rules precluded fetch</span> } 
+  
+  case status => { <span>HTTP @status (@{org.apache.commons.httpclient.HttpStatus.getStatusText(Integer.parseInt(status))})</span> }
+    
+}

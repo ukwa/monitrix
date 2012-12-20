@@ -32,7 +32,7 @@ public class Hosts extends Controller {
 	
 	public static Result getHostInfo(String hostname) {
 		HostInformation hostInfo = db.getHostInfo(hostname);
-
+		
 		if (hostInfo == null)
 			return notFound(); // TODO error handling
 		else

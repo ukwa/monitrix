@@ -33,7 +33,7 @@ public class KnownHostsCollection {
 	
 	// A simple in-memory buffer for quick host lookups
 	// private Set<String> knownHostsLookupCache = null;
-	private Map<String, KnownHostsDBO> knownHostsLookupCache = null;
+	private Map<String, KnownHostsDBO> knownHostsLookupCache = new HashMap<String, KnownHostsDBO>();
 	
 	public KnownHostsCollection(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
@@ -44,7 +44,7 @@ public class KnownHostsCollection {
 	}
 	
 	private void initKnownLookupHostCache() {
-		// Set<String> knownHostsLookupCache = new HashSet<String>();
+		/* 
 		Map<String, KnownHostsDBO> knownHostsLookupCache = new HashMap<String, KnownHostsDBO>();
 		
 		DBCursor cursor = collection.find();
@@ -53,7 +53,8 @@ public class KnownHostsCollection {
 			knownHostsLookupCache.put(dbo.getHostname(), dbo);
 		}
 		
-		this.knownHostsLookupCache = knownHostsLookupCache; 			
+		this.knownHostsLookupCache = knownHostsLookupCache;
+		*/
 	}
 	
 	/**

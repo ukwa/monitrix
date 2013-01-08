@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import uk.bl.monitrix.db.mongodb.MongoProperties;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -21,8 +20,8 @@ public class AlertsCollection {
 		collection.insert(alert.dbo);
 	}
 	
-	public Iterator<AlertsDBO> getByType(AlertType type) {
-		final DBCursor cursor = collection.find(new BasicDBObject(MongoProperties.FIELD_ALERTS_TYPE, type.name()));
+	public Iterator<AlertsDBO> all() {
+		final DBCursor cursor = collection.find();
 		
 		return new Iterator<AlertsDBO>() {		
 			@Override

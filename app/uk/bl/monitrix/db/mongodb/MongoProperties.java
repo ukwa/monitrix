@@ -50,8 +50,9 @@ public class MongoProperties {
 	public static final String FIELD_KNOWN_HOSTS_LAST_ACCESS = "last_access";
 	
 	/** Database field keys (Alerts collection) **/
-	public static final String FIELD_ALERTS_URL = "offending_url";
-	public static final String FIELD_ALERTS_TYPE = "alert_type";
+	public static final String FIELD_ALERTS_OFFENDING_HOST = "offending_host";
+	public static final String FIELD_ALERTS_NAME = "alert_name";
+	public static final String FIELD_ALERTS_DESCRIPTION = "alert_description";
 	
 	/** Bulk insert chunk size **/
 	public static final int BULK_INSERT_CHUNK_SIZE = 500000;

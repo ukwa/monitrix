@@ -3,6 +3,7 @@ package uk.bl.monitrix.db;
 import java.util.Iterator;
 import java.util.List;
 
+import uk.bl.monitrix.AlertLog;
 import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.HostInformation;
@@ -40,6 +41,12 @@ public interface DBConnector {
 	 * @return list of host names
 	 */
 	public List<String> searchHosts(String query);
+	
+	/**
+	 * Returns the DB-backed alert log.
+	 * @return the alert log
+	 */
+	public AlertLog getAlertLog();
 	
 	/**
 	 * Returns DB-backed host information

@@ -11,10 +11,15 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 
+import uk.bl.monitrix.Alert;
+import uk.bl.monitrix.AlertLog;
 import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.HostInformation;
+import uk.bl.monitrix.alerts.AlertPipeline;
 import uk.bl.monitrix.db.DBConnector;
+import uk.bl.monitrix.db.mongodb.alerts.AlertsCollection;
+import uk.bl.monitrix.db.mongodb.alerts.AlertsDBO;
 import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsCollection;
 import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsDBO;
 import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogCollection;
@@ -49,6 +54,9 @@ public class MongoConnector implements DBConnector {
 	// Pre-Aggregated Stats collection
 	private PreAggregatedStatsCollection preAggregatedStatsCollection;
 	
+	// Alerts collection
+	private AlertsCollection alertsCollection;
+	
 	public MongoConnector() throws IOException {
 		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
 	}
@@ -64,6 +72,7 @@ public class MongoConnector implements DBConnector {
 		this.heritrixLogCollection = new HeritrixLogCollection(db);
 		this.knownHosts = new KnownHostsCollection(db);
 		this.preAggregatedStatsCollection = new PreAggregatedStatsCollection(db, knownHosts);
+		this.alertsCollection = new AlertsCollection(db);
 	}
 
 	@Override
@@ -75,6 +84,8 @@ public class MongoConnector implements DBConnector {
 		long crawlStartTime = Long.MAX_VALUE;
 		long crawlLastActivity = 0;
 		long linesTotal = 0;
+		
+		AlertPipeline alertPipeline = new AlertPipeline();
 		
 		while (iterator.hasNext()) {
 			long bulkStart = System.currentTimeMillis();
@@ -104,6 +115,15 @@ public class MongoConnector implements DBConnector {
 				
 				// Update pre-aggregated stats
 				preAggregatedStatsCollection.update(next);
+				
+				// Check alerts
+				for (Alert alert : alertPipeline.check(next)) {
+					AlertsDBO alertDBO = new AlertsDBO(new BasicDBObject());
+					alertDBO.setOffendingHost(next.getHost());
+					alertDBO.setAlertName(alert.getAlertName());
+					alertDBO.setAlertDescription(alert.getAlertDescription());
+					alertsCollection.insert(alertDBO);
+				}
 			}
 			
 			linesTotal += counter;
@@ -152,6 +172,13 @@ public class MongoConnector implements DBConnector {
 	@Override
 	public List<String> searchHosts(String query) {
 		return knownHosts.searchHost(query);
+	}
+	
+	@Override
+	public AlertLog getAlertLog() {
+		// Note: this means that every object calling this method gets their own copy, including their own cache!
+		// TODO either use a central cache or only create a single MongoBackedCrawlStatistics instance
+		return new MongoBackedAlertLog(alertsCollection);
 	}
 	
 	@Override

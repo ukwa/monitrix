@@ -12,20 +12,28 @@ public class AlertsDBO {
 		this.dbo = dbo;
 	}
 	
-	public AlertType getAlertType() {
-		return AlertType.valueOf(dbo.get(MongoProperties.FIELD_ALERTS_TYPE).toString());
+	public String getOffendingHost() {
+		return dbo.get(MongoProperties.FIELD_ALERTS_OFFENDING_HOST).toString();
 	}
 	
-	public void setAlertType(AlertType alertType) {
-		dbo.put(MongoProperties.FIELD_ALERTS_TYPE, alertType.name());
+	public void setOffendingHost(String hostname) {
+		dbo.put(MongoProperties.FIELD_ALERTS_OFFENDING_HOST, hostname);
 	}
 	
-	public String getURL() {
-		return dbo.get(MongoProperties.FIELD_ALERTS_URL).toString();
+	public String getAlertName() {
+		return dbo.get(MongoProperties.FIELD_ALERTS_NAME).toString();
 	}
 	
-	public void setURL(String url) {
-		dbo.put(MongoProperties.FIELD_ALERTS_URL, url);
+	public void setAlertName(String alertName) {
+		dbo.put(MongoProperties.FIELD_ALERTS_NAME, alertName);
+	}
+	
+	public String getAlertDescription() {
+		return dbo.get(MongoProperties.FIELD_ALERTS_DESCRIPTION).toString();
+	}
+	
+	public void setAlertDescription(String description) {
+		dbo.put(MongoProperties.FIELD_ALERTS_DESCRIPTION, description);
 	}
 	
 }

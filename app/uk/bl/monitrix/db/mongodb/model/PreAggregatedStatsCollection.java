@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb.model.preaggregatedstats;
+package uk.bl.monitrix.db.mongodb.model;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,7 +12,6 @@ import com.mongodb.DBObject;
 
 import uk.bl.monitrix.CrawlLogEntry;
 import uk.bl.monitrix.db.mongodb.MongoProperties;
-import uk.bl.monitrix.db.mongodb.model.knownhosts.KnownHostsCollection;
 
 /**
  * Wraps the MongoDB 'Pre-Aggregated Stats' collection.

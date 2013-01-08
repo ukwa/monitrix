@@ -9,7 +9,7 @@ import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.HostInformation;
 import uk.bl.monitrix.db.ReadConnector;
 import uk.bl.monitrix.db.mongodb.AbstractMongoConnector;
-import uk.bl.monitrix.db.mongodb.model.knownhosts.KnownHostsDBO;
+import uk.bl.monitrix.db.mongodb.model.KnownHostsDBO;
 
 /**
  * An implementation of {@link ReadConnector} for MongoDB.

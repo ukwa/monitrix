@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb.model.alerts;
+package uk.bl.monitrix.db.mongodb.model;
 
 import java.util.AbstractList;
 import java.util.Iterator;

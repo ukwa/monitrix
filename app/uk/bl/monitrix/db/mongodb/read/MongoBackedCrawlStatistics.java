@@ -8,9 +8,9 @@ import java.util.List;
 
 import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.TimeseriesValue;
-import uk.bl.monitrix.db.mongodb.model.globalstats.GlobalStatsCollection;
-import uk.bl.monitrix.db.mongodb.model.preaggregatedstats.PreAggregatedStatsCollection;
-import uk.bl.monitrix.db.mongodb.model.preaggregatedstats.PreAggregatedStatsDBO;
+import uk.bl.monitrix.db.mongodb.model.GlobalStatsCollection;
+import uk.bl.monitrix.db.mongodb.model.PreAggregatedStatsCollection;
+import uk.bl.monitrix.db.mongodb.model.PreAggregatedStatsDBO;
 
 /**
  * TODO needs caching!

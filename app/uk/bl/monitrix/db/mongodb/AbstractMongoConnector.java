@@ -2,11 +2,11 @@ package uk.bl.monitrix.db.mongodb;
 
 import java.io.IOException;
 
-import uk.bl.monitrix.db.mongodb.model.alerts.AlertsCollection;
-import uk.bl.monitrix.db.mongodb.model.crawllog.CrawlLogCollection;
-import uk.bl.monitrix.db.mongodb.model.globalstats.GlobalStatsCollection;
-import uk.bl.monitrix.db.mongodb.model.knownhosts.KnownHostsCollection;
-import uk.bl.monitrix.db.mongodb.model.preaggregatedstats.PreAggregatedStatsCollection;
+import uk.bl.monitrix.db.mongodb.model.AlertsCollection;
+import uk.bl.monitrix.db.mongodb.model.CrawlLogCollection;
+import uk.bl.monitrix.db.mongodb.model.GlobalStatsCollection;
+import uk.bl.monitrix.db.mongodb.model.KnownHostsCollection;
+import uk.bl.monitrix.db.mongodb.model.PreAggregatedStatsCollection;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;

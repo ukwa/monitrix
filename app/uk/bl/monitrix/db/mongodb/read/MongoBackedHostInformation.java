@@ -12,9 +12,9 @@ import java.util.Set;
 
 import uk.bl.monitrix.HostInformation;
 import uk.bl.monitrix.PieChartValue;
-import uk.bl.monitrix.db.mongodb.model.crawllog.CrawlLogCollection;
-import uk.bl.monitrix.db.mongodb.model.crawllog.CrawlLogDBO;
-import uk.bl.monitrix.db.mongodb.model.knownhosts.KnownHostsDBO;
+import uk.bl.monitrix.db.mongodb.model.CrawlLogCollection;
+import uk.bl.monitrix.db.mongodb.model.CrawlLogDBO;
+import uk.bl.monitrix.db.mongodb.model.KnownHostsDBO;
 
 /**
  * An implementation of the {@link HostInformation} interface backed by the

@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb.model.globalstats;
+package uk.bl.monitrix.db.mongodb.model;
 
 import uk.bl.monitrix.db.mongodb.MongoProperties;
 

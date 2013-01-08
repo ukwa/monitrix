@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb.model.knownhosts;
+package uk.bl.monitrix.db.mongodb.model;
 
 import java.util.Arrays;
 

@@ -8,8 +8,8 @@ import java.util.Map;
 
 import uk.bl.monitrix.Alert;
 import uk.bl.monitrix.AlertLog;
-import uk.bl.monitrix.db.mongodb.model.alerts.AlertsCollection;
-import uk.bl.monitrix.db.mongodb.model.alerts.AlertsDBO;
+import uk.bl.monitrix.db.mongodb.model.AlertsCollection;
+import uk.bl.monitrix.db.mongodb.model.AlertsDBO;
 
 public class MongoBackedAlertLog implements AlertLog {
 	

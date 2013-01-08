@@ -15,9 +15,9 @@ import uk.bl.monitrix.alerts.AlertPipeline;
 import uk.bl.monitrix.db.IngestConnector;
 import uk.bl.monitrix.db.mongodb.AbstractMongoConnector;
 import uk.bl.monitrix.db.mongodb.MongoProperties;
-import uk.bl.monitrix.db.mongodb.model.alerts.AlertsDBO;
-import uk.bl.monitrix.db.mongodb.model.crawllog.CrawlLogDBO;
-import uk.bl.monitrix.db.mongodb.model.globalstats.GlobalStatsDBO;
+import uk.bl.monitrix.db.mongodb.model.AlertsDBO;
+import uk.bl.monitrix.db.mongodb.model.CrawlLogDBO;
+import uk.bl.monitrix.db.mongodb.model.GlobalStatsDBO;
 
 public class MongoIngestConnector extends AbstractMongoConnector implements IngestConnector {
 

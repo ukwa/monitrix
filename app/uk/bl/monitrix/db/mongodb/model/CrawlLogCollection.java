@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb.model.crawllog;
+package uk.bl.monitrix.db.mongodb.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;

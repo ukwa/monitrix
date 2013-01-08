@@ -6,8 +6,8 @@ import java.util.List;
 
 import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlLogEntry;
-import uk.bl.monitrix.db.mongodb.model.crawllog.CrawlLogCollection;
-import uk.bl.monitrix.db.mongodb.model.crawllog.CrawlLogDBO;
+import uk.bl.monitrix.db.mongodb.model.CrawlLogCollection;
+import uk.bl.monitrix.db.mongodb.model.CrawlLogDBO;
 
 /**
  * An implementation of the {@link CrawlLog} interface backed by the

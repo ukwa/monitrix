@@ -23,6 +23,7 @@ public class MongoProperties {
 	public static final String COLLECTION_HERITRIX_LOG = "heritrix_log";
 	public static final String COLLECTION_PRE_AGGREGATED_STATS = "pre_aggregated_stats";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
+	public static final String COLLECTION_ALERTS = "alerts";
 	
 	/** Database field keys (Global Stats collection) **/
 	public static final String FIELD_GLOBAL_LINES_TOTAL = "lines_total";
@@ -47,6 +48,10 @@ public class MongoProperties {
 	public static final String FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED = "host_name_tokenized";
 	public static final String FIELD_KNOWN_HOSTS_FIRST_ACCESS = "first_access";
 	public static final String FIELD_KNOWN_HOSTS_LAST_ACCESS = "last_access";
+	
+	/** Database field keys (Alerts collection) **/
+	public static final String FIELD_ALERTS_URL = "offending_url";
+	public static final String FIELD_ALERTS_TYPE = "alert_type";
 	
 	/** Bulk insert chunk size **/
 	public static final int BULK_INSERT_CHUNK_SIZE = 500000;

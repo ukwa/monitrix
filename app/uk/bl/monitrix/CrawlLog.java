@@ -3,8 +3,6 @@ package uk.bl.monitrix;
 import java.util.Iterator;
 import java.util.List;
 
-import uk.bl.monitrix.heritrix.LogEntry;
-
 /**
  * The Crawl Log interface. Provides access to the raw log
  * data stored in the database.
@@ -20,7 +18,7 @@ public interface CrawlLog {
 	 * @param n the number of entries to return
 	 * @return the log entries
 	 */
-	public List<LogEntry> getMostRecentEntries(int n);
+	public List<CrawlLogEntry> getMostRecentEntries(int n);
 	
 	/**
 	 * Counts the log entries for a specific host.
@@ -34,6 +32,6 @@ public interface CrawlLog {
 	 * @param hostname the host name
 	 * @return the log entries for the host
 	 */
-	public Iterator<LogEntry> getEntriesForHost(String hostname); 
+	public Iterator<CrawlLogEntry> getEntriesForHost(String hostname); 
 	
 }

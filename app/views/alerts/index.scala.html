@@ -1,4 +1,4 @@
-@(alerts: List[uk.bl.monitrix.Alert])
+@(alerts: Map[String, List[uk.bl.monitrix.Alert]])
 
 @main("Monitrix - Alerts") {
   <!-- TODO figure out how custom tags work in Play/Java -->
@@ -9,9 +9,12 @@
   <li class="active"><a href="javascript:void(0);">Alerts</a></li>
   <li><a href="admin">Admin</a></li>
 }{
-  <table class="table table-compressed table-striped">
-    @for(alert <- alerts) {
-      <tr><td></td><td><span class="label label-warning">@alert.getAlertName()</span></small></td><td>@alert.getAlertDescription()</td></tr>
-    }
-  </table>
+   @for(host <- alerts.keySet) {
+    <h5>@host (@alerts.get(host).size)</h5>
+    <table class="table table-compressed">
+      @for(alert <- alerts.get(host)) {
+        <tr><td><span class="label label-warning">@alert.getAlertName</span></td><td>@alert.getAlertDescription</td></tr>
+      }
+    </table>
+  }
 }

@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb;
+package uk.bl.monitrix.db.mongodb.read;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -8,9 +8,9 @@ import java.util.List;
 
 import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.TimeseriesValue;
-import uk.bl.monitrix.db.mongodb.globalstats.GlobalStatsCollection;
-import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsCollection;
-import uk.bl.monitrix.db.mongodb.preaggregatedstats.PreAggregatedStatsDBO;
+import uk.bl.monitrix.db.mongodb.model.globalstats.GlobalStatsCollection;
+import uk.bl.monitrix.db.mongodb.model.preaggregatedstats.PreAggregatedStatsCollection;
+import uk.bl.monitrix.db.mongodb.model.preaggregatedstats.PreAggregatedStatsDBO;
 
 /**
  * TODO needs caching!

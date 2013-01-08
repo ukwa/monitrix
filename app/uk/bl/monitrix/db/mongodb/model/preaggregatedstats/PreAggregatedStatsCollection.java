@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb.preaggregatedstats;
+package uk.bl.monitrix.db.mongodb.model.preaggregatedstats;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,9 +10,9 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
+import uk.bl.monitrix.CrawlLogEntry;
 import uk.bl.monitrix.db.mongodb.MongoProperties;
-import uk.bl.monitrix.db.mongodb.knownhosts.KnownHostsCollection;
-import uk.bl.monitrix.heritrix.LogEntry;
+import uk.bl.monitrix.db.mongodb.model.knownhosts.KnownHostsCollection;
 
 /**
  * Wraps the MongoDB 'Pre-Aggregated Stats' collection.
@@ -76,7 +76,7 @@ public class PreAggregatedStatsCollection {
 	 * updates are done.
 	 * @param entry the log entry
 	 */
-	public void update(LogEntry entry) {
+	public void update(CrawlLogEntry entry) {
 		// Step 1 - compute the timeslot
 		long timeslot = (entry.getTimestamp().getTime() / MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) *
 				MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;

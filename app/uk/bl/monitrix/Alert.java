@@ -1,7 +1,7 @@
 package uk.bl.monitrix;
 
 /**
- * An Alert flag.
+ * An Alert.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class Alert {

@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb.alerts;
+package uk.bl.monitrix.db.mongodb.model.alerts;
 
 import uk.bl.monitrix.db.mongodb.MongoProperties;
 

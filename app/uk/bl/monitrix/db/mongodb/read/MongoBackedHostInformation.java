@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb;
+package uk.bl.monitrix.db.mongodb.read;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,9 +12,9 @@ import java.util.Set;
 
 import uk.bl.monitrix.HostInformation;
 import uk.bl.monitrix.PieChartValue;
-import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogCollection;
-import uk.bl.monitrix.db.mongodb.heritrixlog.HeritrixLogDBO;
-import uk.bl.monitrix.db.mongodb.knownhosts.KnownHostsDBO;
+import uk.bl.monitrix.db.mongodb.model.crawllog.CrawlLogCollection;
+import uk.bl.monitrix.db.mongodb.model.crawllog.CrawlLogDBO;
+import uk.bl.monitrix.db.mongodb.model.knownhosts.KnownHostsDBO;
 
 /**
  * An implementation of the {@link HostInformation} interface backed by the
@@ -26,9 +26,9 @@ public class MongoBackedHostInformation implements HostInformation {
 	
 	private KnownHostsDBO dbo;
 	
-	private HeritrixLogCollection log;
+	private CrawlLogCollection log;
 	
-	public MongoBackedHostInformation(KnownHostsDBO dbo, HeritrixLogCollection log) {
+	public MongoBackedHostInformation(KnownHostsDBO dbo, CrawlLogCollection log) {
 		this.dbo = dbo;
 		this.log = log;
 	}
@@ -52,7 +52,7 @@ public class MongoBackedHostInformation implements HostInformation {
 	public List<String> getCrawlers() {
 		Set<String> crawlers = new HashSet<String>();
 
-		Iterator<HeritrixLogDBO> entries = log.getEntriesForHost(dbo.getHostname());		
+		Iterator<CrawlLogDBO> entries = log.getEntriesForHost(dbo.getHostname());		
 		while (entries.hasNext())
 			crawlers.add(entries.next().getCrawlerID());
 		
@@ -71,9 +71,9 @@ public class MongoBackedHostInformation implements HostInformation {
 		// (HTTPCode -> NumberOfLines)
 		Map<Integer, Integer> codes = new HashMap<Integer, Integer>();
 		
-		Iterator<HeritrixLogDBO> entries = log.getEntriesForHost(dbo.getHostname());
+		Iterator<CrawlLogDBO> entries = log.getEntriesForHost(dbo.getHostname());
 		while (entries.hasNext()) {
-			HeritrixLogDBO dbo = entries.next();
+			CrawlLogDBO dbo = entries.next();
 			
 			Integer code = dbo.geHTTPCode();
 			Integer value = codes.get(code);

@@ -7,7 +7,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import uk.bl.monitrix.heritrix.LogEntry;
+import uk.bl.monitrix.CrawlLogEntry;
+import uk.bl.monitrix.LogfileReader;
 
 public class LogReaderTest {
 	
@@ -17,11 +18,11 @@ public class LogReaderTest {
 	@Test
 	public void testLogRead() throws IOException {
 		LogfileReader reader = new LogfileReader(PATH_TO_LOGFILE);
-		Iterator<LogEntry> entries = reader.iterator();
+		Iterator<CrawlLogEntry> entries = reader.iterator();
 		
 		int counter = 0;
 		while (entries.hasNext()) {
-			LogEntry entry = entries.next();
+			CrawlLogEntry entry = entries.next();
 			Assert.assertTrue(entry.getTimestamp().getTime() > 0);
 			Assert.assertNotNull(entry.getHTTPCode()); // Just make sure the method gets called
 			Assert.assertTrue(entry.getDownloadSize() > -1);

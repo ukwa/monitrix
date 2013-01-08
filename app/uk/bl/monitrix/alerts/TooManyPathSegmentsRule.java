@@ -1,7 +1,7 @@
 package uk.bl.monitrix.alerts;
 
 import uk.bl.monitrix.Alert;
-import uk.bl.monitrix.heritrix.LogEntry;
+import uk.bl.monitrix.CrawlLogEntry;
 
 public class TooManyPathSegmentsRule implements AlertRule {
 
@@ -10,7 +10,7 @@ public class TooManyPathSegmentsRule implements AlertRule {
 	private static final String ALERT_DESCRIPTION = "The following URL has too many path segments: ";
 	
 	@Override
-	public Alert check(LogEntry entry) {
+	public Alert check(CrawlLogEntry entry) {
 		String[] pathSegments = entry.getURL().split("/");
 		if (pathSegments.length > AlertProperties.TOO_MANY_PATH_SEGMENTS_THRESHOLD)
 			return new Alert(entry.getHost(), ALERT_NAME, ALERT_DESCRIPTION + entry.getURL());

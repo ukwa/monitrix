@@ -6,14 +6,14 @@ import global.Global;
 import play.mvc.Result;
 import play.mvc.Controller;
 import uk.bl.monitrix.HostInformation;
-import uk.bl.monitrix.db.DBConnector;
+import uk.bl.monitrix.db.ReadConnector;
 
 public class Hosts extends Controller {
 	
 	// String constants
 	private static final String QUERY = "query";
 	
-	private static DBConnector db = Global.getBackend();
+	private static ReadConnector db = Global.getBackend();
 	
 	public static Result searchHosts() {
 		String query = getQueryParam(QUERY);

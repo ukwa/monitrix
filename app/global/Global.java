@@ -11,8 +11,8 @@ import play.mvc.Result;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Results;
-import uk.bl.monitrix.db.DBConnector;
-import uk.bl.monitrix.db.mongodb.MongoConnector;
+import uk.bl.monitrix.db.ReadConnector;
+import uk.bl.monitrix.db.mongodb.read.MongoReadConnector;
 
 /**
  * The Play! Global object.
@@ -22,18 +22,18 @@ import uk.bl.monitrix.db.mongodb.MongoConnector;
 public class Global extends GlobalSettings {
 	
 	// Storage backend
-	private static DBConnector db = null;
+	private static ReadConnector db = null;
 	
 	private void connectBackend() {
 		try {
-			db = new MongoConnector();
+			db = new MongoReadConnector();
 			Logger.info("Database connected");
 		} catch (Exception e) {
 			Logger.error("FATAL - could not connect to MongoDB");
 		}		
 	}
 	
-	public static DBConnector getBackend() {
+	public static ReadConnector getBackend() {
 		return db;
 	}
 	

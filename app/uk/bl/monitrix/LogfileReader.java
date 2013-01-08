@@ -1,4 +1,4 @@
-package uk.bl.monitrix.heritrix;
+package uk.bl.monitrix;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
+
 
 /**
  * Utility class that provides serial read access to a Heritrix log file.
@@ -23,7 +24,7 @@ public class LogfileReader {
 			throw new FileNotFoundException(filename + " not found");
 	}
 
-	public Iterator<LogEntry> iterator() {
+	public Iterator<CrawlLogEntry> iterator() {
 		try {
 			return new LogIterator(log);
 		} catch (IOException e) {
@@ -33,7 +34,7 @@ public class LogfileReader {
 		}
 	}
 	
-	private class LogIterator implements Iterator<LogEntry> {
+	private class LogIterator implements Iterator<CrawlLogEntry> {
 		
 		private FileInputStream is;
 		
@@ -53,9 +54,9 @@ public class LogfileReader {
 		}
 
 		@Override
-		public LogEntry next() {
+		public CrawlLogEntry next() {
 			try {
-				LogEntry next = new LogEntry(nextLine);
+				CrawlLogEntry next = new CrawlLogEntry(nextLine);
 				nextLine = reader.readLine();
 				if (nextLine == null)
 					is.close();

@@ -1,4 +1,4 @@
-package uk.bl.monitrix.heritrix;
+package uk.bl.monitrix;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -12,7 +12,7 @@ import java.util.List;
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class LogEntry {
+public class CrawlLogEntry {
 	
 	private static DateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	
@@ -22,7 +22,7 @@ public class LogEntry {
 	
 	private String bufferedHost = null;
 	
-	public LogEntry(String line) {
+	public CrawlLogEntry(String line) {
 		this.line = line;
 		for (String field : line.split(" ")) {
 			if (!field.isEmpty())

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.bl.monitrix.Alert;
-import uk.bl.monitrix.heritrix.LogEntry;
+import uk.bl.monitrix.CrawlLogEntry;
 
 public class AlertPipeline {
 	
@@ -14,7 +14,7 @@ public class AlertPipeline {
 		rules.add(new TooManyPathSegmentsRule());
 	}
 	
-	public List<Alert> check(LogEntry entry) {
+	public List<Alert> check(CrawlLogEntry entry) {
 		List<Alert> alerts = new ArrayList<Alert>();
 		
 		for (AlertRule rule : rules) {

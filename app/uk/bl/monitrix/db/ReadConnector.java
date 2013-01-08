@@ -1,26 +1,21 @@
 package uk.bl.monitrix.db;
 
-import java.util.Iterator;
 import java.util.List;
 
 import uk.bl.monitrix.AlertLog;
 import uk.bl.monitrix.CrawlLog;
 import uk.bl.monitrix.CrawlStatistics;
 import uk.bl.monitrix.HostInformation;
-import uk.bl.monitrix.heritrix.LogEntry;
 
 /**
- * A minimal DB connection interface.
+ * A minimal connection interface for read access to the Monitrix DB.
+ * 
+ * Note: I'm separating read and write primarily to keep the line-count
+ * lower on the implementation classes (i.e. for better readability).
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public interface DBConnector {
-	
-	/**
-	 * TODO need to change this, since we want to work in 'tail -f'-like mode
-	 * @param iterator
-	 */
-	public void insert(Iterator<LogEntry> iterator);
+public interface ReadConnector {
 	
 	/**
 	 * Returns DB-backed crawl log.

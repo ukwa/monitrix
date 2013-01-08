@@ -1,4 +1,4 @@
-package uk.bl.monitrix.db.mongodb.heritrixlog;
+package uk.bl.monitrix.db.mongodb.model.crawllog;
 
 import java.util.AbstractList;
 import java.util.List;
@@ -12,11 +12,11 @@ import com.mongodb.DBObject;
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class HeritrixLogDBO {
+public class CrawlLogDBO {
 	
 	DBObject dbo;
 	
-	public HeritrixLogDBO(DBObject dbo) {
+	public CrawlLogDBO(DBObject dbo) {
 		this.dbo = dbo;
 	}
 	
@@ -107,7 +107,7 @@ public class HeritrixLogDBO {
 	 * @param log the list of wrapper objects
 	 * @return the list of DBObjects
 	 */
-	static List<DBObject> map(final List<HeritrixLogDBO> log) {
+	static List<DBObject> map(final List<CrawlLogDBO> log) {
 		return new AbstractList<DBObject>() {
 			
 			@Override

@@ -43,20 +43,6 @@ public class KnownHostsCollection {
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 1));
 	}
 	
-	private void initKnownLookupHostCache() {
-		/* 
-		Map<String, KnownHostsDBO> knownHostsLookupCache = new HashMap<String, KnownHostsDBO>();
-		
-		DBCursor cursor = collection.find();
-		while (cursor.hasNext()) {
-			KnownHostsDBO dbo = new KnownHostsDBO(cursor.next());
-			knownHostsLookupCache.put(dbo.getHostname(), dbo);
-		}
-		
-		this.knownHostsLookupCache = knownHostsLookupCache;
-		*/
-	}
-	
 	/**
 	 * Checks if the host is already in the Known Hosts list. To minimize database
 	 * access, this method will first check against an in-memory cache, and only
@@ -64,10 +50,7 @@ public class KnownHostsCollection {
 	 * @param hostname the host name
 	 * @return <code>true</code> if the host is in the Known Hosts list
 	 */
-	public boolean exists(String hostname) {
-		if (knownHostsLookupCache == null)
-			initKnownLookupHostCache();
-		
+	public boolean exists(String hostname) {		
 		if (knownHostsLookupCache.containsKey(hostname))
 			return true;
 		
@@ -87,9 +70,6 @@ public class KnownHostsCollection {
 	 * @return the host information
 	 */
 	public KnownHostsDBO getHostInfo(String hostname) {
-		if (knownHostsLookupCache == null)
-			initKnownLookupHostCache();
-			
 		if (knownHostsLookupCache.containsKey(hostname))
 			return knownHostsLookupCache.get(hostname);
 		
@@ -131,7 +111,7 @@ public class KnownHostsCollection {
 	}
 	
 	public void commit() {
-		// TODO risky - we'll lose updates to the database that haven't been made through this object!
+		// TODO risky - we'll lose updates to the database that haven't been made through this object instance!
 		final List<KnownHostsDBO> cachedKnownHosts = new ArrayList<KnownHostsDBO>(knownHostsLookupCache.values());
 		
 		collection.drop();

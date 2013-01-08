@@ -95,7 +95,7 @@ public class PreAggregatedStatsCollection {
 			dbo.setDownloadVolume(dbo.getDownloadVolume() + entry.getDownloadSize());
 		}
 		
-		// Step 4 - update known hosts info
+		// Step 4 - update hosts info
 		String hostname = entry.getHost();
 		if (knownHosts.exists(hostname)) {
 			knownHosts.setLastAccess(hostname, entry.getTimestamp().getTime());
@@ -103,7 +103,7 @@ public class PreAggregatedStatsCollection {
 			dbo.setNumberOfNewHostsCrawled(dbo.getNumberOfNewHostsCrawled() + 1);
 			knownHosts.addToList(hostname, entry.getTimestamp().getTime());
 		}
-
+		
 		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable
 		cache.put(timeslot, dbo);

@@ -1,5 +1,11 @@
 package uk.bl.monitrix.db.mongodb.model;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+
 import uk.bl.monitrix.db.mongodb.MongoProperties;
 
 import com.mongodb.DBObject;
@@ -82,6 +88,22 @@ public class PreAggregatedStatsDBO implements Comparable<PreAggregatedStatsDBO> 
 	 */
 	public void setNumberOfNewHostsCrawled(long newHostsCrawled) {
 		dbo.put(MongoProperties.FIELD_PRE_AGGREGATED_NEW_HOSTS_CRAWLED, newHostsCrawled);
+	}
+	
+	/**
+	 * The list of hosts that were 'completed' (i.e. last accessed) within this timeslot.
+	 * @return the list of completed hosts
+	 */
+	public Set<String> getCompletedHosts() {
+	  	return new HashSet<String>(Arrays.asList(dbo.get(MongoProperties.FIELD_PRE_AGGREGATED_COMPLETED_HOSTS).toString().split(",")));
+	}
+	
+	/**
+	 * Sets the list of hosts that were 'completed' (i.e. last accessed) within this timeslot.
+	 * @param hostnames the list of hostnames
+	 */
+	public void setCompletedHosts(Set<String> hostnames) {
+		dbo.put(MongoProperties.FIELD_PRE_AGGREGATED_COMPLETED_HOSTS, StringUtils.join(hostnames, ","));
 	}
 
 	@Override

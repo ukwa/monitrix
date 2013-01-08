@@ -42,6 +42,7 @@ public class MongoProperties {
 	public static final String FIELD_PRE_AGGREGATED_DOWNLOAD_VOLUME = "download_volume";
 	public static final String FIELD_PRE_AGGREGATED_NUMBER_OF_URLS = "number_of_urls";
 	public static final String FIELD_PRE_AGGREGATED_NEW_HOSTS_CRAWLED = "new_hosts_crawled";
+	public static final String FIELD_PRE_AGGREGATED_COMPLETED_HOSTS = "completed_hosts";
 	
 	/** Database field keys (Known Hosts collection) **/
 	public static final String FIELD_KNOWN_HOSTS_HOSTNAME = "host_name";

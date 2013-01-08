@@ -1,11 +1,15 @@
 package uk.bl.monitrix.api;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import com.google.common.net.InternetDomainName;
 
 /**
  * Wraps a single Heritrix log line.
@@ -120,25 +124,23 @@ public class CrawlLogEntry {
 		return line;
 	}
 	
+	/**
+	 * Utility method to extract the domain name from a URL. Cf.
+	 * 
+	 * http://stackoverflow.com/questions/4819775/implementing-public-suffix-extraction-using-java
+	 * 
+	 * @param url the URL
+	 * @return the domain name
+	 */
 	private static String getHostFromURL(String url) {
-		String host;
-		if (url.startsWith("http://")) {
-			host = url.substring(7);
-		} else if (url.startsWith("https://")) {
-			host = url.substring(8);
-		} else if (url.startsWith("dns:")){
-			host = url.substring(4);
-		} else {
+		try {
+			String host = new URI(url).getHost();
+			InternetDomainName domainName = InternetDomainName.from(host);
+			return domainName.topPrivateDomain().name();
+		} catch (URISyntaxException e) {
 			// Should never happen
-			throw new RuntimeException("Invalid URL: " + url);
+			throw new RuntimeException(e);
 		}
-		
-		host = host.substring(host.indexOf('.') + 1);
-		
-		if (host.indexOf("/") < 0)
-			return host;
-		
-		return host.substring(0, host.indexOf("/"));
 	}
 
 }

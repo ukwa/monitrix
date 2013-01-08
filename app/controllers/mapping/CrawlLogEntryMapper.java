@@ -9,6 +9,8 @@ import uk.bl.monitrix.api.CrawlLogEntry;
  * A simple class that wraps a {@link CrawlLogEntry} so that it can be directly 
  * serialized to JSON by Play. 
  * 
+ * TODO complete!
+ * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CrawlLogEntryMapper {

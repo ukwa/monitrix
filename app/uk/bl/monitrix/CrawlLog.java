@@ -1,4 +1,4 @@
-package uk.bl.monitrix.api;
+package uk.bl.monitrix;
 
 import java.util.Iterator;
 import java.util.List;

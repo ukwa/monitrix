@@ -4,8 +4,8 @@ import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
 
-import uk.bl.monitrix.api.CrawlLog;
-import uk.bl.monitrix.api.CrawlLogEntry;
+import uk.bl.monitrix.CrawlLog;
+import uk.bl.monitrix.CrawlLogEntry;
 import uk.bl.monitrix.db.mongodb.model.CrawlLogCollection;
 import uk.bl.monitrix.db.mongodb.model.CrawlLogDBO;
 

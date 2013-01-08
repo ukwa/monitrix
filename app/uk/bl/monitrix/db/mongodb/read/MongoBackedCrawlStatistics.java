@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import uk.bl.monitrix.api.CrawlStatistics;
-import uk.bl.monitrix.api.TimeseriesValue;
+import uk.bl.monitrix.CrawlStatistics;
+import uk.bl.monitrix.TimeseriesValue;
 import uk.bl.monitrix.db.mongodb.model.GlobalStatsCollection;
 import uk.bl.monitrix.db.mongodb.model.PreAggregatedStatsCollection;
 import uk.bl.monitrix.db.mongodb.model.PreAggregatedStatsDBO;

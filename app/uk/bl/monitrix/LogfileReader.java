@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
-import uk.bl.monitrix.api.CrawlLogEntry;
 
 /**
  * Utility class that provides serial read access to a Heritrix log file.

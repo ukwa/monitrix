@@ -5,7 +5,7 @@ import java.util.List;
 import global.Global;
 import play.mvc.Result;
 import play.mvc.Controller;
-import uk.bl.monitrix.api.HostInformation;
+import uk.bl.monitrix.HostInformation;
 import uk.bl.monitrix.db.ReadConnector;
 
 public class Hosts extends Controller {

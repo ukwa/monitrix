@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import uk.bl.monitrix.api.HostInformation;
-import uk.bl.monitrix.api.PieChartValue;
+import uk.bl.monitrix.HostInformation;
+import uk.bl.monitrix.PieChartValue;
 import uk.bl.monitrix.db.mongodb.model.CrawlLogCollection;
 import uk.bl.monitrix.db.mongodb.model.CrawlLogDBO;
 import uk.bl.monitrix.db.mongodb.model.KnownHostsDBO;

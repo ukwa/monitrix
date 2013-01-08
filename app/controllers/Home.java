@@ -5,7 +5,7 @@ import global.Global;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import uk.bl.monitrix.api.CrawlLog;
+import uk.bl.monitrix.CrawlLog;
 
 public class Home extends Controller {
 	

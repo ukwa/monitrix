@@ -10,7 +10,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-import uk.bl.monitrix.api.CrawlLogEntry;
+import uk.bl.monitrix.CrawlLogEntry;
 import uk.bl.monitrix.db.mongodb.MongoProperties;
 
 /**

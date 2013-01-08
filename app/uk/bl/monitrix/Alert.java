@@ -1,4 +1,4 @@
-package uk.bl.monitrix.api;
+package uk.bl.monitrix;
 
 /**
  * An Alert.

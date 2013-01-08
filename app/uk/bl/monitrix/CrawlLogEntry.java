@@ -1,4 +1,4 @@
-package uk.bl.monitrix.api;
+package uk.bl.monitrix;
 
 import java.net.MalformedURLException;
 import java.net.URL;

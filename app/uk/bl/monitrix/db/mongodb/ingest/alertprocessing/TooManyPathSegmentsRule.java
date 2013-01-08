@@ -1,7 +1,7 @@
 package uk.bl.monitrix.db.mongodb.ingest.alertprocessing;
 
-import uk.bl.monitrix.api.Alert;
-import uk.bl.monitrix.api.CrawlLogEntry;
+import uk.bl.monitrix.Alert;
+import uk.bl.monitrix.CrawlLogEntry;
 
 public class TooManyPathSegmentsRule implements AlertRule {
 

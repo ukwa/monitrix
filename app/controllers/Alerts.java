@@ -3,7 +3,7 @@ package controllers;
 import global.Global;
 import play.mvc.Controller;
 import play.mvc.Result;
-import uk.bl.monitrix.api.AlertLog;
+import uk.bl.monitrix.AlertLog;
 
 public class Alerts extends Controller {
 	

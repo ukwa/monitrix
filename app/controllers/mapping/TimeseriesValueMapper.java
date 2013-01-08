@@ -3,7 +3,7 @@ package controllers.mapping;
 import java.util.AbstractList;
 import java.util.List;
 
-import uk.bl.monitrix.api.TimeseriesValue;
+import uk.bl.monitrix.TimeseriesValue;
 
 /**
  * A simple class that wraps a {@link TimeseriesValue} so that it can be directly 

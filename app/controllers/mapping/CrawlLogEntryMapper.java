@@ -3,7 +3,7 @@ package controllers.mapping;
 import java.util.AbstractList;
 import java.util.List;
 
-import uk.bl.monitrix.api.CrawlLogEntry;
+import uk.bl.monitrix.CrawlLogEntry;
 
 /**
  * A simple class that wraps a {@link CrawlLogEntry} so that it can be directly 

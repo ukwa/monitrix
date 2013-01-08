@@ -6,7 +6,7 @@ import controllers.mapping.TimeseriesValueMapper;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import uk.bl.monitrix.api.CrawlStatistics;
+import uk.bl.monitrix.CrawlStatistics;
 
 public class Timeline extends Controller {
 

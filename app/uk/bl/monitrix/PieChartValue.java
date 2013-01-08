@@ -1,4 +1,4 @@
-package uk.bl.monitrix.api;
+package uk.bl.monitrix;
 
 /**
  * A value in a pie chart (name, value).

@@ -10,10 +10,8 @@
   <li><a href="admin">Admin</a></li>
 }{
   <table class="table table-compressed table-striped">
-    <h4>Offending URLs (@alerts.size())</h4>
     @for(alert <- alerts) {
-      <tr><td></td><td><span class="label label-warning">@alert.getName()</span></small></td><td>@alert.getDescription()</td></tr>
+      <tr><td></td><td><span class="label label-warning">@alert.getAlertName()</span></small></td><td>@alert.getAlertDescription()</td></tr>
     }
-    
   </table>
 }

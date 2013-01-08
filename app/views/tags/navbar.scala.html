@@ -1,0 +1,26 @@
+@(activePath: String) 
+
+@{
+  val items = Seq(
+    ("/", "Home"),
+    ("/timeline", "Crawl Timeline"),
+    ("/seed-stats", "Seed Stats"),
+    ("/crawl-parameters", "Crawl Parameters"),
+    ("/alerts", "Alerts"),
+    ("/admin", "Admin")
+  )
+     
+  val html = 
+    <ul class="nav">
+      {
+        items.map { case (path, label) =>
+          if (path equals activePath) 
+            <li class="active"><a href="javascript:void(0);">{ label }</a></li>
+          else
+            <li><a href={ path }>{ label }</a></li>
+        }
+      }
+    </ul>
+    
+  html
+}

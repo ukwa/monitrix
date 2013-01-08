@@ -1,4 +1,4 @@
-package uk.bl.monitrix.alerts;
+package uk.bl.monitrix.db.mongodb.ingest.alertprocessing;
 
 public class AlertProperties {
 	

@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import uk.bl.monitrix.Alert;
-import uk.bl.monitrix.AlertLog;
+import uk.bl.monitrix.api.Alert;
+import uk.bl.monitrix.api.AlertLog;
 import uk.bl.monitrix.db.mongodb.model.AlertsCollection;
 import uk.bl.monitrix.db.mongodb.model.AlertsDBO;
 

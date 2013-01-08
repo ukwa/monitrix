@@ -1,11 +1,7 @@
+@import tags.navbar
+
 @main("Monitrix - Crawl Parameters") {
-  <!-- TODO figure out how custom tags work in Play/Java -->
-  <li><a href="/">Home</a></li>
-  <li><a href="crawl-timeline">Crawl Timeline</a></li>
-  <li><a href="seed-stats">Seed Stats</a></li>
-  <li class="active"><a href="javascript:void(0);">Crawl Parameters</a></li>
-  <li><a href="alerts">Alerts</a></li>
-  <li><a href="admin">Admin</a></li>
+  @navbar("/crawl-parameters")
 } {
     
 }

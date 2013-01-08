@@ -1,12 +1,12 @@
 package controllers;
 
 import global.Global;
-import controllers.filter.TimeseriesValueFilter;
+import controllers.mapping.TimeseriesValueMapper;
 
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import uk.bl.monitrix.CrawlStatistics;
+import uk.bl.monitrix.api.CrawlStatistics;
 
 public class Timeline extends Controller {
 
@@ -17,15 +17,15 @@ public class Timeline extends Controller {
 	}
 	
 	public static Result getDatavolume() {
-		return ok(Json.toJson(TimeseriesValueFilter.map(stats.getDatavolumeHistory(100))));
+		return ok(Json.toJson(TimeseriesValueMapper.map(stats.getDatavolumeHistory(100))));
 	}
 	
 	public static Result getURLs() {
-		return ok(Json.toJson(TimeseriesValueFilter.map(stats.getCrawledURLsHistory(100))));
+		return ok(Json.toJson(TimeseriesValueMapper.map(stats.getCrawledURLsHistory(100))));
 	}
 	
 	public static Result getNewHostsCrawled() {
-		return ok(Json.toJson(TimeseriesValueFilter.map(stats.getNewHostsCrawledHistory(100))));
+		return ok(Json.toJson(TimeseriesValueMapper.map(stats.getNewHostsCrawledHistory(100))));
 	}
 	
 }

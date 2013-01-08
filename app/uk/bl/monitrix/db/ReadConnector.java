@@ -2,10 +2,10 @@ package uk.bl.monitrix.db;
 
 import java.util.List;
 
-import uk.bl.monitrix.AlertLog;
-import uk.bl.monitrix.CrawlLog;
-import uk.bl.monitrix.CrawlStatistics;
-import uk.bl.monitrix.HostInformation;
+import uk.bl.monitrix.api.AlertLog;
+import uk.bl.monitrix.api.CrawlLog;
+import uk.bl.monitrix.api.CrawlStatistics;
+import uk.bl.monitrix.api.HostInformation;
 
 /**
  * A minimal connection interface for read access to the Monitrix DB.

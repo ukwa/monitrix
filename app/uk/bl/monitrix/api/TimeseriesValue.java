@@ -1,4 +1,4 @@
-package uk.bl.monitrix;
+package uk.bl.monitrix.api;
 
 /**
  * A coordinate pair in a time-series graph (timestamp -> value).

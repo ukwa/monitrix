@@ -1,4 +1,4 @@
-package uk.bl.monitrix;
+package uk.bl.monitrix.api;
 
 import java.util.List;
 

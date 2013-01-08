@@ -2,7 +2,7 @@ package uk.bl.monitrix.db;
 
 import java.util.Iterator;
 
-import uk.bl.monitrix.CrawlLogEntry;
+import uk.bl.monitrix.api.CrawlLogEntry;
 
 /**
  * A minimal connection interface for write access to the Monitrix DB.

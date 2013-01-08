@@ -1,13 +1,9 @@
-@(crawlStatistics: uk.bl.monitrix.CrawlStatistics)
+@(crawlStatistics: uk.bl.monitrix.api.CrawlStatistics)
+
+@import tags.navbar
 
 @main("Monitrix - Crawl Timeline") {
-  <!-- TODO figure out how custom tags work in Play/Java -->
-  <li><a href="/">Home</a></li>
-  <li class="active"><a href="javascript:void(0);">Crawl Timeline</a></li>
-  <li><a href="seed-stats">Seed Stats</a></li>
-  <li><a href="crawl-parameters">Crawl Parameters</a></li>
-  <li><a href="alerts">Alerts</a></li>
-  <li><a href="admin">Admin</a></li>
+  @navbar("/timeline")
 } {
   <div class="container-fluid">
     <div class="row-fluid">

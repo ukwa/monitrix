@@ -1,11 +1,11 @@
 package controllers;
 
-import controllers.filter.LogEntryFilter;
+import controllers.mapping.CrawlLogEntryMapper;
 import global.Global;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import uk.bl.monitrix.CrawlLog;
+import uk.bl.monitrix.api.CrawlLog;
 
 public class Home extends Controller {
 	
@@ -17,7 +17,7 @@ public class Home extends Controller {
 	
 	// TODO not sure where to put this API method...
 	public static Result getMostRecent() {
-		return ok(Json.toJson(LogEntryFilter.map(log.getMostRecentEntries(100))));
+		return ok(Json.toJson(CrawlLogEntryMapper.map(log.getMostRecentEntries(100))));
 	}
   
 }

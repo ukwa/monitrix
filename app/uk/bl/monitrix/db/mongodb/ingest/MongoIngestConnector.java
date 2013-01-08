@@ -9,12 +9,12 @@ import play.Logger;
 
 import com.mongodb.BasicDBObject;
 
-import uk.bl.monitrix.Alert;
-import uk.bl.monitrix.CrawlLogEntry;
-import uk.bl.monitrix.alerts.AlertPipeline;
+import uk.bl.monitrix.api.Alert;
+import uk.bl.monitrix.api.CrawlLogEntry;
 import uk.bl.monitrix.db.IngestConnector;
 import uk.bl.monitrix.db.mongodb.AbstractMongoConnector;
 import uk.bl.monitrix.db.mongodb.MongoProperties;
+import uk.bl.monitrix.db.mongodb.ingest.alertprocessing.AlertPipeline;
 import uk.bl.monitrix.db.mongodb.model.AlertsDBO;
 import uk.bl.monitrix.db.mongodb.model.CrawlLogDBO;
 import uk.bl.monitrix.db.mongodb.model.GlobalStatsDBO;

@@ -1,9 +1,9 @@
-package controllers.filter;
+package controllers.mapping;
 
 import java.util.AbstractList;
 import java.util.List;
 
-import uk.bl.monitrix.TimeseriesValue;
+import uk.bl.monitrix.api.TimeseriesValue;
 
 /**
  * A simple class that wraps a {@link TimeseriesValue} so that it can be directly 
@@ -11,13 +11,13 @@ import uk.bl.monitrix.TimeseriesValue;
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class TimeseriesValueFilter {
+public class TimeseriesValueMapper {
 
 	public long x;
 	
 	public long y;
 	
-	public TimeseriesValueFilter(TimeseriesValue val) {
+	public TimeseriesValueMapper(TimeseriesValue val) {
 		this.x = val.getTimestamp() / 1000;
 		this.y = val.getValue();
 	}
@@ -28,12 +28,12 @@ public class TimeseriesValueFilter {
 	 * @param timeseries the timeseries
 	 * @return the wrapped list
 	 */
-	public static List<TimeseriesValueFilter> map(final List<TimeseriesValue> timeseries) {
-		return new AbstractList<TimeseriesValueFilter>() {
+	public static List<TimeseriesValueMapper> map(final List<TimeseriesValue> timeseries) {
+		return new AbstractList<TimeseriesValueMapper>() {
 			
 			@Override
-			public TimeseriesValueFilter get(int index) {
-				return new TimeseriesValueFilter(timeseries.get(index));
+			public TimeseriesValueMapper get(int index) {
+				return new TimeseriesValueMapper(timeseries.get(index));
 			}
 
 			@Override

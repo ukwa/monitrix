@@ -1,13 +1,9 @@
 @(query: String, results: List[String], took: Long)
 
+@import tags.navbar
+
 @main("Monitrix - Host Information") {
-  <!-- TODO figure out how custom tags work in Play/Java -->
-  <li><a href="/">Home</a></li>
-  <li><a href="timeline">Crawl Timeline</a></li>
-  <li><a href="seed-stats">Seed Stats</a></li>
-  <li><a href="crawl-parameters">Crawl Parameters</a></li>
-  <li><a href="alerts">Alerts</a></li>
-  <li><a href="admin">Admin</a></li>
+  @navbar("")
 }{
   <div class="container-fluid" style="padding-bottom:40px;">
     <div class="row-fluid">

@@ -1,10 +1,10 @@
-package uk.bl.monitrix.alerts;
+package uk.bl.monitrix.db.mongodb.ingest.alertprocessing;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.bl.monitrix.Alert;
-import uk.bl.monitrix.CrawlLogEntry;
+import uk.bl.monitrix.api.Alert;
+import uk.bl.monitrix.api.CrawlLogEntry;
 
 public class AlertPipeline {
 	

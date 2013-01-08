@@ -16,9 +16,7 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="monitrix-row">
-          <ul class="nav">
-            @navigation
-          </ul>
+          @navigation
           <form class="navbar-form pull-right" action="@routes.Hosts.searchHosts()" method="GET" style="margin-top:1px;">
             <input type="text" name="query" style="font-size:12px;height:16px;" placeholder="Enter Host or URL...">
             <button type="submit" class="btn btn-small">Go!</button>

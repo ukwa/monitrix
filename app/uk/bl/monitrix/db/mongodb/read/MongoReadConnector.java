@@ -3,10 +3,10 @@ package uk.bl.monitrix.db.mongodb.read;
 import java.io.IOException;
 import java.util.List;
 
-import uk.bl.monitrix.AlertLog;
-import uk.bl.monitrix.CrawlLog;
-import uk.bl.monitrix.CrawlStatistics;
-import uk.bl.monitrix.HostInformation;
+import uk.bl.monitrix.api.AlertLog;
+import uk.bl.monitrix.api.CrawlLog;
+import uk.bl.monitrix.api.CrawlStatistics;
+import uk.bl.monitrix.api.HostInformation;
 import uk.bl.monitrix.db.ReadConnector;
 import uk.bl.monitrix.db.mongodb.AbstractMongoConnector;
 import uk.bl.monitrix.db.mongodb.model.KnownHostsDBO;

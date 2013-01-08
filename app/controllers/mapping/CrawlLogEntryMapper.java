@@ -1,9 +1,9 @@
-package controllers.filter;
+package controllers.mapping;
 
 import java.util.AbstractList;
 import java.util.List;
 
-import uk.bl.monitrix.CrawlLogEntry;
+import uk.bl.monitrix.api.CrawlLogEntry;
 
 /**
  * A simple class that wraps a {@link CrawlLogEntry} so that it can be directly 
@@ -11,13 +11,13 @@ import uk.bl.monitrix.CrawlLogEntry;
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class LogEntryFilter {
+public class CrawlLogEntryMapper {
 	
 	public String url;
 	
 	public long timestamp;
 	
-	public LogEntryFilter(CrawlLogEntry entry) {
+	public CrawlLogEntryMapper(CrawlLogEntry entry) {
 		this.url = entry.getURL();
 		this.timestamp = entry.getTimestamp().getTime();
 	}
@@ -28,12 +28,12 @@ public class LogEntryFilter {
 	 * @param log the log entries
 	 * @return the wrapped list
 	 */
-	public static List<LogEntryFilter> map(final List<CrawlLogEntry> log) {
-		return new AbstractList<LogEntryFilter>() {
+	public static List<CrawlLogEntryMapper> map(final List<CrawlLogEntry> log) {
+		return new AbstractList<CrawlLogEntryMapper>() {
 			
 			@Override
-			public LogEntryFilter get(int index) {
-				return new LogEntryFilter(log.get(index));
+			public CrawlLogEntryMapper get(int index) {
+				return new CrawlLogEntryMapper(log.get(index));
 			}
 
 			@Override

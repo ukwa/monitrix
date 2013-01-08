@@ -7,8 +7,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import uk.bl.monitrix.CrawlLogEntry;
 import uk.bl.monitrix.LogfileReader;
+import uk.bl.monitrix.api.CrawlLogEntry;
 
 public class LogReaderTest {
 	

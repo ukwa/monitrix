@@ -1,13 +1,15 @@
 package uk.bl.monitrix.api;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import play.Logger;
 
 import com.google.common.net.InternetDomainName;
 
@@ -32,6 +34,15 @@ public class CrawlLogEntry {
 			if (!field.isEmpty())
 				fields.add(field.trim());
 		}
+	}
+	
+	/**
+	 * Returns the alerts that were generated while parsing the log entry, if any.
+	 * @return the list of alerts
+	 */
+	public List<Alert> getValidationAlerts() {
+		// TODO implement
+		return new ArrayList<Alert>();
 	}
 	
 	/**
@@ -133,13 +144,23 @@ public class CrawlLogEntry {
 	 * @return the domain name
 	 */
 	private static String getHostFromURL(String url) {
+		// Not the nicest solution - but neither java.net.URL nor com.google.common.net.InternetDomainName
+		// can handle Heritrix' custom 'dns:' protocol prefix.
+		if (url.startsWith("dns:"))
+			url = "http://" + url.substring(4);
+		
+		String host = null;
 		try {
-			String host = new URI(url).getHost();
+			host = new URL(url).getHost();
 			InternetDomainName domainName = InternetDomainName.from(host);
 			return domainName.topPrivateDomain().name();
-		} catch (URISyntaxException e) {
-			// Should never happen
-			throw new RuntimeException(e);
+		} catch (MalformedURLException e) {
+			Logger.warn(e.getMessage());
+			return url;
+		} catch (IllegalArgumentException e) {
+			// Will be thrown by InternetDomainName.from in case the host name looks weird (which is frequently the case...)
+			Logger.warn(e.getMessage());
+			return host; 
 		}
 	}
 

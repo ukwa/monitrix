@@ -32,7 +32,7 @@
         @if(global.Global.getBackend() != null) {
           Current Crawl 
           <span class="monitrix-crawl-factoid">completed since @{
-            (System.currentTimeMillis - global.Global.getBackend().getCrawlStatistics().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
+            (System.currentTimeMillis - global.Global.getBackend().getCrawlLog().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
           } days</span>
         } else {
           Database not connected.

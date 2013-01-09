@@ -1,16 +1,7 @@
-@(alerts: Map[String, List[uk.bl.monitrix.Alert]])
-
 @import tags.navbar
 
 @main("Monitrix - Alerts") {
   @navbar("/alerts")
 }{
-   @for(host <- alerts.keySet) {
-    <h5>@host (@alerts.get(host).size)</h5>
-    <table class="table table-compressed">
-      @for(alert <- alerts.get(host)) {
-        <tr><td><span class="label label-warning">@alert.getAlertName</span></td><td>@alert.getAlertDescription</td></tr>
-      }
-    </table>
-  }
+
 }

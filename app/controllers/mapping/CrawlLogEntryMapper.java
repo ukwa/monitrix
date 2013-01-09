@@ -3,10 +3,10 @@ package controllers.mapping;
 import java.util.AbstractList;
 import java.util.List;
 
-import uk.bl.monitrix.CrawlLogEntry;
+import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
- * A simple class that wraps a {@link CrawlLogEntry} so that it can be directly 
+ * A simple class that wraps a {@link LogFileEntry} so that it can be directly 
  * serialized to JSON by Play. 
  * 
  * TODO complete!
@@ -25,7 +25,7 @@ public class CrawlLogEntryMapper {
 	}
 	
 	/**
-	 * Utility method to lazily map a list of {@link CrawlLogEntry} objects
+	 * Utility method to lazily map a list of {@link LogFileEntry} objects
 	 * to a list of JSON-compatible wrappers.
 	 * @param log the log entries
 	 * @return the wrapped list

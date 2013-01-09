@@ -1,0 +1,182 @@
+package uk.bl.monitrix.heritrix;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import play.Logger;
+
+import com.google.common.net.InternetDomainName;
+
+import uk.bl.monitrix.model.Alert;
+import uk.bl.monitrix.model.Alert.AlertType;
+import uk.bl.monitrix.model.CrawlLogEntry;
+
+/**
+ * An in-memory implementation of {@link CrawlLogEntry}, for use with {@link LogfileReader}.
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
+public class LogFileEntry extends CrawlLogEntry {
+	
+	// TODO make configurable via config file
+	private static final int TOO_MANY_PATH_SEGMENTS_THRESHOLD = 18;
+	
+	private static final String MSG_MALFORMED_URL = "Malformed URL: ";
+	private static final String MSG_TOO_MANY_PATH_SEGMENTS = "Too many path segments in URL: ";
+	
+	private static DateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	
+	private String line;
+	
+	private List<String> fields = new ArrayList<String>();
+	
+	private String bufferedHost = null;
+	
+	private List<Alert> alerts = new ArrayList<Alert>();
+	
+	public LogFileEntry(String line) {
+		this.line = line;
+		for (String field : line.split(" ")) {
+			if (!field.isEmpty())
+				fields.add(field.trim());
+		}
+		
+		for (Alert alert : validate())
+			alerts.add(alert);
+	}
+	
+	private List<Alert> validate() {
+		List<Alert> alerts = new ArrayList<Alert>();
+		
+		String[] pathSegments = this.getURL().split("/");
+		if ((pathSegments.length - 1) > TOO_MANY_PATH_SEGMENTS_THRESHOLD)
+			alerts.add(new DefaultAlert(this.getHost(), AlertType.TOO_MANY_PATH_SEGMENTS, MSG_TOO_MANY_PATH_SEGMENTS + this.getURL()));
+
+		return alerts;
+	}
+	
+	public List<Alert> getAlerts() {
+		return alerts;
+	}
+	
+	@Override
+	public Date getTimestamp() {
+		try {
+			return ISO_FORMAT.parse(fields.get(0));
+		} catch (ParseException e) {
+			// Should never happen!
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@Override
+	public int getHTTPCode() {
+		return Integer.parseInt(fields.get(1));
+	}
+	
+	@Override
+	public int getDownloadSize() {
+		if (fields.get(2).equals("-"))
+			return 0;
+		
+		return Integer.parseInt(fields.get(2));
+	}
+	
+	@Override
+	public String getURL() {
+		return fields.get(3);
+	}
+	
+	@Override
+	public String getHost() {
+		if (bufferedHost == null) {
+			HostParseResult parseResult = getHostFromURL(getURL());
+			bufferedHost = parseResult.hostname;
+			if (parseResult.alert != null)
+				alerts.add(parseResult.alert);
+		}
+		
+		return bufferedHost;
+	}
+	
+	@Override
+	public String getBreadcrumbCodes() {
+		return fields.get(4);
+	}
+
+	@Override
+	public String getReferrer() {
+		return fields.get(5);
+	}
+	
+	@Override
+	public String getContentType() {
+		return fields.get(6);
+	}
+	
+	@Override
+	public String getCrawlerID() {
+		return fields.get(7);
+	}
+
+	@Override
+	public String getSHA1Hash() {
+		return fields.get(9);
+	}
+	
+	@Override
+	public String getAnnotations() {
+		return fields.get(11);
+	}
+	
+	@Override
+	public String toString() {
+		return line;
+	}
+	
+	/**
+	 * Helper method to extract the domain name from a URL. 
+	 * Cf. http://stackoverflow.com/questions/4819775/implementing-public-suffix-extraction-using-java
+	 * @param url the URL
+	 * @return the domain name
+	 */
+	private static HostParseResult getHostFromURL(String url) {
+		// Not the nicest solution - but neither java.net.URL nor com.google.common.net.InternetDomainName
+		// can handle Heritrix' custom 'dns:' protocol prefix.
+		if (url.startsWith("dns:"))
+			url = "http://" + url.substring(4);
+		
+		String host = null;
+		try {
+			host = new URL(url).getHost();
+			InternetDomainName domainName = InternetDomainName.from(host);
+			return new HostParseResult(domainName.topPrivateDomain().name(), null);
+		} catch (MalformedURLException e) {
+			Logger.warn(e.getMessage());
+			return new HostParseResult(url, new DefaultAlert(url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+		} catch (IllegalArgumentException e) {
+			// Will be thrown by InternetDomainName.from in case the host name looks weird (which is frequently the case...)
+			Logger.warn(e.getMessage());
+			return new HostParseResult(host, new DefaultAlert(host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + host));
+		}
+	}
+	
+	/**
+	 * Simple helper class to wrap the result of host-from-URL parsing.
+	 */
+	private static class HostParseResult {
+		public String hostname;
+		public DefaultAlert alert;
+		
+		HostParseResult(String hostname, DefaultAlert alert) {
+			this.hostname = hostname;
+			this.alert = alert;
+		}
+	}
+
+}

@@ -1,15 +1,15 @@
-@(hostInfo: uk.bl.monitrix.HostInformation)
+@(knownHost: uk.bl.monitrix.model.KnownHost)
 
 @import tags.{heritrixStatus, navbar}
 
 @main("Monitrix - Host Information") {
   @navbar("")
 }{
-  <h1 style="padding:0px 0px 10px 5px;"><a href="http://@hostInfo.getHostname()" target="_blank">@hostInfo.getHostname()</a></h1>
+  <h1 style="padding:0px 0px 10px 5px;"><a href="http://@knownHost.getHostname()" target="_blank">@knownHost.getHostname()</a></h1>
   <table class="table monitrix-hostinfo">
-    <tr><td class="monitrix-hostinfo-label">First Accessed</td><td colspan="2">@{new Date(hostInfo.getFirstAccess()).format("dd MMM yy, HH:mm")}</td></tr>
-    <tr><td class="monitrix-hostinfo-label">Last Accessed</td><td colspan="2">@{new Date(hostInfo.getLastAccess()).format("dd MMM yy, HH:mm")}</td></tr>
-    <tr><td class="monitrix-hostinfo-label">No. Crawled URLs</td><td colspan="2">@hostInfo.countCrawledURLs()</td></tr>
+    <tr><td class="monitrix-hostinfo-label">First Accessed</td><td colspan="2">@{new Date(knownHost.getFirstAccess()).format("dd MMM yy, HH:mm")}</td></tr>
+    <tr><td class="monitrix-hostinfo-label">Last Accessed</td><td colspan="2">@{new Date(knownHost.getLastAccess()).format("dd MMM yy, HH:mm")}</td></tr>
+    <tr><td class="monitrix-hostinfo-label">No. Crawled URLs</td><td colspan="2"></td></tr>
     <tr>
       <td class="monitrix-hostinfo-label">HTTP Results</td>
       <td style="vertical-align:middle; width:300px;"><div id="chart"></div></td>
@@ -20,30 +20,16 @@
               <tr><th># of URLs</th><th>%</th><th>Result</th><th>Code</th></tr>
             </thead>
             <tbody>
-              @defining(hostInfo.getHTTPCodes().map(_.getValue()).foldLeft(0l)(_ + _)) { sum =>
-                @for(result <- hostInfo.getHTTPCodes().sortWith(_.getValue() > _.getValue())) {
-                  <tr><td>@result.getValue()</td><td>@{(result.getValue() * 100) / sum}</td><td>@heritrixStatus(result.getLabel())</td><td>@result.getLabel()</td></tr>
-                }
-              }
+
             </tbody>
           </table>
         </small>
       </td>
     </tr>
-    <tr><td class="monitrix-hostinfo-label">Crawlers (@hostInfo.getCrawlers().size())</td><td colspan="2">@hostInfo.getCrawlers().mkString(", ")</td></tr>
   </table>
   
   <script src="@routes.Assets.at("javascripts/monitrix-piechart.js")" type="text/javascript"></script>
   <script>
-    window.onload = function() {
-      new Monitrix.PieChart(
-    		  240, 240, 100,
-    		  [
-    		  @{hostInfo.getHTTPCodes().map(code =>
-    		    "{'label':'" + code.getLabel() + "','value':" + code.getValue()  + "}" 
-    		  ).mkString(", ") }
-    		  ],
-    		  'chart');
-    }
+
   </script>
 }

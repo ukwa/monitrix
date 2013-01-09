@@ -1,4 +1,4 @@
-@(crawlStatistics: uk.bl.monitrix.CrawlStatistics)
+@(crawlLog: uk.bl.monitrix.model.CrawlLog)
 
 @import tags.navbar
 
@@ -12,11 +12,11 @@
         <span class="label" style="padding:10px 20px;">CRAWL COMPLETED</span>
         <small>
           <table class="table table-condensed unstyled" style="margin-top:20px;">
-            <tr><td>Started</td><td>@{new Date(crawlStatistics.getCrawlStartTime()).format("dd MMM yy, hh:mm")}</td></tr>
-            <tr><td>Last Activity</td><td>@{new Date(crawlStatistics.getTimeOfLastCrawlActivity()).format("dd MMM yy, hh:mm")}</td></tr>
+            <tr><td>Started</td><td>@{new Date(crawlLog.getCrawlStartTime()).format("dd MMM yy, hh:mm")}</td></tr>
+            <tr><td>Last Activity</td><td>@{new Date(crawlLog.getTimeOfLastCrawlActivity()).format("dd MMM yy, hh:mm")}</td></tr>
             
             <!-- TODO implement duration formatting as a custom tag -->
-            <tr><td>Crawl Duration</td><td>@{crawlStatistics.getCrawlDuration() / (1000 * 60 * 60);} hours</td></tr>
+            <tr><td>Crawl Duration</td><td>@{crawlLog.getCrawlDuration() / (1000 * 60 * 60);} hours</td></tr>
             <tr><td>URLs Crawled</td><td id="total-urls-crawled"></td></tr>
             <tr><td>Data Volume</td><td id="total-data-volume"></td></tr>
           </table>

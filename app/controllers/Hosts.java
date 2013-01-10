@@ -1,11 +1,14 @@
 package controllers;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import play.mvc.Result;
 import play.mvc.Controller;
 import uk.bl.monitrix.Global;
 import uk.bl.monitrix.database.DBConnector;
+import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
 
 public class Hosts extends Controller {
@@ -33,10 +36,16 @@ public class Hosts extends Controller {
 	public static Result getHostInfo(String hostname) {
 		KnownHost knownHost = db.getKnownHost(hostname);
 		
-		if (knownHost == null)
+		if (knownHost == null) {
 			return notFound(); // TODO error handling
-		else
-			return ok(views.html.hosts.hostinfo.render(knownHost));
+		} else {
+			Iterator<CrawlLogEntry> iterator = db.getCrawlLog().getEntriesForHost(hostname);
+			List<CrawlLogEntry> entries = new ArrayList<CrawlLogEntry>();
+			while (iterator.hasNext())
+				entries.add(iterator.next());
+			
+			return ok(views.html.hosts.hostinfo.render(knownHost, entries));
+		}
 	}
 	
 	private static String getQueryParam(String key) {

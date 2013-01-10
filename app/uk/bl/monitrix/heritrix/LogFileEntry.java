@@ -24,7 +24,7 @@ import uk.bl.monitrix.model.CrawlLogEntry;
 public class LogFileEntry extends CrawlLogEntry {
 	
 	// TODO make configurable via config file
-	private static final int TOO_MANY_PATH_SEGMENTS_THRESHOLD = 18;
+	private static final int TOO_MANY_PATH_SEGMENTS_THRESHOLD = 16;
 	
 	private static final String MSG_MALFORMED_URL = "Malformed URL: ";
 	private static final String MSG_TOO_MANY_PATH_SEGMENTS = "Too many path segments in URL: ";
@@ -55,7 +55,7 @@ public class LogFileEntry extends CrawlLogEntry {
 		
 		String[] pathSegments = this.getURL().split("/");
 		if ((pathSegments.length - 1) > TOO_MANY_PATH_SEGMENTS_THRESHOLD)
-			alerts.add(new DefaultAlert(this.getHost(), AlertType.TOO_MANY_PATH_SEGMENTS, MSG_TOO_MANY_PATH_SEGMENTS + this.getURL()));
+			alerts.add(new DefaultAlert(this.getTimestamp().getTime(), this.getHost(), AlertType.TOO_MANY_PATH_SEGMENTS, MSG_TOO_MANY_PATH_SEGMENTS + this.getURL()));
 
 		return alerts;
 	}
@@ -95,7 +95,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	@Override
 	public String getHost() {
 		if (bufferedHost == null) {
-			HostParseResult parseResult = getHostFromURL(getURL());
+			HostParseResult parseResult = getHost(this);
 			bufferedHost = parseResult.hostname;
 			if (parseResult.alert != null)
 				alerts.add(parseResult.alert);
@@ -145,9 +145,10 @@ public class LogFileEntry extends CrawlLogEntry {
 	 * @param url the URL
 	 * @return the domain name
 	 */
-	private static HostParseResult getHostFromURL(String url) {
+	private static HostParseResult getHost(LogFileEntry entry) {
 		// Not the nicest solution - but neither java.net.URL nor com.google.common.net.InternetDomainName
 		// can handle Heritrix' custom 'dns:' protocol prefix.
+		String url = entry.getURL();
 		if (url.startsWith("dns:"))
 			url = "http://" + url.substring(4);
 		
@@ -158,11 +159,11 @@ public class LogFileEntry extends CrawlLogEntry {
 			return new HostParseResult(domainName.topPrivateDomain().name(), null);
 		} catch (MalformedURLException e) {
 			Logger.warn(e.getMessage());
-			return new HostParseResult(url, new DefaultAlert(url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(url, new DefaultAlert(entry.getTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (IllegalArgumentException e) {
 			// Will be thrown by InternetDomainName.from in case the host name looks weird (which is frequently the case...)
 			Logger.warn(e.getMessage());
-			return new HostParseResult(host, new DefaultAlert(host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + host));
+			return new HostParseResult(host, new DefaultAlert(entry.getTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + host));
 		}
 	}
 	
@@ -184,16 +185,24 @@ public class LogFileEntry extends CrawlLogEntry {
 	 */
 	private static class DefaultAlert implements Alert {
 		
+		private long timestamp;
+		
 		private String offendingHost;
 		
 		private AlertType type;
 		
 		private String description;
 		
-		public DefaultAlert(String offendingHost, AlertType type, String description) {
+		public DefaultAlert(long timestamp, String offendingHost, AlertType type, String description) {
+			this.timestamp = timestamp;
 			this.offendingHost = offendingHost;
 			this.type = type;
 			this.description = description;
+		}
+		
+		@Override
+		public long getTimestamp() {
+			return timestamp;
 		}
 
 		@Override

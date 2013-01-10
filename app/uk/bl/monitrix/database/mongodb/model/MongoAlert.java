@@ -17,6 +17,23 @@ public class MongoAlert implements Alert {
 		this.dbo = dbo;
 	}
 	
+	/**
+	 * Returns the MongoDB entity that's backing this object.
+	 * @return the DBObject
+	 */
+	public DBObject getBackingDBO() {
+		return dbo;
+	}
+	
+	@Override
+	public long getTimestamp() {
+		return (Long) dbo.get(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP);
+	}
+	
+	public void setTimestamp(long timestamp) {
+		dbo.put(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, timestamp);
+	}
+	
 	@Override
 	public String getOffendingHost() {
 		return dbo.get(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST).toString();

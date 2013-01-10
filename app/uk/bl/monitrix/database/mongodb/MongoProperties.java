@@ -25,6 +25,7 @@ public class MongoProperties {
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
 	
 	/** Database field keys (Alert Log collection) **/
+	public static final String FIELD_ALERT_LOG_TIMESTAMP = "timestamp";
 	public static final String FIELD_ALERT_LOG_OFFENDING_HOST = "offending_host";
 	public static final String FIELD_ALERT_LOG_ALERT_TYPE = "alert_type";
 	public static final String FIELD_ALERT_LOG_DESCRIPTION = "alert_description";

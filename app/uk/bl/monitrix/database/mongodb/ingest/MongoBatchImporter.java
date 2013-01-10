@@ -12,8 +12,10 @@ import com.mongodb.Mongo;
 import com.mongodb.BasicDBObject;
 
 import uk.bl.monitrix.database.mongodb.MongoProperties;
+import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
 import uk.bl.monitrix.heritrix.LogFileEntry;
+import uk.bl.monitrix.model.Alert;
 
 public class MongoBatchImporter {
 	
@@ -29,6 +31,9 @@ public class MongoBatchImporter {
 	// Crawl log
 	private MongoCrawlLogImporter crawlLogImporter;
 	
+	// Alert log
+	private MongoAlertLogImporter alertLogImporter;
+	
 	public MongoBatchImporter() throws IOException {
 		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
 	}
@@ -43,6 +48,7 @@ public class MongoBatchImporter {
 		
 		this.crawlStatsImporter = new MongoCrawlStatsImporter(db, new MongoKnownHostImporter(db));
 		this.crawlLogImporter = new MongoCrawlLogImporter(db);
+		this.alertLogImporter = new MongoAlertLogImporter(db);
 	}
 	
 	public void insert(Iterator<LogFileEntry> iterator) {
@@ -52,7 +58,8 @@ public class MongoBatchImporter {
 		while (iterator.hasNext()) {
 			long bulkStart = System.currentTimeMillis();
 			
-			List<MongoCrawlLogEntry> bulk = new ArrayList<MongoCrawlLogEntry>();
+			List<MongoCrawlLogEntry> logEntryBatch = new ArrayList<MongoCrawlLogEntry>();
+			List<MongoAlert> alertBatch = new ArrayList<MongoAlert>();
 			
 			int counter = 0; // Should be slightly faster than using list.size() to count
 			while (iterator.hasNext() & counter < MongoProperties.BULK_INSERT_CHUNK_SIZE) {
@@ -66,17 +73,30 @@ public class MongoBatchImporter {
 				dbo.setCrawlerID(next.getCrawlerID());
 				dbo.setHTTPCode(next.getHTTPCode());
 				dbo.setLogLine(next.toString());
-				bulk.add(dbo);	
+				logEntryBatch.add(dbo);	
 				
 				// Update pre-aggregated stats
 				crawlStatsImporter.update(next);
 				
-				// TODO record log-entry-level alerts
+				for (Alert a : next.getAlerts()) {
+					MongoAlert alert = new MongoAlert(new BasicDBObject());
+					alert.setTimestamp(next.getTimestamp().getTime());
+					alert.setOffendingHost(a.getOffendingHost());
+					alert.setAlertType(a.getAlertType());
+					alert.setAlertDescription(a.getAlertDescription());
+					alertBatch.add(alert);
+				}
 			}
 
 			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
 			bulkStart = System.currentTimeMillis();
-			crawlLogImporter.insert(bulk);
+			
+			crawlLogImporter.insert(logEntryBatch);
+			logEntryBatch.clear();
+			
+			alertLogImporter.insert(alertBatch);
+			alertBatch.clear();
+			
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}
 		crawlStatsImporter.commit();

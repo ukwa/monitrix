@@ -20,7 +20,7 @@ import uk.bl.monitrix.model.AlertLog;
  */
 public class MongoAlertLog implements AlertLog {
 	
-	private DBCollection collection;
+	protected DBCollection collection;
 	
 	public MongoAlertLog(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_ALERT_LOG);

@@ -25,7 +25,7 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	}
 	
 	/**
-	 * Adds a new host to the Known Hosts list.  Note that this method ONLY writes to
+	 * Adds a new host to the Known Hosts list. Note that this method ONLY writes to
 	 * the in-memory cache! In order to write to the database, execute the .commit() method
 	 * after your additions are done.
 	 * @param hostname the host name
@@ -40,21 +40,19 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	}
 	
 	/**
-	 * Updates the last access time for the specified host.
+	 * Updates the last access time for the specified host. Note that this method ONLY 
+	 * writes to the in-memory cache! In order to write to the database, execute the .commit()
+	 * method after your additions are done.
 	 * @param hostname the hostname
 	 * @param lastAccess the new last access time
 	 */
 	public void setLastAccess(String hostname, long lastAccess) {		
 		// In this case we know it's a safe cast
-		MongoKnownHost dbo = (MongoKnownHost) this.getKnownHost(hostname);
-		if (dbo != null) {		
+		MongoKnownHost dbo = (MongoKnownHost) getKnownHost(hostname);
+		if (dbo != null)
 			dbo.setLastAccess(lastAccess);
-	
-			// TODO optimize!
-			collection.save(dbo.getBackingDBO());
-		} else {
+		else
 			Logger.warn("Attempt to write last access info to unknown host: " + hostname);
-		}
 	}
 	
 	/**

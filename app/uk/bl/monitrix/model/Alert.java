@@ -6,6 +6,12 @@ package uk.bl.monitrix.model;
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public interface Alert {
+	
+	/**
+	 * The timestamp at which the alert occured originally.
+	 * @return the timestamp
+	 */
+	public long getTimestamp();
 
 	/**
 	 * The offending host that is the source of this alert.

@@ -41,10 +41,24 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	public LogFileEntry(String line) {
 		this.line = line;
-		for (String field : line.split(" ")) {
-			if (!field.isEmpty())
-				fields.add(field.trim());
+
+		String[] split = line.split(" ");
+
+		// Column 1 - 11
+		int ctr = 0;
+		while (fields.size() < 11 && ctr < split.length) {
+			if (!split[ctr].isEmpty())
+				fields.add(split[ctr].trim());
+			ctr++;
 		}
+		
+		// Column 12 (annotations) - note that annotations may contain white spaces, so we need to re-join
+		StringBuilder sb = new StringBuilder();
+		for (int i=ctr; i<split.length; i++) {
+			sb.append(split[i] + " ");
+		}
+		
+		fields.add(sb.toString().trim());
 		
 		for (Alert alert : validate())
 			alerts.add(alert);

@@ -31,6 +31,12 @@
           </small>
         </td>
       </tr>
+      <tr>
+        <td class="monitrix-hostinfo-label">Virus Check</td>
+        <td colspan="2">
+          <div id="chart-viruscheck"></div>
+        </td>
+      </tr>
       @defining(uk.bl.monitrix.analytics.LogAnalytics.getCrawlerIDs(logEntries.iterator)) { crawlers =>
         <tr><td class="monitrix-hostinfo-label">Crawlers (@crawlers.size())</td><td colspan="2">@crawlers.mkString(", ")</td></tr>
       }
@@ -47,6 +53,15 @@
     		    ).mkString(", ") }
               ],
     		  'chart');
+        
+        new Monitrix.PieChart(
+      	      240, 240, 100,
+                [
+      		    @{uk.bl.monitrix.analytics.LogAnalytics.getVirusDistribution(logEntries.iterator).map(code =>
+      		      "{'label':'" + code.getLabel() + "','value':" + code.getValue()  + "}" 
+      		    ).mkString(", ") }
+                ],
+      		  'chart-viruscheck');
       }
     </script>
   }

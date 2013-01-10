@@ -7,9 +7,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import uk.bl.monitrix.heritrix.LogFileEntry;
-import uk.bl.monitrix.heritrix.LogfileReader;
-
 public class LogReaderTest {
 	
 	/** a tiny, 1000-line log file for unit testing **/

@@ -77,8 +77,23 @@ public class LogAnalytics {
 	 * @return the virus distribution
 	 */
 	public static List<PieChartValue> getVirusDistribution(Iterator<CrawlLogEntry> log) {
-		// TODO implement
-		return null;
+		// TODO dummy impl only - improve so that viruses are recorded by name
+		int clean = 0;
+		int infected = 0;
+		
+		while (log.hasNext()) {			
+			String annotations = log.next().getAnnotations();
+			if (annotations.contains("FOUND")) {
+				infected++;
+			} else {
+				clean++;
+			}
+		}
+		
+		List<PieChartValue> pieChart = new ArrayList<PieChartValue>();
+		pieChart.add(new PieChartValue("Clean", clean));
+		pieChart.add(new PieChartValue("Infected", infected));
+		return pieChart;
 	}
 
 }

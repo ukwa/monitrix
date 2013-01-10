@@ -25,10 +25,23 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	
 	private void parseEntry() {
 		fields = new ArrayList<String>();
-		for (String field : this.toString().split(" ")) {
-			if (!field.isEmpty())
-				fields.add(field.trim());
+		String[] split = this.toString().split(" ");
+
+		// Column 1 - 11
+		int ctr = 0;
+		while (fields.size() < 11 && ctr < split.length) {
+			if (!split[ctr].isEmpty())
+				fields.add(split[ctr].trim());
+			ctr++;
 		}
+		
+		// Column 12 (annotations) - note that annotations may contain white spaces, so we need to re-join
+		StringBuilder sb = new StringBuilder();
+		for (int i=ctr; i<split.length; i++) {
+			sb.append(split[i] + " ");
+		}
+		
+		fields.add(sb.toString().trim());
 	}
 	
 	/**

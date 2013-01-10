@@ -34,6 +34,10 @@ public class MongoKnownHostList implements KnownHostList {
 	
 	public MongoKnownHostList(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
+		
+		// Known Hosts collection is indexed by hostname and tokenized host name
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 1));
 	}
 
 	@Override

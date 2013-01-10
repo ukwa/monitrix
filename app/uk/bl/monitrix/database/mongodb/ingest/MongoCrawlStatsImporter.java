@@ -16,9 +16,6 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		super(db);
 		
 		this.knownHosts = knownHosts;
-		
-		// Collection is indexed by timestamp (will be skipped automatically if index exists)
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP, 1));
 	}
 	
 	/**

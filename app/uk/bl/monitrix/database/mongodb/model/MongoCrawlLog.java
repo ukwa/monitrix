@@ -28,6 +28,10 @@ public class MongoCrawlLog extends CrawlLog {
 	
 	public MongoCrawlLog(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_CRAWL_LOG);
+		
+		// The Heritrix Log collection is indexed by timestamp and hostname (will be skipped automatically if index exists)
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, 1));
 	}
 
 	@Override

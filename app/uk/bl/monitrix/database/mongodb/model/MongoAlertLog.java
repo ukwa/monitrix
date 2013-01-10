@@ -24,6 +24,10 @@ public class MongoAlertLog implements AlertLog {
 	
 	public MongoAlertLog(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_ALERT_LOG);
+		
+		// Collection is indexed by timestamp and host (will be skipped automatically if index exists)
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, 1));
 	}
 
 	@Override

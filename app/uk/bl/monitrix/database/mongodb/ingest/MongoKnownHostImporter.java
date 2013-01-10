@@ -10,7 +10,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 
-import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHost;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHostList;
 
@@ -18,10 +17,6 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 
 	public MongoKnownHostImporter(DB db) {
 		super(db);
-		
-		// Known Hosts collection is indexed by hostname and tokenized host name
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 1));
 	}
 	
 	/**

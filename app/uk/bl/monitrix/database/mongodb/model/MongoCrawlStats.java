@@ -28,6 +28,9 @@ public class MongoCrawlStats implements CrawlStats {
 	
 	public MongoCrawlStats(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_CRAWL_STATS);
+		
+		// Collection is indexed by timestamp (will be skipped automatically if index exists)
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP, 1));
 	}
 
 	@Override

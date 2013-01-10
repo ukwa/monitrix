@@ -29,10 +29,10 @@
       <div class="monitrix-row">
         <h1>monitrix</h1>
         <p>
-        @if(global.Global.getBackend() != null) {
+        @if(uk.bl.monitrix.Global.getBackend() != null) {
           Current Crawl 
           <span class="monitrix-crawl-factoid">completed since @{
-            (System.currentTimeMillis - global.Global.getBackend().getCrawlLog().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
+            (System.currentTimeMillis - uk.bl.monitrix.Global.getBackend().getCrawlLog().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
           } days</span>
         } else {
           Database not connected.

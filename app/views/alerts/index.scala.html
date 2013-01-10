@@ -1,7 +1,14 @@
+@(alerts: List[uk.bl.monitrix.model.Alert])
+
 @import tags.navbar
 
 @main("Monitrix - Alerts") {
   @navbar("/alerts")
 }{
-
+  <h5>@alerts.size Alerts Total</h5>
+  <table class="table table-compressed">
+    @for(alert <- alerts) {
+      <tr><td><span class="label label-warning">@alert.getAlertType.name</span></td><td>@alert.getAlertDescription</td></tr>
+    }
+  </table>
 }

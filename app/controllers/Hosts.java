@@ -2,9 +2,9 @@ package controllers;
 
 import java.util.List;
 
-import global.Global;
 import play.mvc.Result;
 import play.mvc.Controller;
+import uk.bl.monitrix.Global;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.model.KnownHost;
 

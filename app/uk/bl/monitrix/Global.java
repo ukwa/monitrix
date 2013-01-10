@@ -1,4 +1,4 @@
-package global;
+package uk.bl.monitrix;
 
 import java.lang.reflect.Method;
 

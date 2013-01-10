@@ -14,7 +14,7 @@ import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHost;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHostList;
 
-public class MongoKnownHostImporter extends MongoKnownHostList {
+class MongoKnownHostImporter extends MongoKnownHostList {
 
 	public MongoKnownHostImporter(DB db) {
 		super(db);

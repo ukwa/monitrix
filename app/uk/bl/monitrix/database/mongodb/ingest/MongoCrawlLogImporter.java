@@ -11,7 +11,7 @@ import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLog;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
 
-public class MongoCrawlLogImporter extends MongoCrawlLog {
+class MongoCrawlLogImporter extends MongoCrawlLog {
 
 	public MongoCrawlLogImporter(DB db) {
 		super(db);

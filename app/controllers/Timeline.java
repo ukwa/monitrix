@@ -2,12 +2,12 @@ package controllers;
 
 import java.util.List;
 
-import global.Global;
 import controllers.mapping.TimeseriesValueMapper;
 
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import uk.bl.monitrix.Global;
 import uk.bl.monitrix.analytics.CrawlStatsAnalytics;
 import uk.bl.monitrix.analytics.TimeseriesValue;
 import uk.bl.monitrix.model.CrawlLog;

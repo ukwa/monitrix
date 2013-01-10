@@ -178,5 +178,39 @@ public class LogFileEntry extends CrawlLogEntry {
 			this.alert = alert;
 		}
 	}
+	
+	/**
+	 * An in-memory implementation of {@link Alert}.
+	 */
+	private static class DefaultAlert implements Alert {
+		
+		private String offendingHost;
+		
+		private AlertType type;
+		
+		private String description;
+		
+		public DefaultAlert(String offendingHost, AlertType type, String description) {
+			this.offendingHost = offendingHost;
+			this.type = type;
+			this.description = description;
+		}
+
+		@Override
+		public String getOffendingHost() {
+			return offendingHost;
+		}
+
+		@Override
+		public AlertType getAlertType() {
+			return type;
+		}
+
+		@Override
+		public String getAlertDescription() {
+			return description;
+		}
+
+	}
 
 }

@@ -20,6 +20,7 @@ public class LogAnalytics {
 	
 	/**
 	 * Extracts the unique crawler IDs from the log entries. 
+	 * @param log the log entries
 	 * @return the IDs of the crawlers that crawled this host
 	 */
 	public static List<String> getCrawlerIDs(Iterator<CrawlLogEntry> log) {
@@ -35,6 +36,7 @@ public class LogAnalytics {
 	
 	/**
 	 * Computes the distribution of fetch status codes in the log entries.
+	 * @param log the log entries
 	 * @return the distribution of fetch status codes
 	 */
 	public static List<PieChartValue> getFetchStatusDistribution(Iterator<CrawlLogEntry> log) {
@@ -61,18 +63,20 @@ public class LogAnalytics {
 	
 	/**
 	 * Computes the distribution of MIME types from the log entries.
+	 * @param log the log entries
 	 * @return the distribution of MIME types
 	 */
-	public static List<PieChartValue> getMimeTypeDistribution() {
+	public static List<PieChartValue> getMimeTypeDistribution(Iterator<CrawlLogEntry> log) {
 		// TODO implement
 		return null;
 	}
 	
 	/**
 	 * Computes the distribution of clean vs. virused URLs from the log entries. 
+	 * @param log the log entries
 	 * @return the virus distribution
 	 */
-	public static List<PieChartValue> getVirusDistribution() {
+	public static List<PieChartValue> getVirusDistribution(Iterator<CrawlLogEntry> log) {
 		// TODO implement
 		return null;
 	}

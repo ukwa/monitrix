@@ -3,7 +3,6 @@ package uk.bl.monitrix.model;
 import java.util.Iterator;
 import java.util.List;
 
-
 /**
  * The crawl log interface.
  * 

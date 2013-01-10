@@ -24,18 +24,37 @@ public class Timeline extends Controller {
 	}
 	
 	public static Result getDatavolume() {
-		List<TimeseriesValue> datavolume = CrawlStatsAnalytics.getDatavolumeHistory(stats.getCrawlStats(), 100);
+		List<TimeseriesValue> datavolume = CrawlStatsAnalytics.getDatavolumeHistory(stats.getCrawlStats(), getMaxPoints());
 		return ok(Json.toJson(TimeseriesValueMapper.map(datavolume)));
 	}
 	
 	public static Result getURLs() {
-		List<TimeseriesValue> urls = CrawlStatsAnalytics.getCrawledURLsHistory(stats.getCrawlStats(), 100);
+		List<TimeseriesValue> urls = CrawlStatsAnalytics.getCrawledURLsHistory(stats.getCrawlStats(), getMaxPoints());
 		return ok(Json.toJson(TimeseriesValueMapper.map(urls)));
 	}
 	
 	public static Result getNewHostsCrawled() {
-		List<TimeseriesValue> newHosts = CrawlStatsAnalytics.getNewHostsCrawledHistory(stats.getCrawlStats(), 100);
+		List<TimeseriesValue> newHosts = CrawlStatsAnalytics.getNewHostsCrawledHistory(stats.getCrawlStats(), getMaxPoints());
 		return ok(Json.toJson(TimeseriesValueMapper.map(newHosts)));
+	}
+	
+	private static int getMaxPoints() {
+		String[] param = request().queryString().get("maxpoints");
+		if (param == null)
+			return 100;
+		
+		if (param.length < 1)
+			return 100;
+		
+		try {
+			int maxPoints = Integer.parseInt(param[0]);
+			if (maxPoints < 100)
+				maxPoints = 100;
+			
+			return maxPoints;
+		} catch (Throwable t) {
+			return 100;
+		}
 	}
 	
 }

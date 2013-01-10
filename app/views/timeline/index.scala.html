@@ -31,6 +31,11 @@
             <div class="graph-thumb-container">
               <div class="graph-thumb-y-axis" id="graph-volume-axis"></div>
               <div class="graph-thumb graph-tumb-loading" id="graph-volume"></div>
+              <p class="pull-right monitrix-graph-thumb-fullscreen">
+                <a href="javascript:$(createLightBox('/api/timeline/datavolume')).lightbox_me({destroyOnClose: true});">
+                  <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
+                </a>
+              </p>
             </div>
           </div>
             
@@ -39,6 +44,11 @@
             <div class="graph-thumb-container">
               <div class="graph-thumb-y-axis" id="graph-urls-axis"></div>
               <div class="graph-thumb graph-tumb-loading" id="graph-urls"></div>
+              <p class="pull-right monitrix-graph-thumb-fullscreen">
+                <a href="javascript:$(createLightBox('/api/timeline/urls-crawled')).lightbox_me({destroyOnClose: true});">
+                  <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
+                </a>
+              </p>
             </div>
           </div>  
         </div>
@@ -49,6 +59,11 @@
             <div class="graph-thumb-container">
               <div class="graph-thumb-y-axis" id="graph-hosts-axis"></div>
               <div class="graph-thumb graph-tumb-loading" id="graph-hosts"></div>
+              <p class="pull-right monitrix-graph-thumb-fullscreen">
+                <a href="javascript:$(createLightBox('/api/timeline/new-hosts-crawled')).lightbox_me({destroyOnClose: true});">
+                  <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
+                </a>
+              </p>
             </div>
           </div>
             
@@ -57,6 +72,9 @@
             <div class="graph-thumb-container">
               <div class="graph-thumb-y-axis" id="graph-completed-hosts-axis"></div>
               <div class="graph-thumb graph-tumb-loading" id="graph-completed-hosts"></div>
+              <p class="pull-right monitrix-graph-thumb-fullscreen">
+                <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
+              </p>
             </div>
           </div>            
         </div>
@@ -64,8 +82,9 @@
     </div>
   </div>
   
+  <script src="@routes.Assets.at("javascripts/jquery.lightbox_me.js")" type="text/javascript"></script>
   <script>
-    function loadGraph(url, divId, name, color, opt_total_callback) {
+    function loadGraph(url, divId, name, color, opt_show_hover_detail, opt_total_callback) {
       $.getJSON(url, function(data) {
         if (data) {
           var total = 0;
@@ -88,12 +107,12 @@
               element: document.getElementById(divId + '-axis')
           });
           
-          /*
-          new Rickshaw.Graph.HoverDetail({
-            graph: graph,
-            yFormatter: function(y) { return (y / (1024 * 1024 * 1024)).toPrecision(2) + ' GB'; }
-          });
-          */
+          if (opt_show_hover_detail) {
+            new Rickshaw.Graph.HoverDetail({
+              graph: graph,
+              yFormatter: function(y) { return (y / (1024 * 1024 * 1024)).toPrecision(2) + ' GB'; }
+            });
+          }
               
           $('#' + divId).removeClass('graph-tumb-loading');
           graph.render();
@@ -109,15 +128,30 @@
       });    	
     }
     
-    loadGraph('/api/timeline/datavolume', 'graph-volume', 'Volume', '#c05020', function(total) {
+    function createLightBox(url) {
+        var div = document.createElement('div');
+        div.id = 'lightbox';
+        div.style.width = '800px';
+        div.style.height = '600px';
+        div.style.background = "#fff";
+        
+        loadGraph(url + '?maxpoints=400', 'lightbox', 'Volume', '#c05020', true, function(total) {
+            total = total / (1024 * 1024 * 1024);
+            $('#total-data-volume').html(total.toPrecision(4) + ' GB');	
+          });
+        
+        return div;
+      }
+    
+    loadGraph('/api/timeline/datavolume?maxpoints=100', 'graph-volume', 'Volume', '#c05020', false, function(total) {
       total = total / (1024 * 1024 * 1024);
       $('#total-data-volume').html(total.toPrecision(4) + ' GB');	
     });
     
-    loadGraph('/api/timeline/urls-crawled', 'graph-urls', 'URLs', '#c05020', function(total) {
+    loadGraph('/api/timeline/urls-crawled?maxpoints=100', 'graph-urls', 'URLs', '#c05020', false, function(total) {
       $('#total-urls-crawled').html(total);
     });  
     
-    loadGraph('/api/timeline/new-hosts-crawled', 'graph-hosts', 'New Hosts', '#c05020');
+    loadGraph('/api/timeline/new-hosts-crawled?maxpoints=100', 'graph-hosts', 'New Hosts', '#c05020', false);
   </script>
 }

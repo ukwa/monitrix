@@ -13,7 +13,6 @@ import uk.bl.monitrix.model.KnownHost;
 
 public class Hosts extends Controller {
 	
-	// String constants
 	private static final String QUERY = "query";
 	
 	private static DBConnector db = Global.getBackend();

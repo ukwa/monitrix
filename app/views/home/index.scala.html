@@ -1,7 +1,62 @@
+@(log: uk.bl.monitrix.model.CrawlLog, stats: uk.bl.monitrix.model.CrawlStats, alerts: uk.bl.monitrix.model.AlertLog)
+
 @import tags.navbar
 
 @main("Monitrix - Home") {
   @navbar("/")
 }{
+  <p>
+    Crawl Started: @{ new Date(log.getCrawlStartTime) }
+  </p>
   
+  <p>
+    Total number of URLs crawled: @log.countEntries
+  </p>
+  
+  @defining(stats.getMostRecentStats(2)(1)) { currentStats =>
+    <p>
+      Current Crawl Rate [URLs/min]
+      <div class="chart" id="gauge-crawl-rate" data-percent="0"><small><span></span></small></div>
+    </p>
+    
+    <p>
+      Current Download Rate [MB/min]
+      <div class="chart" id="gauge-download-rate" data-percent="0"><small><span></span></small></div>
+    </p>
+    
+    <h5>Recent Alerts</h5>
+    @for(alert <- alerts.getMostRecent(20)) {
+      <p>@alert.getAlertType().name @uk.bl.monitrix.NumberFormat.since(alert.getTimestamp) Host: @alert.getOffendingHost</p>
+    }
+
+    <link rel="stylesheet"type="text/css" href="@routes.Assets.at("stylesheets/jquery.easy-pie-chart.css")">
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.easy-pie-chart.js")"></script>
+    <script type="text/javascript">
+      function refreshGauges() {
+        $.getJSON('/api/stats/recent', function(data) {
+        	var crawlRate = $('#gauge-crawl-rate');
+        	crawlRate.data('easyPieChart').update(data.crawl_rate / 20);
+        	$('span', crawlRate).text(data.crawl_rate);
+        	
+        	var downloadRate = $('#gauge-download-rate');
+        	downloadRate.data('easyPieChart').update(data.download_rate / 600000);
+        	$('span', downloadRate).text((data.download_rate / (1024 * 1024)).toPrecision(3) + 'MB');
+        	
+        	window.setTimeout(refreshGauges, 10000);
+        });
+      }
+    	
+      $(function() {
+        $('.chart').easyPieChart({
+          animate: 200,
+          lineWidth: 7,
+          lineCap: 'square',
+          barColor: '#850303',
+          size:80
+        });
+      });
+      
+      refreshGauges();
+    </script>
+  }
 }

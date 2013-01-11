@@ -66,6 +66,11 @@ public class MongoCrawlLog extends CrawlLog {
 
 		return recent;
 	}
+	
+	@Override
+	public long countEntries() {
+		return collection.count();
+	}
 
 	@Override
 	public long countEntriesForHost(String hostname) {

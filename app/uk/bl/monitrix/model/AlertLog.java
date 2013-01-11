@@ -25,6 +25,13 @@ public interface AlertLog {
 	public Iterator<Alert> listAll();
 	
 	/**
+	 * Returns the N most recent alerts.
+	 * @param n the number of alerts to return
+	 * @return the list of alerts
+	 */
+	public List<Alert> getMostRecent(int n);
+	
+	/**
 	 * Returns the names of offending hosts listed in the alert log.
 	 * @return the offending host names
 	 */
@@ -35,12 +42,12 @@ public interface AlertLog {
 	 * @param hostname the hostname
 	 * @return the number of alerts stored for the host
 	 */
-	public long countForHost(String hostname);
+	public long countAlertsForHost(String hostname);
 	
 	/**
 	 * Returns an iterator over the alerts stored for a particular host.
 	 * @return the alerts
 	 */
-	public Iterator<Alert> listForHost(String hostname);
+	public Iterator<Alert> listAlertsForHost(String hostname);
 
 }

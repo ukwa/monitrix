@@ -15,7 +15,7 @@ public class Alerts extends Controller {
 	private static AlertLog alertLog = Global.getBackend().getAlertLog();
 	
 	public static Result index() {
-		// TODO improve
+		// TODO improve - pagination?
 		Iterator<Alert> it = alertLog.listAll();
 		
 		List<Alert> alerts = new ArrayList<Alert>();

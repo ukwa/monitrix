@@ -14,7 +14,7 @@ public class LogReaderTest {
 
 	@Test
 	public void testLogRead() throws IOException {
-		LogfileReader reader = new LogfileReader(PATH_TO_LOGFILE);
+		SimpleLogfileReader reader = new SimpleLogfileReader(PATH_TO_LOGFILE);
 		Iterator<LogFileEntry> entries = reader.iterator();
 		
 		int counter = 0;

@@ -42,6 +42,12 @@ public abstract class CrawlLog {
 	public abstract List<CrawlLogEntry> getMostRecentEntries(int n);
 	
 	/**
+	 * Returns the total number of log entries.
+	 * @return the total number of log entries
+	 */
+	public abstract long countEntries();
+	
+	/**
 	 * Counts the log entries for a specific host.
 	 * @param hostname the host name
 	 * @return the number of log entries for the host

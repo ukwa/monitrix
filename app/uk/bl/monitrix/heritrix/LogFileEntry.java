@@ -18,7 +18,7 @@ import uk.bl.monitrix.model.Alert.AlertType;
 import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
- * An in-memory implementation of {@link CrawlLogEntry}, for use with {@link LogfileReader}.
+ * An in-memory implementation of {@link CrawlLogEntry}, for use with {@link SimpleLogfileReader}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class LogFileEntry extends CrawlLogEntry {

@@ -1,6 +1,7 @@
 package uk.bl.monitrix.database.mongodb.model;
 
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,6 +40,17 @@ public class MongoAlertLog implements AlertLog {
 	public Iterator<Alert> listAll() {
 		return map(collection.find());
 	}
+	
+	@Override
+	public List<Alert> getMostRecent(int n) {
+		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, -1)).limit(n);
+		
+		List<Alert> recent = new ArrayList<Alert>();
+		while(cursor.hasNext())
+			recent.add(new MongoAlert(cursor.next()));
+
+		return recent;
+	}
 
 	@Override
 	public List<String> getOffendingHosts() {
@@ -58,12 +70,12 @@ public class MongoAlertLog implements AlertLog {
 	}
 
 	@Override
-	public long countForHost(String hostname) {
+	public long countAlertsForHost(String hostname) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname));
 	}
 
 	@Override
-	public Iterator<Alert> listForHost(String hostname) {
+	public Iterator<Alert> listAlertsForHost(String hostname) {
 		return map(collection.find(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname)));
 	}
 	

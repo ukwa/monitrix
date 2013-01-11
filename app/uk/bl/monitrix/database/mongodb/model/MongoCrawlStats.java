@@ -1,7 +1,9 @@
 package uk.bl.monitrix.database.mongodb.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.mongodb.BasicDBObject;
@@ -72,6 +74,17 @@ public class MongoCrawlStats implements CrawlStats {
 			cache.put(timestamp, stats);
 			return stats;
 		}
+	}
+
+	@Override
+	public List<CrawlStatsUnit> getMostRecentStats(int n) {
+		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP, -1)).limit(n);
+		
+		List<CrawlStatsUnit> recent = new ArrayList<CrawlStatsUnit>();
+		while(cursor.hasNext())
+			recent.add(new MongoCrawlStatsUnit(cursor.next()));
+
+		return recent;
 	}
 
 }

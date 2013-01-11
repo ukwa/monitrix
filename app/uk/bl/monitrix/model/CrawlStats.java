@@ -1,6 +1,7 @@
 package uk.bl.monitrix.model;
 
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -22,5 +23,12 @@ public interface CrawlStats {
 	 * @return the crawl stats unit
 	 */
 	public CrawlStatsUnit getStatsForTimestamp(long timestamp);
+	
+	/**
+	 * Returns the N most recent recorded stats. 
+	 * @param n the number of timestamp units to return
+	 * @return the stats units
+	 */
+	public List<CrawlStatsUnit> getMostRecentStats(int n);
 
 }

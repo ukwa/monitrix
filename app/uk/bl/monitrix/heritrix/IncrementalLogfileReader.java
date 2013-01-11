@@ -2,29 +2,36 @@ package uk.bl.monitrix.heritrix;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 
 /**
- * Utility class that provides serial read access to a Heritrix log file.
+ * An incremental log file reader.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class LogfileReader {
+public class IncrementalLogfileReader {
+	
+	private BufferedReader reader;
 
-	private File log;
-
-	public LogfileReader(String filename) throws FileNotFoundException {
-		this.log = new File(filename);
-		if (!this.log.exists())
+	public IncrementalLogfileReader(String filename) throws FileNotFoundException {
+		File log = new File(filename);
+		if (!log.exists())
 			throw new FileNotFoundException(filename + " not found");
+		
+		this.reader = new BufferedReader(new FileReader(log));
 	}
 
-	public Iterator<LogFileEntry> iterator() {
+	/**
+	 * Returns an iterator over all log entries that have not yet been consumed through
+	 * this {@link IncrementalLogfileReader} instance (including those that may have been
+	 * added to the underlying log file in the mean time).
+	 * @return the iterator 
+	 */
+	public Iterator<LogFileEntry> newIterator() {
 		try {
-			return new LogIterator(log);
+			return new FollowingLogIterator(reader);
 		} catch (IOException e) {
 			// Should never happen as we've already checked that the file exists
 			// in the constructor!
@@ -32,17 +39,14 @@ public class LogfileReader {
 		}
 	}
 	
-	private class LogIterator implements Iterator<LogFileEntry> {
-		
-		private FileInputStream is;
+	private class FollowingLogIterator implements Iterator<LogFileEntry> {
 		
 		private BufferedReader reader;
-
+		
 		private String nextLine;
 		
-		LogIterator(File log) throws IOException {
-			is = new FileInputStream(log);
-			reader = new BufferedReader(new InputStreamReader(is));
+		FollowingLogIterator(BufferedReader reader) throws IOException {
+			this.reader = reader;
 			nextLine = reader.readLine();
 		}
 		
@@ -56,8 +60,6 @@ public class LogfileReader {
 			try {
 				LogFileEntry next = new LogFileEntry(nextLine);
 				nextLine = reader.readLine();
-				if (nextLine == null)
-					is.close();
 				return next;
 			} catch (IOException e) {
 				// Should never happen as we've already checked that the file exists
@@ -71,6 +73,6 @@ public class LogfileReader {
 			// Not supported
 			throw new UnsupportedOperationException();
 		}
-	}
-	
+	}	
+
 }

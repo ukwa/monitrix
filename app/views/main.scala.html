@@ -1,5 +1,7 @@
 @(title: String)(navigation: Html)(content: Html)
 
+@import tags.crawlFactoid
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -30,10 +32,7 @@
         <h1>monitrix</h1>
         <p>
         @if(uk.bl.monitrix.Global.getBackend() != null) {
-          Current Crawl 
-          <span class="monitrix-crawl-factoid">completed since @{
-            (System.currentTimeMillis - uk.bl.monitrix.Global.getBackend().getCrawlLog().getTimeOfLastCrawlActivity()) / (1000 * 60 * 60 * 24)
-          } days</span>
+          @crawlFactoid()
         } else {
           Database not connected.
         }

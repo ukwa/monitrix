@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 import uk.bl.monitrix.heritrix.LogFileEntry;
-import uk.bl.monitrix.heritrix.LogfileReader;
+import uk.bl.monitrix.heritrix.SimpleLogfileReader;
 
 /**
  * The Heritrix Dummy 'simulates' a crawl in progress by replaying an existing Heritrix log ("source log")
@@ -30,7 +30,7 @@ public class HeritrixDummy {
 	private static final String PATH_TO_DUMMY_LOG = "/home/simonr/dummy.log";
 	
 	// The approx. amount of time between two log events in the dummy log, in millis (we will add a bit of random jitter)
-	private static final int APPROX_LOG_INTERVAL_MS = 500;
+	private static final int APPROX_LOG_INTERVAL_MS = 50;
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		File dummyLog = new File(PATH_TO_DUMMY_LOG);
@@ -38,7 +38,7 @@ public class HeritrixDummy {
 		// Note: we'll append to the file, not replace! 
 		BufferedWriter writer = new BufferedWriter(new FileWriter(dummyLog, true));
 
-		Iterator<LogFileEntry> sourceLog = new LogfileReader(PATH_TO_SOURCE_LOG).iterator();		
+		Iterator<LogFileEntry> sourceLog = new SimpleLogfileReader(PATH_TO_SOURCE_LOG).iterator();		
 		Random rnd = new Random();
 		while (sourceLog.hasNext()) {
 			String entry = sourceLog.next().toString();

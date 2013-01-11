@@ -175,9 +175,25 @@ public class LogFileEntry extends CrawlLogEntry {
 			Logger.warn(e.getMessage());
 			return new HostParseResult(url, new DefaultAlert(entry.getTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (IllegalArgumentException e) {
-			// Will be thrown by InternetDomainName.from in case the host name looks weird (which is frequently the case...)
+			// Will be thrown by InternetDomainName.from in case the host name looks weird
 			Logger.warn(e.getMessage());
-			return new HostParseResult(host, new DefaultAlert(entry.getTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + host));
+			
+			// Special handling for the most common error cause - subdomains ending with '-'
+			String[] tokens = host.split(".");
+			int offendingToken = 0;
+			for (int i=0; i<tokens.length; i++) {
+				if (tokens[i].endsWith("-"))
+					offendingToken = i;
+			}
+			
+			if (offendingToken > 0) {
+				StringBuilder sb = new StringBuilder();
+				for (int i=offendingToken + 1; i<tokens.length; i++)
+					sb.append(tokens[i]);
+				host = sb.toString();
+			}
+			
+			return new HostParseResult(host, new DefaultAlert(entry.getTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		}
 	}
 	

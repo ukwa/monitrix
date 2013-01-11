@@ -92,7 +92,8 @@ public class LogAnalytics {
 		
 		List<PieChartValue> pieChart = new ArrayList<PieChartValue>();
 		pieChart.add(new PieChartValue("Clean", clean));
-		pieChart.add(new PieChartValue("Infected", infected));
+		if (infected > 0)
+			pieChart.add(new PieChartValue("Infected", infected));
 		return pieChart;
 	}
 

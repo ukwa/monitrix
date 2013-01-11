@@ -37,6 +37,12 @@
           <div id="chart-viruscheck" style="width:150px; height:150px;"></div>
         </td>
       </tr>
+      <tr>
+        <td class="monitrix-hostinfo-label">Content Distribution</td>
+        <td colspan="2">
+          <div id="chart-mime" style="width:150px; height:150px;"></div>
+        </td>
+      </tr>
       @defining(uk.bl.monitrix.analytics.LogAnalytics.getCrawlerIDs(logEntries.iterator)) { crawlers =>
         <tr><td class="monitrix-hostinfo-label">Crawlers (@crawlers.size())</td><td colspan="2">@crawlers.mkString(", ")</td></tr>
       }
@@ -63,8 +69,18 @@
               ).mkString(", ") }
             ],
             element: 'chart-viruscheck',
-            colors: ['#850303', '#BD4E4E' ]
+            colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
     	  });
+    	  
+    	  Morris.Donut({
+              data: [
+                @{uk.bl.monitrix.analytics.LogAnalytics.getMimeTypeDistribution(logEntries.iterator).map(code =>
+                  "{'label':'" + code.getLabel() + "','value':" + code.getValue()  + "}" 
+                ).mkString(", ") }
+              ],
+              element: 'chart-mime',
+              colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
+      	  });
       }
       /*
       window.onload = function() {

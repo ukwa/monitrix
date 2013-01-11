@@ -67,8 +67,25 @@ public class LogAnalytics {
 	 * @return the distribution of MIME types
 	 */
 	public static List<PieChartValue> getMimeTypeDistribution(Iterator<CrawlLogEntry> log) {
-		// TODO implement
-		return null;
+		Map<String, Integer> mimeTypes = new HashMap<String, Integer>();
+		
+		while (log.hasNext()) {		
+			String mime = log.next().getContentType();
+			Integer count = mimeTypes.get(mime);
+
+			if (count == null)
+				count = Integer.valueOf(1);
+			else
+				count = Integer.valueOf(count.intValue() + 1);
+			
+			mimeTypes.put(mime, count);
+		}
+		
+		List<PieChartValue> pieChart = new ArrayList<PieChartValue>();
+		for (Entry<String, Integer> entry : mimeTypes.entrySet())
+			pieChart.add(new PieChartValue(entry.getKey(), entry.getValue()));
+		
+		return pieChart;
 	}
 	
 	/**

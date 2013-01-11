@@ -1,4 +1,4 @@
-@(query: String, results: List[String], took: Long)
+@(query: String, results: List[String], took: Long, log: uk.bl.monitrix.model.CrawlLog)
 
 @import tags.navbar
 
@@ -18,7 +18,7 @@
       <!-- Result list -->
       <div class="span10">
         @for(result <- results) {
-          <p><a href="@routes.Hosts.getHostInfo(result)">@result</a></p>
+          <p><a href="@routes.Hosts.getHostInfo(result)">@result</a> <span class="label label-info">@log.countEntriesForHost(result)</span></p>
         }
       </div>
     </div>

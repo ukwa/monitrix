@@ -28,7 +28,7 @@ public class Hosts extends Controller {
 			if (hosts.size() == 1)
 				return redirect(routes.Hosts.getHostInfo(hosts.get(0)));
 			else
-				return ok(views.html.hosts.searchResult.render(query, db.searchHosts(query), (System.currentTimeMillis() - startTime)));
+				return ok(views.html.hosts.searchResult.render(query, db.searchHosts(query), (System.currentTimeMillis() - startTime), db.getCrawlLog()));
 		}
 	}
 	

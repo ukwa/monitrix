@@ -16,10 +16,10 @@ public class NumberFormat {
     private static final String MINUTES_COMPACT = "m";
     
     private static final String HOURS_NORMAL = " hrs ";
-    private static final String HOURS_COMPACT = "h";
+    private static final String HOURS_COMPACT = "h ";
     
     private static final String DAYS_NORMAL = " days ";
-    private static final String DAYS_COMPACT = "d";
+    private static final String DAYS_COMPACT = "d ";
     
     public static final String since(long timestamp) {
     	return since(timestamp, false);

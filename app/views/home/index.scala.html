@@ -7,7 +7,7 @@
 }{
   <div class="container">
     <div class="row">
-      <div class="span12" style="padding:0px 0px 60px 40px;">
+      <div style="padding:0px 0px 60px 40px;">
         <p style="padding:25px 0px 5px 0px;font-size:16px;">
           <em>
             <strong>
@@ -41,9 +41,9 @@
      </div>      
       
       <div class="span7 offset1">
-        <h5>Recent Alerts</h5>
+        <h5>Recent Alerts (out of @alerts.countAll Alerts total) <a class="pull-right" style="font-weight:normal" href="@routes.Alerts.index">Details »</a></h5>
         <table class="table table-condensed">
-          @for(alert <- alerts.getMostRecent(20)) {
+          @for(alert <- alerts.getMostRecent(10)) {
             <tr class="monitrix-alert-table">
               <td>@alertTag(alert.getAlertType())</td>
               <td>@uk.bl.monitrix.NumberFormat.since(alert.getTimestamp, true)</td>

@@ -38,7 +38,7 @@ public class MongoAlertLog implements AlertLog {
 
 	@Override
 	public Iterator<Alert> listAll() {
-		return map(collection.find());
+		return map(collection.find().sort(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, -1)));
 	}
 	
 	@Override
@@ -76,7 +76,7 @@ public class MongoAlertLog implements AlertLog {
 
 	@Override
 	public Iterator<Alert> listAlertsForHost(String hostname) {
-		return map(collection.find(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname)));
+		return map(collection.find(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname)).sort(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, -1)));
 	}
 	
 	/**

@@ -31,12 +31,8 @@ public class NumberFormat {
 		if (since < MINUTE)
 			return JUST_NOW;
 		
-		if (since < HOUR) {
-			if (compact)
-				return (since / MINUTE) + MINUTES_COMPACT;
-			else
-				return (since / MINUTE) + MINUTES_NORMAL;
-		}
+		if (since < HOUR)
+			return (since / MINUTE) + MINUTES_NORMAL;
 		
 		if (since < DAY) {
 			if (compact)

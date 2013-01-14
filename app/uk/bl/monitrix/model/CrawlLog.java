@@ -33,6 +33,15 @@ public abstract class CrawlLog {
 	public long getCrawlDuration() {
 		return getTimeOfLastCrawlActivity() - getCrawlStartTime();
 	}
+	
+	/**
+	 * Utility method: returns true if the last crawl activity was
+	 * more than 2 minutes ago (in which case we consider the crawl idle)
+	 * @return <code>true</code> if the crawl is idle 
+	 */
+	public boolean isIdle() {
+		return (System.currentTimeMillis() - getTimeOfLastCrawlActivity()) > 120000; 
+	}
 
 	/**
 	 * Returns the N most recent entries in the log.

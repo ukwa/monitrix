@@ -15,13 +15,16 @@ import uk.bl.monitrix.model.CrawlLogEntry;
  */
 public class CrawlLogEntryMapper {
 	
+	public long timestamp;
+	
 	public String url;
 	
-	public long timestamp;
+	public long download_size;
 	
 	public CrawlLogEntryMapper(CrawlLogEntry entry) {
 		this.url = entry.getURL();
 		this.timestamp = entry.getTimestamp().getTime();
+		this.download_size = entry.getDownloadSize();
 	}
 	
 	/**

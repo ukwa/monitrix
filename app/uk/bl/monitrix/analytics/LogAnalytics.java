@@ -35,6 +35,59 @@ public class LogAnalytics {
 	}
 	
 	/**
+	 * Computes the average crawl rate values (i.e. average number of URLs crawled per minute)
+	 * for the given log entries.
+	 * @param log the log entries
+	 * @return average download crawl rate in URLs/minute
+	 */
+	public static long getAverageCrawlRate(Iterator<CrawlLogEntry> log) {
+		long startTime = Long.MAX_VALUE;
+		long endTime = Long.MIN_VALUE;
+		long totalURLs = 0;
+		while (log.hasNext()) {
+			CrawlLogEntry next = log.next();
+			
+			long timestamp = next.getTimestamp().getTime();
+			if (timestamp > endTime)
+				endTime = timestamp;
+			
+			if (timestamp < startTime)
+				startTime = timestamp;
+			
+			totalURLs++;
+		}
+		
+		double urlsPerMillisecond = ((double) totalURLs) / ((double) (endTime - startTime));
+		return Math.round(urlsPerMillisecond * 60000);
+	}
+	
+	/**
+	 * Computes the average download rate value (in MB/minute) for the given log entries.
+	 * @param log the log entries
+	 * @return average download rate in MB/minute
+	 */	
+	public static long getAverageDownloadRate(Iterator<CrawlLogEntry> log) {
+		long startTime = Long.MAX_VALUE;
+		long endTime = Long.MIN_VALUE;
+		long downloadVolume = 0;
+		while (log.hasNext()) {
+			CrawlLogEntry next = log.next();
+			
+			long timestamp = next.getTimestamp().getTime();
+			if (timestamp > endTime)
+				endTime = timestamp;
+			
+			if (timestamp < startTime)
+				startTime = timestamp;
+			
+			downloadVolume += next.getDownloadSize();
+		}
+		
+		double bytesPerMillisecond = ((double) downloadVolume) / ((double) (endTime - startTime));
+		return Math.round(bytesPerMillisecond * 60000);
+	}
+	
+	/**
 	 * Computes the distribution of fetch status codes in the log entries.
 	 * @param log the log entries
 	 * @return the distribution of fetch status codes

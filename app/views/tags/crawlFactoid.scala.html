@@ -6,7 +6,7 @@ Current Crawl
     
     if ((System.currentTimeMillis - timeOfLastActivity) > (10 * 60 * 1000)) {
       // Crawl is idle for more than 10 minutes
-      "idle since" + uk.bl.monitrix.NumberFormat.since(timeOfLastActivity)
+      "idle since " + uk.bl.monitrix.NumberFormat.since(timeOfLastActivity)
     } else {
       // Crawl is running
       "running since " + uk.bl.monitrix.NumberFormat.since(crawlLog.getCrawlStartTime()) 

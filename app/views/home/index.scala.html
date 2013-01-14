@@ -1,62 +1,117 @@
 @(log: uk.bl.monitrix.model.CrawlLog, stats: uk.bl.monitrix.model.CrawlStats, alerts: uk.bl.monitrix.model.AlertLog)
 
-@import tags.navbar
+@import tags.{navbar, alertTag}
 
 @main("Monitrix - Home") {
   @navbar("/")
 }{
-  <p>
-    Crawl Started: @{ new Date(log.getCrawlStartTime) }
-  </p>
+  <div class="container">
+    <div class="row">
+      <div class="span12" style="padding:0px 0px 60px 40px;">
+        <p style="padding:25px 0px 5px 0px;font-size:16px;">
+          <em>
+            <strong>
+              @if(log.isIdle) {
+                Crawl Idle Since
+              } else {
+                Crawl Running Since
+              }
+            </strong>
+          </em>
+        </p>
+        <h1 id="wall-clock" style="margin-top:0px;padding-top:0px;font-size:52px"></h1>
+      </div>
+    </div>
+  </div>
   
-  <p>
-    Total number of URLs crawled: @log.countEntries
-  </p>
-  
-  @defining(stats.getMostRecentStats(2)(1)) { currentStats =>
-    <p>
-      Current Crawl Rate [URLs/min]
-      <div class="chart" id="gauge-crawl-rate" data-percent="0"><small><span></span></small></div>
-    </p>
-    
-    <p>
-      Current Download Rate [MB/min]
-      <div class="chart" id="gauge-download-rate" data-percent="0"><small><span></span></small></div>
-    </p>
-    
-    <h5>Recent Alerts</h5>
-    @for(alert <- alerts.getMostRecent(20)) {
-      <p>@alert.getAlertType().name @uk.bl.monitrix.NumberFormat.since(alert.getTimestamp) Host: @alert.getOffendingHost</p>
-    }
-
-    <link rel="stylesheet"type="text/css" href="@routes.Assets.at("stylesheets/jquery.easy-pie-chart.css")">
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.easy-pie-chart.js")"></script>
-    <script type="text/javascript">
-      function refreshGauges() {
-        $.getJSON('/api/stats/recent', function(data) {
-        	var crawlRate = $('#gauge-crawl-rate');
-        	crawlRate.data('easyPieChart').update(data.crawl_rate / 20);
-        	$('span', crawlRate).text(data.crawl_rate);
-        	
-        	var downloadRate = $('#gauge-download-rate');
-        	downloadRate.data('easyPieChart').update(data.download_rate / 600000);
-        	$('span', downloadRate).text((data.download_rate / (1024 * 1024)).toPrecision(3) + 'MB');
-        	
-        	window.setTimeout(refreshGauges, 10000);
-        });
-      }
-    	
-      $(function() {
-        $('.chart').easyPieChart({
-          animate: 200,
-          lineWidth: 7,
-          lineCap: 'square',
-          barColor: '#850303',
-          size:80
-        });
-      });
+  <div class="container">
+    <div class="row">
+      <div class="span4">
+        <div class="monitrix-current-stats pull-left">
+          <strong>Crawl Rate</strong>
+          <div class="chart" id="gauge-crawl-rate" data-percent="0"><span>0</span></div>
+          URLs/min
+        </div>
+        <div class="monitrix-current-stats pull-right">
+          <strong>Download Rate</strong><br/>
+          <div class="chart" id="gauge-download-rate" data-percent="0"><span>0</span></div>
+          MB/min
+        </div>
+        <p style="clear:both;margin-bottom:20px;"/>    
+     </div>      
       
-      refreshGauges();
-    </script>
-  }
+      <div class="span7 offset1">
+        <h5>Recent Alerts</h5>
+        <table class="table table-condensed">
+          @for(alert <- alerts.getMostRecent(20)) {
+            <tr class="monitrix-alert-table">
+              <td>@alertTag(alert.getAlertType())</td>
+              <td>@uk.bl.monitrix.NumberFormat.since(alert.getTimestamp, true)</td>
+              <td><a href="@routes.Hosts.getHostInfo(alert.getOffendingHost)">@alert.getOffendingHost</a></td>
+            </tr>
+          }
+        </table>
+      </div>
+    </div>
+  </div> 
+
+  <link rel="stylesheet"type="text/css" href="@routes.Assets.at("stylesheets/jquery.easy-pie-chart.css")">
+  <script type="text/javascript" src="@routes.Assets.at("javascripts/monitrix-clock.js")"></script>
+  <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.easy-pie-chart.js")"></script>
+  <script type="text/javascript">
+    @if(log.isIdle) {
+      new Monitrix.ProgressClock(@{System.currentTimeMillis - log.getTimeOfLastCrawlActivity}, $('#wall-clock'));
+    } else {
+      new Monitrix.ProgressClock(@{System.currentTimeMillis - log.getCrawlStartTime}, $('#wall-clock'));
+    }
+    
+    function getAverage(logEntries) {
+      var endTime = logEntries[0].timestamp;
+      var startTime = logEntries[logEntries.length - 1].timestamp;
+      var durationInMinutes = (endTime - startTime) / 60000; 
+    		
+      var crawl_rate, total_download_size = 0;
+      if (durationInMinutes > 0) {
+        crawl_rate = logEntries.length / durationInMinutes;
+
+        for (var i=0; i<logEntries.length; i++) {
+          total_download_size += logEntries[i].download_size;	 	
+        }
+      }
+      
+      return { crawl_rate: crawl_rate, download_rate: (total_download_size / durationInMinutes) };
+    }
+        
+    @defining(log.getMostRecentEntries(2000)) { mostRecent =>
+    function refreshGauges() {
+      $.getJSON('/api/log/recent', function(data) {
+    	if ((Date.now() - data[0].timestamp) < 120000) {
+    	  var average = getAverage(data);
+    	  
+          var crawlRate = $('#gauge-crawl-rate');
+          crawlRate.data('easyPieChart').update(50 + average.crawl_rate / @uk.bl.monitrix.analytics.LogAnalytics.getAverageCrawlRate(mostRecent.iterator));
+          $('span', crawlRate).text(average.crawl_rate);
+        	
+          var downloadRate = $('#gauge-download-rate');
+          downloadRate.data('easyPieChart').update(50 * average.download_rate / @uk.bl.monitrix.analytics.LogAnalytics.getAverageDownloadRate(mostRecent.iterator));
+          $('span', downloadRate).text((average.download_rate / (1024 * 1024)).toPrecision(3) + 'MB');
+    	}
+
+        window.setTimeout(refreshGauges, 5000);
+      });
+    }
+    }
+    	
+    $(function() {
+      $('.chart').easyPieChart({
+        animate: 200,
+        lineWidth: 7,
+        lineCap: 'square',
+        barColor: '#850303',
+        size:80
+      });
+    });
+     
+    refreshGauges();
+  </script>
 }

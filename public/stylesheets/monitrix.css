@@ -13,6 +13,7 @@ html, body {
 }
 
 .monitrix-header {
+  width:100%;
   margin:0px 0px 30px 0px;
   padding:30px 0px;
   color:#fff;
@@ -52,6 +53,22 @@ html, body {
 .monitrix-flash-url a {
   text-decoration:none;
   color:#fff;
+}
+
+.monitrix-current-stats {
+  width:100px;
+  padding:5px 15px;
+  margin:0px 10px;
+  text-align:center;
+  font-size:12px;
+}
+
+.monitrix-current-stats div {
+  margin:0 auto;
+}
+
+.monitrix-alert-table {
+  font-size:13px;
 }
 
 .graph-thumb-container {

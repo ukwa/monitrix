@@ -48,7 +48,11 @@
           <td class="monitrix-hostinfo-label">Subdomains (@subdomains.size)</td>
           <td colspan="3" class="monitrix-three-column-text">
             @for(subdomain <- subdomains) {
-              @{subdomain}.@knownHost.getHostname<br/>
+              @if(subdomain.isEmpty) {
+                @knownHost.getHostname
+              } else {
+                @{subdomain}.@knownHost.getHostname<br/>
+              }
             }
           </td>
         }

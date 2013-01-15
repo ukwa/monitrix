@@ -45,8 +45,8 @@ public class MongoBatchImporter {
 	private void init(String hostName, String dbName, int dbPort) throws IOException {
 		this.mongo = new Mongo(hostName, dbPort);
 		this.db = mongo.getDB(dbName);
-		
-		this.crawlStatsImporter = new MongoCrawlStatsImporter(db, new MongoKnownHostImporter(db));
+
+		this.crawlStatsImporter = new MongoCrawlStatsImporter(db,  new MongoKnownHostImporter(db));
 		this.crawlLogImporter = new MongoCrawlLogImporter(db);
 		this.alertLogImporter = new MongoAlertLogImporter(db);
 	}
@@ -62,19 +62,25 @@ public class MongoBatchImporter {
 			List<MongoAlert> alertBatch = new ArrayList<MongoAlert>();
 			
 			int counter = 0; // Should be slightly faster than using list.size() to count
+			long timeOfFirstLogEntryInBatch = Long.MAX_VALUE;
 			while (iterator.hasNext() & counter < MongoProperties.BULK_INSERT_CHUNK_SIZE) {
 				LogFileEntry next = iterator.next();
 				counter++;
+				
+				long timestamp = next.getTimestamp().getTime();
+				if (timestamp < timeOfFirstLogEntryInBatch)
+					timeOfFirstLogEntryInBatch = timestamp;
 
 				// Assemble MongoDB entity
 				MongoCrawlLogEntry dbo = new MongoCrawlLogEntry(new BasicDBObject());
-				dbo.setTimestamp(next.getTimestamp().getTime());
+				dbo.setTimestamp(timestamp);
 				dbo.setHost(next.getHost());
+				dbo.setSubdomain(next.getSubdomain());
 				dbo.setCrawlerID(next.getCrawlerID());
 				dbo.setHTTPCode(next.getHTTPCode());
 				dbo.setLogLine(next.toString());
 				logEntryBatch.add(dbo);	
-				
+								
 				// Update pre-aggregated stats
 				crawlStatsImporter.update(next);
 				
@@ -99,6 +105,7 @@ public class MongoBatchImporter {
 			
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}
+		
 		crawlStatsImporter.commit();
 				
 		Logger.info("Done - took " + (System.currentTimeMillis() - start) + " ms");		

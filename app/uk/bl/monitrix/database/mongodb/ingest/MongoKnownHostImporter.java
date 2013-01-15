@@ -51,6 +51,22 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	}
 	
 	/**
+	 * Adds a subdomain to the specified host. Note that this method ONLY
+	 * writes to the in-memory cache! In order to write to the database, execute the .commit()
+	 * method after your additions are done.
+	 * @param hostname the hostname
+	 * @param subdomain the subdomain to add
+	 */
+	public void addSubdomain(String hostname, String subdomain) {
+		// In this case we know it's a safe cast
+		MongoKnownHost dbo = (MongoKnownHost) getKnownHost(hostname);
+		if (dbo != null)
+			dbo.addSubdomain(subdomain);
+		else
+			Logger.warn("Attempt to write subdomain info to unknown host: " + hostname);
+	}
+	
+	/**
 	 * Writes the contents of the cache to the database.
 	 */
 	public void commit() {

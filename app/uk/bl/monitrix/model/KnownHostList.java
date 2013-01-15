@@ -2,7 +2,6 @@ package uk.bl.monitrix.model;
 
 import java.util.List;
 
-
 /**
  * The known host list interface. Provides read/query access to the list of
  * crawled hosts.
@@ -32,5 +31,13 @@ public interface KnownHostList {
 	 * @return the list of hostnames matching the query 
 	 */
 	public List<String> searchHost(String query);
+	
+	/**
+	 * Retruns the names of the hosts which have been crawled since the
+	 * specified timestamp.
+	 * @param since the timestamp
+	 * @return the list of hosts visited since the timestamp
+	 */
+	public List<KnownHost> getCrawledHosts(long since);
 	
 }

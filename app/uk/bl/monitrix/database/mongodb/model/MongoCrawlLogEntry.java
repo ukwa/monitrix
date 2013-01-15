@@ -97,6 +97,15 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	public void setHost(String hostname) {
 		dbo.put(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname);
 	}
+	
+	@Override
+	public String getSubdomain() {
+		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_SUBDOMAIN);
+	}
+	
+	public void setSubdomain(String subdomain) {
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_SUBDOMAIN, subdomain);
+	}
 
 	@Override
 	public String getBreadcrumbCodes() {

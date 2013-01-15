@@ -37,6 +37,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	private String bufferedHost = null;
 	
+	private String bufferedSubdomain = null;
+	
 	private List<Alert> alerts = new ArrayList<Alert>();
 	
 	public LogFileEntry(String line) {
@@ -74,6 +76,14 @@ public class LogFileEntry extends CrawlLogEntry {
 		return alerts;
 	}
 	
+	private void parseHost() {
+		HostParseResult result = LogFileEntry.extractDomainNames(this);
+		this.bufferedHost = result.host;
+		this.bufferedSubdomain = result.subdomain;
+		if (result.alert != null)
+			alerts.add(result.alert);
+	}
+	
 	public List<Alert> getAlerts() {
 		return alerts;
 	}
@@ -108,14 +118,18 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	@Override
 	public String getHost() {
-		if (bufferedHost == null) {
-			HostParseResult parseResult = getHost(this);
-			bufferedHost = parseResult.hostname;
-			if (parseResult.alert != null)
-				alerts.add(parseResult.alert);
-		}
+		if (bufferedHost == null)
+			parseHost();
 		
 		return bufferedHost;
+	}
+	
+	@Override
+	public String getSubdomain() {
+		if (bufferedSubdomain == null)
+			parseHost();
+			
+		return bufferedSubdomain;
 	}
 	
 	@Override
@@ -159,7 +173,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	 * @param url the URL
 	 * @return the domain name
 	 */
-	private static HostParseResult getHost(LogFileEntry entry) {
+	private static HostParseResult extractDomainNames(LogFileEntry entry) {
 		// Not the nicest solution - but neither java.net.URL nor com.google.common.net.InternetDomainName
 		// can handle Heritrix' custom 'dns:' protocol prefix.
 		String url = entry.getURL();
@@ -167,13 +181,17 @@ public class LogFileEntry extends CrawlLogEntry {
 			url = "http://" + url.substring(4);
 		
 		String host = null;
+		String subdomain = "";
 		try {
 			host = new URL(url).getHost();
-			InternetDomainName domainName = InternetDomainName.from(host);
-			return new HostParseResult(domainName.topPrivateDomain().name(), null);
+			String domainName = InternetDomainName.from(host).topPrivateDomain().name();
+			if (!domainName.equals(host))
+				subdomain = host.substring(0, host.indexOf(domainName) - 1);
+			
+			return new HostParseResult(domainName, subdomain, null);
 		} catch (MalformedURLException e) {
 			Logger.warn(e.getMessage());
-			return new HostParseResult(url, new DefaultAlert(entry.getTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(url, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (IllegalArgumentException e) {
 			// Will be thrown by InternetDomainName.from in case the host name looks weird
 			Logger.warn(e.getMessage());
@@ -187,13 +205,23 @@ public class LogFileEntry extends CrawlLogEntry {
 			}
 			
 			if (offendingToken > -1) {
-				StringBuilder sb = new StringBuilder();
+				StringBuilder subdomainBuilder = new StringBuilder();
+				for (int i=0; i<offendingToken + 1; i++)
+					subdomainBuilder.append("." + tokens[i]);
+				subdomain = subdomainBuilder.toString().substring(1);
+				
+				StringBuilder hostBuilder = new StringBuilder();
 				for (int i=offendingToken + 1; i<tokens.length; i++)
-					sb.append("." + tokens[i]);
-				host = sb.toString().substring(1);
+					hostBuilder.append("." + tokens[i]);
+				host = hostBuilder.toString().substring(1);
 			}
 
-			return new HostParseResult(host, new DefaultAlert(entry.getTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+		} catch (OutOfMemoryError e) {
+			System.out.println("#######################");
+			System.out.println(host);
+			System.out.println(subdomain);
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -201,13 +229,19 @@ public class LogFileEntry extends CrawlLogEntry {
 	 * Simple helper class to wrap the result of host-from-URL parsing.
 	 */
 	private static class HostParseResult {
-		public String hostname;
-		public DefaultAlert alert;
 		
-		HostParseResult(String hostname, DefaultAlert alert) {
-			this.hostname = hostname;
+		private String host;
+		
+		private String subdomain;
+		
+		private Alert alert;
+		
+		HostParseResult(String host, String subdomain, Alert alert) {
+			this.host = host;
+			this.subdomain = subdomain;
 			this.alert = alert;
 		}
+		
 	}
 	
 	/**

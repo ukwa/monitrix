@@ -26,6 +26,9 @@ public class MongoKnownHostList implements KnownHostList {
 	// MongoDB query operator for selecting documents where the field value equals any value in a list
 	private static final String MONGO_QUERY_ALL = "$all";
 	
+	// MongoDB query operator for selecting documents where the field value is greater or equal to a specified value
+	private static final String MONGO_QUERY_GREATER_OR_EQUAL = "$gte"; 
+	
 	protected DBCollection collection;
 	
 	// A simple in-memory buffer for quick host lookups
@@ -35,9 +38,10 @@ public class MongoKnownHostList implements KnownHostList {
 	public MongoKnownHostList(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
 		
-		// Known Hosts collection is indexed by hostname and tokenized host name
+		// Known Hosts collection is indexed by hostname, tokenized host name and last-visit timestamp
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, 1));
 	}
 
 	@Override
@@ -78,6 +82,19 @@ public class MongoKnownHostList implements KnownHostList {
 		DBCursor cursor = collection.find(q);
 		while (cursor.hasNext())
 			hostnames.add(new MongoKnownHost(cursor.next()).getHostname());
+		
+		return hostnames;
+	}
+
+	@Override
+	public List<KnownHost> getCrawledHosts(long since) {
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS,
+				new BasicDBObject(MONGO_QUERY_GREATER_OR_EQUAL, since));
+		
+		List<KnownHost> hostnames = new ArrayList<KnownHost>();
+		DBCursor cursor = collection.find(query).sort(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, -1));
+		while (cursor.hasNext())
+			hostnames.add(new MongoKnownHost(cursor.next()));
 		
 		return hostnames;
 	}

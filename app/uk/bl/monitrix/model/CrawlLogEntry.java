@@ -40,6 +40,12 @@ public abstract class CrawlLogEntry {
 	public abstract String getHost(); 
 	
 	/**
+	 * The subdomain, extracted from the URL.
+	 * @return the subdomain
+	 */
+	public abstract String getSubdomain();
+	
+	/**
 	 * Column #5 - 'breadcrumb codes' showing the trail of downloads that lead to the 
 	 * current URL ('discovery path'). The discovery path of a seed is empty.
 	 * Cf. http://crawler.archive.org/articles/user_manual/glossary.html#discoverypath

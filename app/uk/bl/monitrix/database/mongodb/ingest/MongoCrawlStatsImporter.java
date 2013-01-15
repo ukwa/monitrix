@@ -52,6 +52,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 			dbo.setNumberOfNewHostsCrawled(dbo.getNumberOfNewHostsCrawled() + 1);
 			knownHosts.addToList(hostname, entry.getTimestamp().getTime());
 		}
+		knownHosts.addSubdomain(hostname, entry.getSubdomain());
 		
 		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable

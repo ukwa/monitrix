@@ -34,6 +34,7 @@ public class MongoProperties {
 	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "timestamp";
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	public static final String FIELD_CRAWL_LOG_HOST = "host";
+	public static final String FIELD_CRAWL_LOG_SUBDOMAIN = "subdomain";
 	public static final String FIELD_CRAWL_LOG_CRAWLER_ID = "crawler_id";
 	public static final String FIELD_CRAWL_LOG_HTTP_CODE = "http_code";
 	
@@ -47,6 +48,8 @@ public class MongoProperties {
 	/** Database field keys (Known Hosts collection) **/
 	public static final String FIELD_KNOWN_HOSTS_HOSTNAME = "host_name";
 	public static final String FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED = "host_name_tokenized";
+	public static final String FIELD_KNOWN_HOSTS_SUBDOMAINS = "subdomains";
+	public static final String FIELD_KNOWN_HOSTS_SUBDOMAINS_TOKENIZED = "subdomains_tokenized";
 	public static final String FIELD_KNOWN_HOSTS_FIRST_ACCESS = "first_access";
 	public static final String FIELD_KNOWN_HOSTS_LAST_ACCESS = "last_access";
 	

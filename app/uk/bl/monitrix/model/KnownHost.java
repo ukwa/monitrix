@@ -1,5 +1,7 @@
 package uk.bl.monitrix.model;
 
+import java.util.List;
+
 /**
  * The Known Host domain object interface. Encapsulates the information collected about a specific host
  * during the crawl.
@@ -13,6 +15,12 @@ public abstract class KnownHost {
 	 * @return the host name
 	 */
 	public abstract String getHostname();
+	
+	/**
+	 * The list of subdomains encountered during the crawl.
+	 * @return the subdomains
+	 */
+	public abstract List<String> getSubdomains();
 	
 	/**
 	 * UNIX timestamp of the first recorded access to this host.
@@ -38,6 +46,11 @@ public abstract class KnownHost {
 	 */
 	public static String[] tokenizeName(String hostname) {
 		return hostname.split("-|_|\\.");
+	}
+	
+	@Override
+	public String toString() {
+		return getHostname() + " (last access: " + getLastAccess() + ", first access: " + getFirstAccess() + ")";
 	}
 	
 }

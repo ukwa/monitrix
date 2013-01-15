@@ -22,10 +22,6 @@ public class MongoCrawlLog extends CrawlLog {
 	
 	protected DBCollection collection;
 	
-	private Long crawlStartTime = null;
-	
-	private Long lastCrawlActivity = null;
-	
 	public MongoCrawlLog(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_CRAWL_LOG);
 		
@@ -36,22 +32,22 @@ public class MongoCrawlLog extends CrawlLog {
 
 	@Override
 	public long getCrawlStartTime() {
-		if (crawlStartTime == null) {
-			DBCursor cursor = collection.find().limit(1).sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, 1));
-			while (cursor.hasNext())
-				crawlStartTime = new MongoCrawlLogEntry(cursor.next()).getTimestamp().getTime();					
-		}
+		// TODO cache
+		long crawlStartTime = 0;
+		DBCursor cursor = collection.find().limit(1).sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, 1));
+		while (cursor.hasNext())
+			crawlStartTime = new MongoCrawlLogEntry(cursor.next()).getTimestamp().getTime();					
 		
 		return crawlStartTime;
 	}
 
 	@Override
 	public long getTimeOfLastCrawlActivity() {
-		if (lastCrawlActivity == null) {
-			DBCursor cursor = collection.find().limit(1).sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, -1));
-			while (cursor.hasNext())
-				lastCrawlActivity = new MongoCrawlLogEntry(cursor.next()).getTimestamp().getTime();					
-		}
+		// TODO cache
+		long lastCrawlActivity = 0;
+		DBCursor cursor = collection.find().limit(1).sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, -1));
+		while (cursor.hasNext())
+			lastCrawlActivity = new MongoCrawlLogEntry(cursor.next()).getTimestamp().getTime();					
 		
 		return lastCrawlActivity;
 	}

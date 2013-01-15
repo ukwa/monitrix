@@ -1,6 +1,8 @@
 package uk.bl.monitrix.database.mongodb.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.mongodb.DBObject;
 
@@ -37,6 +39,24 @@ public class MongoKnownHost extends KnownHost {
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname);
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED,
 				Arrays.asList(KnownHost.tokenizeName(hostname)));
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<String> getSubdomains() {
+		return (List<String>) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS);
+	}
+	
+	public void addSubdomain(String subdomain) {
+		List<String> subdomains = getSubdomains();
+		if (subdomains == null)
+			subdomains = new ArrayList<String>();
+		
+		if (!subdomains.contains(subdomain))
+			subdomains.add(subdomain);
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS, subdomains);
+		
+		// TODO add tokenized subdomain name
 	}
 
 	@Override

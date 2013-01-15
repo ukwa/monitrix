@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import play.Logger;
+
 import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
@@ -24,6 +26,7 @@ public class LogAnalytics {
 	 * @return the IDs of the crawlers that crawled this host
 	 */
 	public static List<String> getCrawlerIDs(Iterator<CrawlLogEntry> log) {
+		long computeStart = System.currentTimeMillis();
 		Set<String> crawlers = new HashSet<String>();
 
 		while (log.hasNext())
@@ -31,6 +34,7 @@ public class LogAnalytics {
 		
 		List<String> sorted = new ArrayList<String>(crawlers);
 		Collections.sort(sorted);
+		Logger.info("Extracted Crawler IDs - took " + (System.currentTimeMillis() - computeStart));
 		return sorted;
 	}
 	
@@ -41,6 +45,8 @@ public class LogAnalytics {
 	 * @return average download crawl rate in URLs/minute
 	 */
 	public static long getAverageCrawlRate(Iterator<CrawlLogEntry> log) {
+		long computeStart = System.currentTimeMillis();
+		
 		long startTime = Long.MAX_VALUE;
 		long endTime = Long.MIN_VALUE;
 		long totalURLs = 0;
@@ -58,6 +64,8 @@ public class LogAnalytics {
 		}
 		
 		double urlsPerMillisecond = ((double) totalURLs) / ((double) (endTime - startTime));
+		
+		Logger.info("Computed average crawl rate - took " + (System.currentTimeMillis() - computeStart));
 		return Math.round(urlsPerMillisecond * 60000);
 	}
 	
@@ -67,6 +75,8 @@ public class LogAnalytics {
 	 * @return average download rate in MB/minute
 	 */	
 	public static long getAverageDownloadRate(Iterator<CrawlLogEntry> log) {
+		long computeStart = System.currentTimeMillis();
+		
 		long startTime = Long.MAX_VALUE;
 		long endTime = Long.MIN_VALUE;
 		long downloadVolume = 0;
@@ -84,6 +94,8 @@ public class LogAnalytics {
 		}
 		
 		double bytesPerMillisecond = ((double) downloadVolume) / ((double) (endTime - startTime));
+		
+		Logger.info("Computed average download rate - took " + (System.currentTimeMillis() - computeStart));
 		return Math.round(bytesPerMillisecond * 60000);
 	}
 	
@@ -93,6 +105,8 @@ public class LogAnalytics {
 	 * @return the distribution of fetch status codes
 	 */
 	public static List<PieChartValue> getFetchStatusDistribution(Iterator<CrawlLogEntry> log) {
+		long computeStart = System.currentTimeMillis();
+		
 		Map<Integer, Integer> codes = new HashMap<Integer, Integer>();
 		
 		while (log.hasNext()) {			
@@ -111,6 +125,7 @@ public class LogAnalytics {
 		for (Entry<Integer, Integer> entry : codes.entrySet())
 			pieChart.add(new PieChartValue(entry.getKey().toString(), entry.getValue()));
 		
+		Logger.info("Computed fetch status distribution - took " + (System.currentTimeMillis() - computeStart));
 		return pieChart;
 	}
 	
@@ -120,6 +135,8 @@ public class LogAnalytics {
 	 * @return the distribution of MIME types
 	 */
 	public static List<PieChartValue> getMimeTypeDistribution(Iterator<CrawlLogEntry> log) {
+		long computeStart = System.currentTimeMillis();
+		
 		Map<String, Integer> mimeTypes = new HashMap<String, Integer>();
 		
 		while (log.hasNext()) {		
@@ -138,6 +155,7 @@ public class LogAnalytics {
 		for (Entry<String, Integer> entry : mimeTypes.entrySet())
 			pieChart.add(new PieChartValue(entry.getKey(), entry.getValue()));
 		
+		Logger.info("Computed MIME type distribution - took " + (System.currentTimeMillis() - computeStart));
 		return pieChart;
 	}
 	
@@ -147,6 +165,8 @@ public class LogAnalytics {
 	 * @return the virus distribution
 	 */
 	public static List<PieChartValue> getVirusDistribution(Iterator<CrawlLogEntry> log) {
+		long computeStart = System.currentTimeMillis();
+		
 		// TODO dummy impl only - improve so that viruses are recorded by name
 		int clean = 0;
 		int infected = 0;
@@ -164,6 +184,8 @@ public class LogAnalytics {
 		pieChart.add(new PieChartValue("Clean", clean));
 		if (infected > 0)
 			pieChart.add(new PieChartValue("Infected", infected));
+		
+		Logger.info("Computed virus distribution - took " + (System.currentTimeMillis() - computeStart));
 		return pieChart;
 	}
 

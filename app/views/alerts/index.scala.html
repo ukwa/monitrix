@@ -5,25 +5,28 @@
 @main("Monitrix - Alerts") {
   @navbar("/alerts")
 }{
-  @for(host <- alertLog.getOffendingHosts) {
-    <h3><a style="color:#444; text-decoration:none;" href="@routes.Hosts.getHostInfo(host)">@host (@alertLog.countAlertsForHost(host))</a></h3> 
+  @defining(alertLog.getOffendingHosts) { offendingHosts =>
+    <h1>@alertLog.countAll <span class="monitrix-h1-subline">Alerts from</span> @offendingHosts.size  <span class="monitrix-h1-subline">hosts</span></h1>
+    
     <table class="table table-condensed">
       <thead>
         <tr>
-          <th>Alert</th>
-          <th>Occured</th>
-          <th>Details</th>
+          <th>Offending Host</th>
+          <th>Alerts</th>
+          <th>#</th>
         </tr>
       </thead>
       <tbody>
-        @for(alert <- alertLog.listAlertsForHost(host).asScala.toList) {
-          <tr>
-            <td>@alertTag(alert.getAlertType())</td>
-            <td>@uk.bl.monitrix.NumberFormat.since(alert.getTimestamp, true)</td>
-            <td>@alert.getAlertDescription</td>
-          </tr>
+        @for(host <- offendingHosts) {
+          @for(alertType <- alertLog.getAlertTypesForHost(host)) {
+            <tr>
+              <td><a href="@routes.Hosts.getHostInfo(host)">@host</a></td>
+              <td>@alertTag(alertType)</td>
+              <td>@alertLog.countAlertsForHost(host, alertType)</td>
+            </tr>
+          }
         }
       </tbody>
-    </table>   
+    </table>
   }
 }

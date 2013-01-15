@@ -7,7 +7,7 @@
 }{
   <h1 style="padding:0px 0px 10px 5px;">
     @knownHost.getHostname() 
-    <span class="pull-right">@logEntries.size <span style="font-size:14px;font-weight:normal;">URLs Crawled</span></span>
+    <span class="pull-right">@logEntries.size <span class="monitrix-h1-subline">URLs Crawled</span></span>
   </h1>
     
   @defining(uk.bl.monitrix.analytics.LogAnalytics.getFetchStatusDistribution(logEntries.iterator)) { httpCodes =>   

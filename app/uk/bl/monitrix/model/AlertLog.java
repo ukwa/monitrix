@@ -3,6 +3,8 @@ package uk.bl.monitrix.model;
 import java.util.Iterator;
 import java.util.List;
 
+import uk.bl.monitrix.model.Alert.AlertType;
+
 
 /**
  * The alert log interface. An alert log provides read/query access to all 
@@ -40,9 +42,24 @@ public interface AlertLog {
 	/**
 	 * Returns the total number of alerts stored for a particular host.
 	 * @param hostname the hostname
-	 * @return the number of alerts stored for the host
+	 * @return the total number of alerts stored for the host
 	 */
 	public long countAlertsForHost(String hostname);
+	
+	/**
+	 * Returns the number of alerts of a specific type for a particular host. 
+	 * @param hostname the hostname
+	 * @param type the alert type
+	 * @return the number of alerts of the specified type 
+	 */
+	public long countAlertsForHost(String hostname, AlertType type);
+	
+	/**
+	 * Returns the types of alerts that were recorded for a specific host.
+	 * @param hostname the hostname
+	 * @return the types of alerts the host has caused
+	 */
+	public List<AlertType> getAlertTypesForHost(String hostname);
 	
 	/**
 	 * Returns an iterator over the alerts stored for a particular host.

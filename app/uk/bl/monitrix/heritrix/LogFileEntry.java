@@ -186,7 +186,7 @@ public class LogFileEntry extends CrawlLogEntry {
 			host = new URL(url).getHost();
 			String domainName = InternetDomainName.from(host).topPrivateDomain().name();
 			if (!domainName.equals(host))
-				subdomain = host.substring(0, host.indexOf(domainName) - 1);
+				subdomain = host.substring(0, host.lastIndexOf(domainName) - 1);
 			
 			return new HostParseResult(domainName, subdomain, null);
 		} catch (MalformedURLException e) {
@@ -217,10 +217,9 @@ public class LogFileEntry extends CrawlLogEntry {
 			}
 
 			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
-		} catch (OutOfMemoryError e) {
-			System.out.println("#######################");
-			System.out.println(host);
-			System.out.println(subdomain);
+		} catch (Throwable e) {
+			Logger.warn("Offending host: " + host);
+			Logger.warn("Extracted subdomain: " + subdomain);
 			throw new RuntimeException(e);
 		}
 	}

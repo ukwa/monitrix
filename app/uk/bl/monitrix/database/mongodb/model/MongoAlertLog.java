@@ -9,9 +9,11 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.model.Alert;
+import uk.bl.monitrix.model.Alert.AlertType;
 import uk.bl.monitrix.model.AlertLog;
 
 /**
@@ -73,6 +75,33 @@ public class MongoAlertLog implements AlertLog {
 	public long countAlertsForHost(String hostname) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname));
 	}
+	
+	@Override
+	public long countAlertsForHost(String hostname, AlertType type) {
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname)
+			.append(MongoProperties.FIELD_ALERT_LOG_ALERT_TYPE, type.name());
+		
+		return collection.count(query);
+	}
+	
+	@Override
+	public List<AlertType> getAlertTypesForHost(String hostname) {
+		@SuppressWarnings("rawtypes")
+		final List types = collection.distinct(MongoProperties.FIELD_ALERT_LOG_ALERT_TYPE, new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname));
+				
+		return new AbstractList<Alert.AlertType>() {
+			@Override
+			public AlertType get(int index) {
+				return AlertType.valueOf(types.get(index).toString());
+			}
+
+			@Override
+			public int size() {
+				return types.size();
+			}
+		};
+	}
+
 
 	@Override
 	public Iterator<Alert> listAlertsForHost(String hostname) {
@@ -102,5 +131,5 @@ public class MongoAlertLog implements AlertLog {
 			}
 		};
 	}
-
+	
 }

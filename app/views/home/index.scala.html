@@ -38,7 +38,7 @@
      </div>      
       
       <div class="span7 offset1">
-        <h5>Recent Alerts (out of @alerts.countAll Alerts total) <a class="pull-right" style="font-weight:normal" href="@routes.Alerts.index">Details »</a></h5>
+        <h5>Recent Alerts (out of @alerts.countAll alerts total) <a class="pull-right" style="font-weight:normal" href="@routes.Alerts.index">Details »</a></h5>
         <table class="table table-condensed">
           @for(alert <- alerts.getMostRecent(10)) {
             <tr class="monitrix-alert-table">

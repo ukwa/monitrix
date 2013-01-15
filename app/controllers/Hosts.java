@@ -1,9 +1,10 @@
 package controllers;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.collections.IteratorUtils;
+
+import play.Logger;
 import play.mvc.Result;
 import play.mvc.Controller;
 import uk.bl.monitrix.Global;
@@ -38,10 +39,18 @@ public class Hosts extends Controller {
 		if (knownHost == null) {
 			return notFound(); // TODO error handling
 		} else {
+			long fetchStart = System.currentTimeMillis();
+			Logger.info("Fetching log entries for host " + hostname);
+			List<CrawlLogEntry> entries = IteratorUtils.toList(db.getCrawlLog().getEntriesForHost(hostname));
+			
+			/*
 			Iterator<CrawlLogEntry> iterator = db.getCrawlLog().getEntriesForHost(hostname);
 			List<CrawlLogEntry> entries = new ArrayList<CrawlLogEntry>();
 			while (iterator.hasNext())
 				entries.add(iterator.next());
+			*/
+			
+			Logger.info("Done - took " + (System.currentTimeMillis() - fetchStart) + "ms");
 			
 			return ok(views.html.hosts.hostinfo.render(knownHost, entries));
 		}

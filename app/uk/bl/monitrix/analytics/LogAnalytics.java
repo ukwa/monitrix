@@ -34,7 +34,7 @@ public class LogAnalytics {
 		
 		List<String> sorted = new ArrayList<String>(crawlers);
 		Collections.sort(sorted);
-		Logger.info("Extracted Crawler IDs - took " + (System.currentTimeMillis() - computeStart));
+		Logger.info("Extracted Crawler IDs - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return sorted;
 	}
 	
@@ -65,7 +65,7 @@ public class LogAnalytics {
 		
 		double urlsPerMillisecond = ((double) totalURLs) / ((double) (endTime - startTime));
 		
-		Logger.info("Computed average crawl rate - took " + (System.currentTimeMillis() - computeStart));
+		Logger.info("Computed average crawl rate - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return Math.round(urlsPerMillisecond * 60000);
 	}
 	
@@ -95,7 +95,7 @@ public class LogAnalytics {
 		
 		double bytesPerMillisecond = ((double) downloadVolume) / ((double) (endTime - startTime));
 		
-		Logger.info("Computed average download rate - took " + (System.currentTimeMillis() - computeStart));
+		Logger.info("Computed average download rate - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return Math.round(bytesPerMillisecond * 60000);
 	}
 	
@@ -125,7 +125,7 @@ public class LogAnalytics {
 		for (Entry<Integer, Integer> entry : codes.entrySet())
 			pieChart.add(new PieChartValue(entry.getKey().toString(), entry.getValue()));
 		
-		Logger.info("Computed fetch status distribution - took " + (System.currentTimeMillis() - computeStart));
+		Logger.info("Computed fetch status distribution - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return pieChart;
 	}
 	
@@ -155,7 +155,7 @@ public class LogAnalytics {
 		for (Entry<String, Integer> entry : mimeTypes.entrySet())
 			pieChart.add(new PieChartValue(entry.getKey(), entry.getValue()));
 		
-		Logger.info("Computed MIME type distribution - took " + (System.currentTimeMillis() - computeStart));
+		Logger.info("Computed MIME type distribution - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return pieChart;
 	}
 	
@@ -185,7 +185,7 @@ public class LogAnalytics {
 		if (infected > 0)
 			pieChart.add(new PieChartValue("Infected", infected));
 		
-		Logger.info("Computed virus distribution - took " + (System.currentTimeMillis() - computeStart));
+		Logger.info("Computed virus distribution - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return pieChart;
 	}
 

@@ -9,6 +9,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       "org.mongodb" % "mongo-java-driver" % "2.9.1",
+      "commons-collections" % "commons-collections" % "3.2.1",
       "commons-httpclient" % "commons-httpclient" % "3.1",
       "com.google.guava" % "guava" % "13.0.1"
     )

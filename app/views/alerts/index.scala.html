@@ -20,13 +20,12 @@
         @for(host <- offendingHosts) {
           @defining(alertLog.getAlertTypesForHost(host)) { alertTypes =>
             <tr>
-              <td><a href="@routes.Hosts.getHostInfo(host)">@host</a></td>
+              <td rowspan="@alertTypes.size"><a href="@routes.Hosts.getHostInfo(host)">@host</a></td>
               <td>@alertTag(alertTypes.head)</td>
               <td>@alertLog.countAlertsForHost(host, alertTypes.head)</td>
             </tr>
             @for(alertType <- alertTypes.tail) {
               <tr>
-                <td></td>
                 <td>@alertTag(alertType)</td>
                 <td>@alertLog.countAlertsForHost(host, alertType)</td>
               </tr>

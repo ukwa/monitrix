@@ -68,6 +68,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		for (MongoCrawlStatsUnit dbo : cache.values()) {
 			save(dbo);
 		}
+		
 		cache.clear();
 		knownHosts.commit();
 	}

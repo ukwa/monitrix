@@ -18,12 +18,19 @@
       </thead>
       <tbody>
         @for(host <- offendingHosts) {
-          @for(alertType <- alertLog.getAlertTypesForHost(host)) {
+          @defining(alertLog.getAlertTypesForHost(host)) { alertTypes =>
             <tr>
               <td><a href="@routes.Hosts.getHostInfo(host)">@host</a></td>
-              <td>@alertTag(alertType)</td>
-              <td>@alertLog.countAlertsForHost(host, alertType)</td>
+              <td>@alertTag(alertTypes.head)</td>
+              <td>@alertLog.countAlertsForHost(host, alertTypes.head)</td>
             </tr>
+            @for(alertType <- alertTypes.tail) {
+              <tr>
+                <td></td>
+                <td>@alertTag(alertType)</td>
+                <td>@alertLog.countAlertsForHost(host, alertType)</td>
+              </tr>
+            }
           }
         }
       </tbody>

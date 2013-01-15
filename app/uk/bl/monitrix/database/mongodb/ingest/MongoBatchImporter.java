@@ -25,14 +25,14 @@ public class MongoBatchImporter {
 	// Monitrix database
 	private DB db;
 	
-	// Crawl stats
-	private MongoCrawlStatsImporter crawlStatsImporter;
-	
 	// Crawl log
 	private MongoCrawlLogImporter crawlLogImporter;
 	
 	// Alert log
 	private MongoAlertLogImporter alertLogImporter;
+	
+	// Crawl stats
+	private MongoCrawlStatsImporter crawlStatsImporter;
 	
 	public MongoBatchImporter() throws IOException {
 		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
@@ -46,9 +46,9 @@ public class MongoBatchImporter {
 		this.mongo = new Mongo(hostName, dbPort);
 		this.db = mongo.getDB(dbName);
 
-		this.crawlStatsImporter = new MongoCrawlStatsImporter(db,  new MongoKnownHostImporter(db));
 		this.crawlLogImporter = new MongoCrawlLogImporter(db);
 		this.alertLogImporter = new MongoAlertLogImporter(db);
+		this.crawlStatsImporter = new MongoCrawlStatsImporter(db,  new MongoKnownHostImporter(db, this.alertLogImporter));
 	}
 	
 	public void insert(Iterator<LogFileEntry> iterator) {
@@ -84,6 +84,7 @@ public class MongoBatchImporter {
 				// Update pre-aggregated stats
 				crawlStatsImporter.update(next);
 				
+				// Log-entry-level alerts
 				for (Alert a : next.getAlerts()) {
 					MongoAlert alert = new MongoAlert(new BasicDBObject());
 					alert.setTimestamp(next.getTimestamp().getTime());
@@ -101,7 +102,7 @@ public class MongoBatchImporter {
 			logEntryBatch.clear();
 			
 			alertLogImporter.insert(alertBatch);
-			alertBatch.clear();
+			alertBatch.clear();			
 			
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}

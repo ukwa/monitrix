@@ -10,13 +10,20 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 
+import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHost;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHostList;
+import uk.bl.monitrix.model.Alert.AlertType;
 
 class MongoKnownHostImporter extends MongoKnownHostList {
+	
+	private static final String ALERT_MSG_TOO_MANY_SUBDOMAINS = "The host %s has a suspiciously high number of subdomains (%s)";
+	
+	private MongoAlertLogImporter alertLog;
 
-	public MongoKnownHostImporter(DB db) {
+	public MongoKnownHostImporter(DB db, MongoAlertLogImporter alertLog) {
 		super(db);
+		this.alertLog = alertLog;
 	}
 	
 	/**
@@ -84,6 +91,23 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 				return cachedKnownHosts.size();
 			}	
 		});
+		
+		// Compute host-level alerts
+		// Note: we only need to consider hosts that were added in this batch - ie. those in the cache!
+		for (MongoKnownHost host : cache.values()) {
+			// Subdomain limit
+			int subdomains = host.getSubdomains().size();
+			if (subdomains > 100) {
+				MongoAlert alert = new MongoAlert(new BasicDBObject());
+				alert.setTimestamp(host.getLastAccess());
+				alert.setOffendingHost(host.getHostname());
+				alert.setAlertType(AlertType.TOO_MANY_SUBDOMAINS);
+				alert.setAlertDescription(String.format(ALERT_MSG_TOO_MANY_SUBDOMAINS, host.getHostname(), Integer.toString(subdomains)));
+				alertLog.insert(alert);
+			}
+		}
+		
+		cache.clear();
 	}
 
 }

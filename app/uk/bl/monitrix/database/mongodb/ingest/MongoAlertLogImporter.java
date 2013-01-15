@@ -15,6 +15,10 @@ class MongoAlertLogImporter extends MongoAlertLog {
 		super(db);
 	}
 	
+	public void insert(MongoAlert alert) {
+		collection.insert(alert.getBackingDBO());
+	}
+	
 	public void insert(final List<MongoAlert> alerts) {
 		List<DBObject> mapped = new AbstractList<DBObject>() {
 			@Override

@@ -41,7 +41,10 @@ public interface Alert {
 		MALFORMED_CRAWL_URL,
 		
 		/** A crawl URL with too many path segments **/
-		TOO_MANY_PATH_SEGMENTS
+		TOO_MANY_PATH_SEGMENTS,
+		
+		/** A host has a suspiciously high number of subdomains **/
+		TOO_MANY_SUBDOMAINS
 		
 	}
 

@@ -33,12 +33,13 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	 * @param hostname the host name
 	 * @param accessTime the access time
 	 */
-	public void addToList(String hostname, long accessTime) {	
+	public MongoKnownHost addToList(String hostname, long accessTime) {	
 		MongoKnownHost dbo = new MongoKnownHost(new BasicDBObject());
 		dbo.setHostname(hostname);
 		dbo.setFirstAccess(accessTime);
 		dbo.setLastAccess(accessTime);
 		cache.put(hostname, dbo);
+		return dbo;
 	}
 	
 	/**

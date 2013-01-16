@@ -92,6 +92,25 @@ public class CrawlStatsAnalytics {
 		return getNewHostsCrawledHistory(toList(crawlStats), maxDatapoints);
 	}
 	
+	public static List<TimeseriesValue> getCompletedHostsHistory(final List<CrawlStatsUnit> crawlStats, int maxDatapoints) {
+		return resample(new AbstractList<TimeseriesValue>() {
+			@Override
+			public TimeseriesValue get(int index) {
+				CrawlStatsUnit unit = crawlStats.get(index);
+				return new TimeseriesValue(unit.getTimestamp(), unit.countCompletedHosts());
+			}
+
+			@Override
+			public int size() {
+				return crawlStats.size();
+			}
+		}, crawlStats.size() / maxDatapoints);	
+	}
+	
+	public static List<TimeseriesValue> getCompletedHostsHistory(Iterator<CrawlStatsUnit> crawlStats, int maxDatapoints) {
+		return getCompletedHostsHistory(toList(crawlStats), maxDatapoints);
+	}
+	
 	private static List<TimeseriesValue> resample(List<TimeseriesValue> series, int factor) {
 		Iterator<TimeseriesValue> original = series.iterator();	
 		List<TimeseriesValue> resampled = new ArrayList<TimeseriesValue>();

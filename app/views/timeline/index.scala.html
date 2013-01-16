@@ -58,7 +58,7 @@
             <p>Number of New Hosts Crawled</p>
             <div class="graph-thumb-container">
               <div class="graph-thumb-y-axis" id="graph-hosts-axis"></div>
-              <div class="graph-thumb graph-tumb-loading" id="graph-hosts"></div>
+              <div class="graph-thumb graph-tumb-loading" id="graph-new-hosts"></div>
               <p class="pull-right monitrix-graph-thumb-fullscreen">
                 <a href="javascript:$(createLightBox('/api/timeline/new-hosts-crawled')).lightbox_me({destroyOnClose: true});">
                   <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
@@ -73,7 +73,9 @@
               <div class="graph-thumb-y-axis" id="graph-completed-hosts-axis"></div>
               <div class="graph-thumb graph-tumb-loading" id="graph-completed-hosts"></div>
               <p class="pull-right monitrix-graph-thumb-fullscreen">
-                <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
+                <a href="javascript:$(createLightBox('/api/timeline/completed-hosts')).lightbox_me({destroyOnClose: true});">
+                  <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
+                </a>
               </p>
             </div>
           </div>            
@@ -110,7 +112,7 @@
           if (opt_show_hover_detail) {
             new Rickshaw.Graph.HoverDetail({
               graph: graph,
-              yFormatter: function(y) { return (y / (1024 * 1024 * 1024)).toPrecision(2) + ' GB'; }
+              // yFormatter: function(y) { return (y / (1024 * 1024 * 1024)).toPrecision(2) + ' GB'; }
             });
           }
               
@@ -135,7 +137,7 @@
         div.style.height = '600px';
         div.style.background = "#fff";
         
-        loadGraph(url + '?maxpoints=400', 'lightbox', 'Volume', '#c05020', true, function(total) {
+        loadGraph(url + '?maxpoints=800', 'lightbox', 'Volume', '#c05020', true, function(total) {
             total = total / (1024 * 1024 * 1024);
             $('#total-data-volume').html(total.toPrecision(4) + ' GB');	
           });
@@ -152,6 +154,8 @@
       $('#total-urls-crawled').html(total);
     });  
     
-    loadGraph('/api/timeline/new-hosts-crawled?maxpoints=100', 'graph-hosts', 'New Hosts', '#c05020', false);
+    loadGraph('/api/timeline/new-hosts-crawled?maxpoints=100', 'graph-new-hosts', 'New Hosts', '#c05020', false);
+    
+    loadGraph('/api/timeline/completed-hosts?maxpoints=100', 'graph-completed-hosts', 'Completed Hosts', '#c05020', false);
   </script>
 }

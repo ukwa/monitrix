@@ -1,7 +1,5 @@
 package uk.bl.monitrix.model;
 
-import java.util.Set;
-
 /**
  * The CrawlStatsUnit domain object interface. Encapsulates stats information that was pre-aggregated 
  * for a single base resolution timeslot.
@@ -39,13 +37,14 @@ public abstract class CrawlStatsUnit implements Comparable<CrawlStatsUnit> {
 	 * The number of hosts that were 'completed' (i.e. last accessed) within this unit timeslot.
 	 * @return the number of completed hosts
 	 */	
-	public abstract long countCompletedHosts();
+	public abstract int countCompletedHosts();
 	
 	/**
 	 * The list of hostnames that were 'completed' (i.e. last accessed) within this unit timeslot.
 	 * @return the list of completed hosts
-	 */
-	public abstract Set<String> getCompletedHosts();
+	 *
+	public abstract List<String> getCompletedHosts();
+	*/
 	
 	@Override
 	public int compareTo(CrawlStatsUnit other) {

@@ -1,9 +1,14 @@
 package uk.bl.monitrix.database.mongodb.ingest;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlStats;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlStatsUnit;
+import uk.bl.monitrix.database.mongodb.model.MongoKnownHost;
 import uk.bl.monitrix.model.CrawlLogEntry;
+import uk.bl.monitrix.model.KnownHost;
 
 import com.mongodb.DB;
 import com.mongodb.BasicDBObject;
@@ -11,6 +16,8 @@ import com.mongodb.BasicDBObject;
 class MongoCrawlStatsImporter extends MongoCrawlStats {
 	
 	private MongoKnownHostImporter knownHosts;
+	
+	private HashMap<KnownHost, Long> cachedHostCompletionTimes = new HashMap<KnownHost, Long>();
 	
 	public MongoCrawlStatsImporter(DB db, MongoKnownHostImporter knownHosts) {
 		super(db);
@@ -26,8 +33,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 	 */
 	public void update(CrawlLogEntry entry) {
 		// Step 1 - compute the timeslot
-		long timeslot = (entry.getTimestamp().getTime() / MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) *
-				MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
+		long timeslot = toTimeslot(entry.getTimestamp().getTime());
 				
 		// Step 2 - update data for this timeslot
 		MongoCrawlStatsUnit dbo = (MongoCrawlStatsUnit) this.getStatsForTimestamp(timeslot);
@@ -47,22 +53,45 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		// Step 4 - update hosts info
 		String hostname = entry.getHost();
 		if (knownHosts.isKnown(hostname)) {
+			KnownHost host = knownHosts.getKnownHost(hostname);
+			
+			if (!cachedHostCompletionTimes.containsKey(hostname))
+				cachedHostCompletionTimes.put(host, host.getLastAccess());
+			
+			// Update last access time
 			knownHosts.setLastAccess(hostname, entry.getTimestamp().getTime());
 		} else {
+			long timestamp = entry.getTimestamp().getTime();
+			MongoKnownHost host = knownHosts.addToList(hostname, timestamp);
 			dbo.setNumberOfNewHostsCrawled(dbo.getNumberOfNewHostsCrawled() + 1);
-			knownHosts.addToList(hostname, entry.getTimestamp().getTime());
+			dbo.setCompletedHosts(dbo.countCompletedHosts() + 1);
+			cachedHostCompletionTimes.put(host, timestamp);
 		}
 		knownHosts.addSubdomain(hostname, entry.getSubdomain());
-		
+				
 		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable
 		cache.put(timeslot, dbo);
+	}
+	
+	private long toTimeslot(long timestamp) {
+		 return (timestamp / MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) * MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
 	}
 	
 	/**
 	 * Writes the contents of the cache to the database.
 	 */
 	public void commit() {
+		for (Entry<KnownHost, Long> entry : cachedHostCompletionTimes.entrySet()) {
+			MongoCrawlStatsUnit oldCompletionTimeslot = (MongoCrawlStatsUnit) getStatsForTimestamp(toTimeslot(entry.getValue()));
+			MongoCrawlStatsUnit newCompletionTimeslot = (MongoCrawlStatsUnit) getStatsForTimestamp(toTimeslot(entry.getKey().getLastAccess()));
+			
+			if (oldCompletionTimeslot.getTimestamp() < newCompletionTimeslot.getTimestamp()) {
+				oldCompletionTimeslot.setCompletedHosts(oldCompletionTimeslot.countCompletedHosts() - 1);
+				newCompletionTimeslot.setCompletedHosts(newCompletionTimeslot.countCompletedHosts() + 1);
+			}
+		}
+		
 		// This means we're making individual commits to the DB
 		// TODO see if we can optimize
 		for (MongoCrawlStatsUnit dbo : cache.values()) {
@@ -70,6 +99,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		}
 		
 		cache.clear();
+		cachedHostCompletionTimes.clear();
 		knownHosts.commit();
 	}
 

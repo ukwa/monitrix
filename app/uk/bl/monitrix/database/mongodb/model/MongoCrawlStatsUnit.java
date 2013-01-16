@@ -1,9 +1,5 @@
 package uk.bl.monitrix.database.mongodb.model;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.mongodb.DBObject;
 
 import uk.bl.monitrix.database.mongodb.MongoProperties;
@@ -16,7 +12,7 @@ import uk.bl.monitrix.model.CrawlStatsUnit;
 public class MongoCrawlStatsUnit extends CrawlStatsUnit {
 	
 	private DBObject dbo;
-	
+
 	public MongoCrawlStatsUnit(DBObject dbo) {
 		this.dbo = dbo;
 	}
@@ -66,14 +62,70 @@ public class MongoCrawlStatsUnit extends CrawlStatsUnit {
 	}
 
 	@Override
-	public long countCompletedHosts() {
-		// TODO should we optimize this via a separate numeric DB field?
-		return getCompletedHosts().size();
+	public int countCompletedHosts() {
+		Integer count = (Integer) dbo.get(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS);
+		if (count == null)
+			return 0;
+		
+		return count.intValue();
+	}
+	
+	public void setCompletedHosts(int completedHosts) {
+		dbo.put(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS, completedHosts);
 	}
 
+	/*
 	@Override
-	public Set<String> getCompletedHosts() {
-		return new HashSet<String>(Arrays.asList(dbo.get(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS).toString().split(",")));
+	@SuppressWarnings("unchecked")
+	public List<String> getCompletedHosts() {
+		List<String> completedHosts = (List<String>) dbo.get(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS);
+		if (completedHosts == null)
+			return new CompletedHostsList();
+		
+		return completedHosts;
 	}
+	*/
+	
+
+	
+	/*
+	private static class CompletedHostsList extends AbstractList<String> {
+
+		private List<String> list = null;
+		
+		private HashSet<String> cache = new HashSet<String>(10000);
+		
+		@Override
+		public String get(int index) {
+			if (list == null)
+				list = new ArrayList<String>(cache);
+			
+			return list.get(index);
+		}
+
+		@Override
+		public boolean contains(Object hostname) {
+			return cache.contains(hostname);
+		}
+		
+		@Override
+		public boolean add(String hostname) {
+			list = null;
+			return cache.add(hostname);
+		}
+		
+		@Override
+		public boolean remove(Object hostname) {
+			list = null;
+			return cache.remove(hostname);
+		}
+		
+		@Override
+		public int size() {
+			return cache.size();
+		}
+		
+	}
+	*/
 
 }

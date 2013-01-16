@@ -38,6 +38,11 @@ public class Timeline extends Controller {
 		return ok(Json.toJson(TimeseriesValueMapper.map(newHosts)));
 	}
 	
+	public static Result getCompletedHosts() {
+		List<TimeseriesValue> completedHosts = CrawlStatsAnalytics.getCompletedHostsHistory(stats.getCrawlStats(), getMaxPoints());
+		return ok(Json.toJson(TimeseriesValueMapper.map(completedHosts)));
+	}
+	
 	private static int getMaxPoints() {
 		String[] param = request().queryString().get("maxpoints");
 		if (param == null)

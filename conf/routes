@@ -13,6 +13,7 @@ GET     /timeline                          controllers.Timeline.index()
 GET     /api/timeline/datavolume           controllers.Timeline.getDatavolume()
 GET     /api/timeline/urls-crawled         controllers.Timeline.getURLs()
 GET     /api/timeline/new-hosts-crawled    controllers.Timeline.getNewHostsCrawled()
+GET     /api/timeline/completed-hosts      controllers.Timeline.getCompletedHosts()
 
 # Seed Stats
 GET     /seed-stats                        controllers.Seeds.index()

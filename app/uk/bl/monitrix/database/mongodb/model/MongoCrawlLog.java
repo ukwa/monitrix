@@ -75,7 +75,13 @@ public class MongoCrawlLog extends CrawlLog {
 
 	@Override
 	public Iterator<CrawlLogEntry> getEntriesForHost(String hostname) {
-		final DBCursor cursor = collection.find(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname));
+		// We're using a count first to improve performance (?)
+		// Cf. http://docs.mongodb.org/manual/applications/optimization/
+		long limit = collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname));
+		final DBCursor cursor = collection.find(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname))
+				.hint(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, 1))
+				.limit((int) limit);
+		
 		return new Iterator<CrawlLogEntry>() {
 			@Override
 			public boolean hasNext() {

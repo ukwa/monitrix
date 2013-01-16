@@ -190,11 +190,11 @@ public class LogFileEntry extends CrawlLogEntry {
 			
 			return new HostParseResult(domainName, subdomain, null);
 		} catch (MalformedURLException e) {
-			Logger.warn(e.getMessage());
+			// Logger.warn(e.getMessage());
 			return new HostParseResult(url, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (IllegalArgumentException e) {
 			// Will be thrown by InternetDomainName.from in case the host name looks weird
-			Logger.warn(e.getMessage());
+			// Logger.warn(e.getMessage());
 			
 			// Special handling for the most common error cause - subdomains ending with '-'
 			String[] tokens = host.split("\\.");

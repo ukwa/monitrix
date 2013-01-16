@@ -150,10 +150,11 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 
 	@Override
 	public String getAnnotations() {
-		if (fields == null)
-			parseEntry();
-		
-		return fields.get(11);
+		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS);
+	}
+	
+	public void setAnnotations(String annotations) {
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS, annotations);
 	}
 	
 	public void setLogLine(String line) {

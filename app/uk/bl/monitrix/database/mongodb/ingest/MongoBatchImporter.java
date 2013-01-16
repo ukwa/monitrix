@@ -78,6 +78,7 @@ public class MongoBatchImporter {
 				dbo.setSubdomain(next.getSubdomain());
 				dbo.setCrawlerID(next.getCrawlerID());
 				dbo.setHTTPCode(next.getHTTPCode());
+				dbo.setAnnotations(next.getAnnotations());
 				dbo.setLogLine(next.toString());
 				logEntryBatch.add(dbo);	
 								

@@ -1,8 +1,9 @@
 package controllers;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-
-import org.apache.commons.collections.IteratorUtils;
 
 import play.Logger;
 import play.mvc.Result;
@@ -41,18 +42,16 @@ public class Hosts extends Controller {
 		} else {
 			long fetchStart = System.currentTimeMillis();
 			Logger.info("Fetching log entries for host " + hostname);
-			List<CrawlLogEntry> entries = IteratorUtils.toList(db.getCrawlLog().getEntriesForHost(hostname));
 			
-			/*
+			int count = (int) db.getCrawlLog().countEntriesForHost(hostname);
 			Iterator<CrawlLogEntry> iterator = db.getCrawlLog().getEntriesForHost(hostname);
-			List<CrawlLogEntry> entries = new ArrayList<CrawlLogEntry>();
+			Collection<CrawlLogEntry> entries = new ArrayDeque<CrawlLogEntry>(count);
 			while (iterator.hasNext())
 				entries.add(iterator.next());
-			*/
 			
-			Logger.info("Done - took " + (System.currentTimeMillis() - fetchStart) + "ms");
-			
-			return ok(views.html.hosts.hostinfo.render(knownHost, entries));
+			long took = System.currentTimeMillis() - fetchStart;
+			Logger.info("Done - took " + took + "ms");			
+			return ok(views.html.hosts.hostinfo.render(knownHost, entries, took));
 		}
 	}
 	

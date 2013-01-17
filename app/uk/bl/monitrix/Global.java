@@ -16,7 +16,6 @@ import uk.bl.monitrix.database.mongodb.MongoDBConnector;
 
 /**
  * The Play! Global object.
- * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class Global extends GlobalSettings {

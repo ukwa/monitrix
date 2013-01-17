@@ -5,9 +5,7 @@ import java.util.List;
 
 /**
  * The crawl log interface.
- * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
- *
  */
 public abstract class CrawlLog {
 	

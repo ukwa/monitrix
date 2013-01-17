@@ -20,7 +20,6 @@ import uk.bl.monitrix.model.KnownHostList;
 /**
  * A MongoDB-backed implementation of {@link DBConnector}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
- *
  */
 public class MongoDBConnector implements DBConnector {
 	

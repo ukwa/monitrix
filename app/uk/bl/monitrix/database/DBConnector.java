@@ -8,7 +8,7 @@ import uk.bl.monitrix.model.CrawlStats;
 import uk.bl.monitrix.model.KnownHost;
 
 /**
- * A minimal connection interface for read access to the Monitrix DB.
+ * A connection interface for read access to the Monitrix DB.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public interface DBConnector {

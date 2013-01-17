@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * An incremental log file reader.
+ * An incremental log file reader that emulates UNIX 'tail -f'-like read behavior.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class IncrementalLogfileReader {

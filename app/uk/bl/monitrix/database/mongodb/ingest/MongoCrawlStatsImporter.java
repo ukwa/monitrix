@@ -13,6 +13,12 @@ import uk.bl.monitrix.model.KnownHost;
 import com.mongodb.DB;
 import com.mongodb.BasicDBObject;
 
+/**
+ * An extended version of {@link MongoCrawlStats} that adds ingest capability.
+ * The ingest is 'smart' in the sense as it also performs various aggregation computations,
+ * including those involving the known hosts list.
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 class MongoCrawlStatsImporter extends MongoCrawlStats {
 	
 	private MongoKnownHostImporter knownHosts;

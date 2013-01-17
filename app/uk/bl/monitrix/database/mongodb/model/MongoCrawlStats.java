@@ -19,7 +19,6 @@ import uk.bl.monitrix.model.CrawlStatsUnit;
 /**
  * A MongoDB-backed implementation of {@link CrawlStats}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
- *
  */
 public class MongoCrawlStats implements CrawlStats {
 	

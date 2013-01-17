@@ -6,11 +6,7 @@ import java.util.List;
 import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
- * A simple class that wraps a {@link LogFileEntry} so that it can be directly 
- * serialized to JSON by Play. 
- * 
- * TODO complete!
- * 
+ * Wraps a {@link LogFileEntry} so that it can be directly serialized to JSON by Play. 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CrawlLogEntryMapper {

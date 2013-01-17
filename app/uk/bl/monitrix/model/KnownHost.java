@@ -6,7 +6,6 @@ import java.util.List;
  * The Known Host domain object interface. Encapsulates the information collected about a specific host
  * during the crawl.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
- *
  */
 public abstract class KnownHost {
 	

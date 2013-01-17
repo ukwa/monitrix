@@ -7,6 +7,10 @@ import java.util.List;
 
 import uk.bl.monitrix.model.CrawlStatsUnit;
 
+/**
+ * Helper functions for computing various stats from CrawlStats collection. 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class CrawlStatsAnalytics {
 	
 	/**

@@ -15,6 +15,10 @@ import uk.bl.monitrix.database.mongodb.model.MongoKnownHost;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHostList;
 import uk.bl.monitrix.model.Alert.AlertType;
 
+/**
+ * An extended version of {@link MongoKnownHostList} that adds insert/update capability.
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 class MongoKnownHostImporter extends MongoKnownHostList {
 	
 	private static final String ALERT_MSG_TOO_MANY_SUBDOMAINS = "The host %s has a suspiciously high number of subdomains (%s)";

@@ -19,7 +19,6 @@ import uk.bl.monitrix.model.KnownHostList;
 /**
  * A MongoDB-backed implementation of {@link KnownHostList}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
- *
  */
 public class MongoKnownHostList implements KnownHostList {
 	

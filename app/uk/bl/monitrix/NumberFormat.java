@@ -1,7 +1,7 @@
 package uk.bl.monitrix;
 
 /**
- * Various helper functions for number and date formatting.
+ * Helper functions for number and date formatting.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class NumberFormat {

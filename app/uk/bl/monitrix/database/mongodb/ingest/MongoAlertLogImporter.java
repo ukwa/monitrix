@@ -9,6 +9,10 @@ import com.mongodb.DBObject;
 import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoAlertLog;
 
+/**
+ * An extended version of {@link MongoAlertLog} that adds insert capability.
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 class MongoAlertLogImporter extends MongoAlertLog {
 
 	public MongoAlertLogImporter(DB db) {

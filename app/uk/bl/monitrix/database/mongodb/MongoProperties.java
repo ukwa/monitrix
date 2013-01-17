@@ -6,7 +6,6 @@ import play.Play;
 
 /**
  * Central access point to Mongo config options, DB table and field names, etc.
- * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class MongoProperties {

@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 
 /**
- * Utility class that provides serial read access to a Heritrix log file.
+ * Utility class that provides one-time serial read access to a Heritrix log file.
+ * Refer to {@link IncrementalLogfileReader} for an implementation that can remain
+ * attached to a file and provide UNIX 'tail -f'-like read behavior.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class SimpleLogfileReader  {

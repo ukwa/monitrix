@@ -19,7 +19,6 @@ import uk.bl.monitrix.model.AlertLog;
 /**
  * A MongoDB-backed implementation of {@link AlertLog}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
- *
  */
 public class MongoAlertLog implements AlertLog {
 	

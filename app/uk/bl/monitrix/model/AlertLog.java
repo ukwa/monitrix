@@ -5,11 +5,9 @@ import java.util.List;
 
 import uk.bl.monitrix.model.Alert.AlertType;
 
-
 /**
  * The alert log interface. An alert log provides read/query access to all 
  * alerts stored in the backend.
- * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public interface AlertLog {

@@ -16,7 +16,7 @@ import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
  * Helper functions for computing various stats from log entries. 
- * @author Rainer Simon <rainer.simon@ait.ac.a.t>
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class LogAnalytics {
 	

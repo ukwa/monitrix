@@ -3,8 +3,7 @@ package controllers.mapping;
 import uk.bl.monitrix.model.CrawlStatsUnit;
 
 /**
- * A simple class that wraps a {@link CrawlStatsUnit} so that it can be directly 
- * serialized to JSON by Play. 
+ * Wraps a {@link CrawlStatsUnit} so that it can be directly serialized to JSON by Play. 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CrawlStatsUnitMapper {

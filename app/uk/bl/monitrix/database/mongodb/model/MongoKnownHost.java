@@ -56,7 +56,7 @@ public class MongoKnownHost extends KnownHost {
 			subdomains.add(subdomain);
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS, subdomains);
 		
-		// TODO add tokenized subdomain name
+		// TODO add tokenized subdomain name? (Could be useful for search)
 	}
 
 	@Override

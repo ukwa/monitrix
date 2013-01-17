@@ -17,6 +17,11 @@ import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
 import uk.bl.monitrix.heritrix.LogFileEntry;
 import uk.bl.monitrix.model.Alert;
 
+/**
+ * An importer class that ingests a batch of crawl log entries, performing all necessary
+ * data aggregation computations. 
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class MongoBatchImporter {
 	
 	// MongoDB host

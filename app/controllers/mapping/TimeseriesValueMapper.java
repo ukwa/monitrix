@@ -6,9 +6,7 @@ import java.util.List;
 import uk.bl.monitrix.analytics.TimeseriesValue;
 
 /**
- * A simple class that wraps a {@link TimeseriesValue} so that it can be directly 
- * serialized to JSON by Play. 
- * 
+ * Wraps a {@link TimeseriesValue} so that it can be directly serialized to JSON by Play. 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class TimeseriesValueMapper {

@@ -9,6 +9,10 @@ import com.mongodb.DBObject;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLog;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
 
+/**
+ * An extended version of {@link MongoCrawlLog} that adds insert capability.
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 class MongoCrawlLogImporter extends MongoCrawlLog {
 
 	public MongoCrawlLogImporter(DB db) {

@@ -20,6 +20,9 @@ import uk.bl.monitrix.model.CrawlLogEntry;
  */
 public class LogAnalytics {
 	
+	// String constant - 'text' prefix for checking MIME types
+	private static final String TEXT = "text";
+	
 	/**
 	 * Extracts the unique crawler IDs from the log entries. 
 	 * @param log the log entries
@@ -157,6 +160,30 @@ public class LogAnalytics {
 		
 		Logger.info("Computed MIME type distribution - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return pieChart;
+	}
+	
+	/**
+	 * Helper function to compute the ratio of text MIME types (i.e. every type starting with 'text/') vs.
+	 * all other types.
+	 * @param log the log entries
+	 * @return the ratio text/non-text resources
+	 */
+	public static double getTextToNonTextResourceRatio(Iterator<CrawlLogEntry> log) {
+		int text = 0;
+		int nonText = 0;
+		
+		while (log.hasNext()) {			
+			String contentType = log.next().getContentType();
+			if (contentType.startsWith(TEXT))
+				text++;
+			else
+				nonText++;
+		}
+		
+		if (nonText == 0)
+			return 99;
+		
+		return ((double) text)/((double) nonText);
 	}
 	
 	/**

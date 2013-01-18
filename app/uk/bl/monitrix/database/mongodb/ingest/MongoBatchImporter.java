@@ -53,7 +53,7 @@ public class MongoBatchImporter {
 
 		this.crawlLogImporter = new MongoCrawlLogImporter(db);
 		this.alertLogImporter = new MongoAlertLogImporter(db);
-		this.crawlStatsImporter = new MongoCrawlStatsImporter(db,  new MongoKnownHostImporter(db, this.alertLogImporter));
+		this.crawlStatsImporter = new MongoCrawlStatsImporter(db,  new MongoKnownHostImporter(db, this.crawlLogImporter, this.alertLogImporter));
 	}
 	
 	public void insert(Iterator<LogFileEntry> iterator) {

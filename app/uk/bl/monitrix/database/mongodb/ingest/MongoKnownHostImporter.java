@@ -2,6 +2,7 @@ package uk.bl.monitrix.database.mongodb.ingest;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import play.Logger;
@@ -10,10 +11,12 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 
+import uk.bl.monitrix.analytics.LogAnalytics;
 import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHost;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHostList;
 import uk.bl.monitrix.model.Alert.AlertType;
+import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
  * An extended version of {@link MongoKnownHostList} that adds insert/update capability.
@@ -23,10 +26,15 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	
 	private static final String ALERT_MSG_TOO_MANY_SUBDOMAINS = "The host %s has a suspiciously high number of subdomains (%s)";
 	
+	private static final String ALERT_MSG_TXT_TO_NONTEXT_RATIO = "The host %s serves a suspiciously high ratio of text vs. non-text resources";
+	
+	private MongoCrawlLogImporter crawlLog;
+	
 	private MongoAlertLogImporter alertLog;
 
-	public MongoKnownHostImporter(DB db, MongoAlertLogImporter alertLog) {
+	public MongoKnownHostImporter(DB db, MongoCrawlLogImporter crawlLog, MongoAlertLogImporter alertLog) {
 		super(db);
+		this.crawlLog = crawlLog;
 		this.alertLog = alertLog;
 	}
 	
@@ -99,6 +107,7 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 		
 		// Compute host-level alerts
 		// Note: we only need to consider hosts that were added in this batch - ie. those in the cache!
+		Logger.info("Computing host-level alerts for " + cache.size() +  " hosts");
 		for (MongoKnownHost host : cache.values()) {
 			// Subdomain limit
 			int subdomains = host.getSubdomains().size();
@@ -108,6 +117,18 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 				alert.setOffendingHost(host.getHostname());
 				alert.setAlertType(AlertType.TOO_MANY_SUBDOMAINS);
 				alert.setAlertDescription(String.format(ALERT_MSG_TOO_MANY_SUBDOMAINS, host.getHostname(), Integer.toString(subdomains)));
+				alertLog.insert(alert);
+			}
+			
+			// Text-to-Nontext content type ratio
+			Iterator<CrawlLogEntry> log = crawlLog.getEntriesForHost(host.getHostname(), true);
+			double ratio = LogAnalytics.getTextToNonTextResourceRatio(log);
+			if (ratio > 90) {
+				MongoAlert alert = new MongoAlert(new BasicDBObject());
+				alert.setTimestamp(host.getLastAccess());
+				alert.setOffendingHost(host.getHostname());
+				alert.setAlertType(AlertType.TXT_TO_NONTEXT_RATIO);
+				alert.setAlertDescription(String.format(ALERT_MSG_TXT_TO_NONTEXT_RATIO, host.getHostname()));
 				alertLog.insert(alert);
 			}
 		}

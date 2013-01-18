@@ -53,7 +53,7 @@ public class Hosts extends Controller {
 			while (iterator.hasNext()) {
 				entries.add(iterator.next());
 				ctr++;
-				if (ctr % tenPercent == 0)
+				if (tenPercent > 0 && ctr % tenPercent == 0)
 					Logger.info(ctr / tenPercent + "0% fetched from DB");
 			}
 			

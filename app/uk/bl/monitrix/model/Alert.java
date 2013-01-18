@@ -44,7 +44,10 @@ public interface Alert {
 		TOO_MANY_PATH_SEGMENTS,
 		
 		/** A host has a suspiciously high number of subdomains **/
-		TOO_MANY_SUBDOMAINS
+		TOO_MANY_SUBDOMAINS,
+		
+		/** A host serves a suspicsiously high rate of text/non-text MIME types - crawler block? **/
+		TXT_TO_NONTEXT_RATIO
 		
 	}
 

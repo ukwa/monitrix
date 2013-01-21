@@ -13,8 +13,8 @@ import uk.bl.monitrix.database.mongodb.ingest.MongoBatchImporter;
 public class BatchLogProcessor {
 	
 	// private static final String LOG_FILE = "test/sample-log-1E3.txt";
-	// private static final String LOG_FILE = "/home/simonr/Downloads/sample-log-2E6.log";
-	private static final String LOG_FILE = "/home/simonr/Downloads/crawl.log.20120914182409";
+	private static final String LOG_FILE = "/home/simonr/Downloads/sample-log-2E6.log";
+	// private static final String LOG_FILE = "/home/simonr/Downloads/crawl.log.20120914182409";
 	
 	public static void main(String[] args) throws IOException {
 		MongoBatchImporter mongo = new MongoBatchImporter("localhost", "monitrix", 27017);

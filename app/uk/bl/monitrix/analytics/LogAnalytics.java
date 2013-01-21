@@ -102,6 +102,14 @@ public class LogAnalytics {
 		return Math.round(bytesPerMillisecond * 60000);
 	}
 	
+	public static String extractVirusName(CrawlLogEntry entry) {
+		// TODO dummy implementation - finish!
+		if (entry.getAnnotations().contains("FOUND"))
+			return "VIRUS";
+		
+		return null;
+	}
+	
 	/**
 	 * Computes the distribution of fetch status codes in the log entries.
 	 * @param log the log entries

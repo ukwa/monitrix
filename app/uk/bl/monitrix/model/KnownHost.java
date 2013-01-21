@@ -1,6 +1,7 @@
 package uk.bl.monitrix.model;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Known Host domain object interface. Encapsulates the information collected about a specific host
@@ -32,6 +33,32 @@ public abstract class KnownHost {
 	 * @return the last access to the host
 	 */
 	public abstract long getLastAccess();
+	
+	/**
+	 * The distribution of Heritrix fetch status codes for the URLs crawled at
+	 * this host. The return value is a map that has the encountered fetch status
+	 * codes (200, 404, -1, ...) as keys, and the number of URLs that have ended
+	 * with that status as values. 
+	 * @return the fetch status distribution
+	 */
+	public abstract Map<String, Integer> getFetchStatusDistribution();
+	
+	/**
+	 * The distribution of MIME content types for the URLs crawled at this
+	 * host. The return value is a map that has the mime type names as
+	 * keys, and the number of URLs that have returned that MIME type
+	 * as values.
+	 * @return the content type distribution
+	 */
+	public abstract Map<String, Integer> getContentTypeDistribution();
+	
+	/**
+	 * Returns the virus stats that have been recorded for this host. The
+	 * return value is a map that has the name of the viruses as keys,
+	 * and the number of URLs infected with that virus as values.
+	 * @return the virus stats
+	 */
+	public abstract Map<String, Integer> getVirusStats();
 
 	/**
 	 * Helper method to split a host name into tokens. Host names

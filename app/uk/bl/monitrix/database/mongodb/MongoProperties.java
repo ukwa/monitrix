@@ -52,6 +52,9 @@ public class MongoProperties {
 	public static final String FIELD_KNOWN_HOSTS_SUBDOMAINS_TOKENIZED = "subdomains_tokenized";
 	public static final String FIELD_KNOWN_HOSTS_FIRST_ACCESS = "first_access";
 	public static final String FIELD_KNOWN_HOSTS_LAST_ACCESS = "last_access";
+	public static final String FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES = "fetch_status_codes";
+	public static final String FIELD_KNOWN_HOSTS_CONTENT_TYPES = "content_types";
+	public static final String FIELD_KNOWN_HOSTS_VIRUS_STATS = "virus_stats";
 	
 	/** Bulk insert chunk size **/
 	public static final int BULK_INSERT_CHUNK_SIZE = 500000;

@@ -2,8 +2,11 @@ package uk.bl.monitrix.database.mongodb.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 import uk.bl.monitrix.database.mongodb.MongoProperties;
@@ -75,6 +78,48 @@ public class MongoKnownHost extends KnownHost {
 	
 	public void setLastAccess(long lastAccess) {
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, lastAccess);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Integer> getFetchStatusDistribution() {
+		DBObject fetchStatusCodes = (DBObject) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES);
+		if (fetchStatusCodes == null)
+			return new HashMap<String, Integer>();
+		
+		return fetchStatusCodes.toMap();
+	}
+	
+	public void setFetchStatusDistribution(Map<String, Integer> fetchStatusDistribution) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES, new BasicDBObject(fetchStatusDistribution));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Integer> getContentTypeDistribution() {
+		DBObject contentTypeDistribution = (DBObject) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES);
+		if (contentTypeDistribution == null)
+			return new HashMap<String, Integer>();
+		
+		return contentTypeDistribution.toMap();
+	}
+	
+	public void setContentTypeDistribution(Map<String, Integer> contentTypeDistribution) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES, new BasicDBObject(contentTypeDistribution));
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Integer> getVirusStats() {
+		DBObject virusStats = (DBObject) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS);
+		if (virusStats == null)
+			return new HashMap<String, Integer>();
+		
+		return virusStats.toMap();
+	}
+	
+	public void setVirusStats(Map<String, Integer> virusStats) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS, new BasicDBObject(virusStats));
 	}
 
 }

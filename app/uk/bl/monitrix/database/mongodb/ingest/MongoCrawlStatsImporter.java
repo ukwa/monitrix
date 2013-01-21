@@ -1,5 +1,6 @@
 package uk.bl.monitrix.database.mongodb.ingest;
 
+import uk.bl.monitrix.analytics.LogAnalytics;
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlStats;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlStatsUnit;
@@ -72,6 +73,11 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 		}
 		knownHosts.addSubdomain(hostname, entry.getSubdomain());
+		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
+		knownHosts.incrementContentTypeCounter(hostname, entry.getContentType());
+		String virusName = LogAnalytics.extractVirusName(entry);
+		if (virusName != null)
+			knownHosts.incrementVirusStats(hostname, virusName);
 				
 		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable

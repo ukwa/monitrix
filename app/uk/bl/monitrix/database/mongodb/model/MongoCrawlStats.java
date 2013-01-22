@@ -57,9 +57,6 @@ public class MongoCrawlStats implements CrawlStats {
 
 	@Override
 	public CrawlStatsUnit getStatsForTimestamp(long timestamp) {
-		
-		// TODO check if the timestamp conforms to the base resolution raster (and adjust if not)
-		
 		if (cache.containsKey(timestamp))
 			return cache.get(timestamp);
 		

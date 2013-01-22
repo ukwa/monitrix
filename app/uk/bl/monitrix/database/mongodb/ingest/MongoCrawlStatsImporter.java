@@ -1,5 +1,6 @@
 package uk.bl.monitrix.database.mongodb.ingest;
 
+import play.Logger;
 import uk.bl.monitrix.analytics.LogAnalytics;
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlStats;
@@ -37,7 +38,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		long timeslot = toTimeslot(entry.getTimestamp().getTime());
 				
 		// Step 2 - update data for this timeslot
-		MongoCrawlStatsUnit currentUnit = (MongoCrawlStatsUnit) this.getStatsForTimestamp(timeslot);
+		MongoCrawlStatsUnit currentUnit = (MongoCrawlStatsUnit) getStatsForTimestamp(timeslot);
 		if (currentUnit == null) {
 			// Step 3a - init data for this timeslot
 			currentUnit = new MongoCrawlStatsUnit(new BasicDBObject());
@@ -75,7 +76,17 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		knownHosts.addSubdomain(hostname, entry.getSubdomain());
 		knownHosts.addCrawlerID(hostname, entry.getCrawlerID());
 		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
-		knownHosts.incrementContentTypeCounter(hostname, entry.getContentType());
+		
+		// Warning: there seems to be a bug in Heritrix which sometimes leaves a 'content type template' (?)
+		// in the log line: content type = '$ctype'. This causes MongoDB to crash, because it can't use 
+		// strings starting with '$' as JSON keys. Therefore, we'll cut off the '$' and log a warning.
+		String contentType = entry.getContentType();
+		if (contentType.charAt(0) == '$') {
+			Logger.warn("Invalid content type found in log: " + contentType);
+			contentType = contentType.substring(1);
+		}
+		knownHosts.incrementContentTypeCounter(hostname, contentType);
+		
 		String virusName = LogAnalytics.extractVirusName(entry);
 		if (virusName != null)
 			// MongoDB says: fields stored in the db can't have . in them.

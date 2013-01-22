@@ -108,12 +108,11 @@ public class MongoBatchImporter {
 			logEntryBatch.clear();
 			
 			alertLogImporter.insert(alertBatch);
-			alertBatch.clear();			
+			alertBatch.clear();		
 			
+			crawlStatsImporter.commit();
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}
-		
-		crawlStatsImporter.commit();
 				
 		Logger.info("Done - took " + (System.currentTimeMillis() - start) + " ms");		
 	}

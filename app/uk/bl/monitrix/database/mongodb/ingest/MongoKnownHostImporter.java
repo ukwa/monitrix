@@ -1,15 +1,12 @@
 package uk.bl.monitrix.database.mongodb.ingest;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import play.Logger;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.DBObject;
 
 import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHost;
@@ -146,24 +143,14 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	 * Writes the contents of the cache to the database.
 	 */
 	public void commit() {
-		// TODO risky - we'll lose updates to the database that haven't been made through this object instance!
-		final List<MongoKnownHost> cachedKnownHosts = new ArrayList<MongoKnownHost>(cache.values());	
-		collection.drop();
-		collection.insert(new AbstractList<DBObject>() {
-			@Override
-			public DBObject get(int index) {
-				return cachedKnownHosts.get(index).getBackingDBO();
-			}
-
-			@Override
-			public int size() {
-				return cachedKnownHosts.size();
-			}	
-		});
+		Logger.info("Updating known hosts list (" + cache.size() +  " hosts)");
+		for (MongoKnownHost knownHost : new ArrayList<MongoKnownHost>(cache.values())) {
+			collection.save(knownHost.getBackingDBO());
+		}
 		
 		// Compute host-level alerts
 		// Note: we only need to consider hosts that were added in this batch - ie. those in the cache!
-		Logger.info("Computing host-level alerts for " + cache.size() +  " hosts");
+		Logger.info("Computing host-level alerts");
 		for (MongoKnownHost host : cache.values()) {
 			// Subdomain limit
 			int subdomains = host.getSubdomains().size();
@@ -176,6 +163,7 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 				alertLog.insert(alert);
 			}
 			
+			// TODO text-to-nontext ratio
 			/* Text-to-Nontext content type ratio
 			Iterator<CrawlLogEntry> log = crawlLog.getEntriesForHost(host.getHostname(), true);
 			double ratio = LogAnalytics.getTextToNonTextResourceRatio(log);

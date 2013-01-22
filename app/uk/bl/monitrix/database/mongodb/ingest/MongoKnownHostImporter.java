@@ -80,6 +80,15 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 		else
 			Logger.warn("Attempt to write subdomain info to unknown host: " + hostname);
 	}
+	
+	public void addCrawlerID(String hostname, String crawlerId) {
+		// In this case we know it's a safe cast
+		MongoKnownHost dbo = (MongoKnownHost) getKnownHost(hostname);
+		if (dbo != null)
+			dbo.addCrawlerID(crawlerId);
+		else
+			Logger.warn("Attempt to write crawlerID info to unknown host: " + hostname);		
+	}
 
 	public void incrementFetchStatusCounter(String hostname, int fetchStatus) {
 		// In this case we know it's a safe cast

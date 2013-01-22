@@ -73,6 +73,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 		}
 		knownHosts.addSubdomain(hostname, entry.getSubdomain());
+		knownHosts.addCrawlerID(hostname, entry.getCrawlerID());
 		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
 		knownHosts.incrementContentTypeCounter(hostname, entry.getContentType());
 		String virusName = LogAnalytics.extractVirusName(entry);

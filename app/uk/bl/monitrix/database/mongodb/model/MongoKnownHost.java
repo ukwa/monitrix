@@ -82,9 +82,22 @@ public class MongoKnownHost extends KnownHost {
 	
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<String> getCrawlerIDs() {
-		// TODO dummy - implement!
-		return new ArrayList<String>();
+		List<String> crawlers = (List<String>) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_CRAWLERS);
+		if (crawlers == null)
+			return new ArrayList<String>();
+		
+		return crawlers;
+	}
+	
+	public void addCrawlerID(String id) {
+		List<String> crawlers = getCrawlerIDs();
+		
+		if (!crawlers.contains(id))
+			crawlers.add(id);
+		
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_CRAWLERS, crawlers);
 	}
 
 	@Override

@@ -77,7 +77,8 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		knownHosts.incrementContentTypeCounter(hostname, entry.getContentType());
 		String virusName = LogAnalytics.extractVirusName(entry);
 		if (virusName != null)
-			knownHosts.incrementVirusStats(hostname, virusName);
+			// MongoDB says: fields stored in the db can't have . in them.
+			knownHosts.incrementVirusStats(hostname, virusName.replace('.', '@'));
 				
 		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable

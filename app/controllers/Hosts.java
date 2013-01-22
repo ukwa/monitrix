@@ -1,17 +1,11 @@
 package controllers;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
-import play.Logger;
 import play.mvc.Result;
 import play.mvc.Controller;
 import uk.bl.monitrix.Global;
 import uk.bl.monitrix.database.DBConnector;
-import uk.bl.monitrix.database.mongodb.model.MongoCrawlLog;
-import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
 
 public class Hosts extends Controller {
@@ -41,25 +35,7 @@ public class Hosts extends Controller {
 		if (knownHost == null) {
 			return notFound(); // TODO error handling
 		} else {
-			long fetchStart = System.currentTimeMillis();
-			Logger.info("Fetching log entries for host " + hostname);
-			
-			int total = (int) db.getCrawlLog().countEntriesForHost(hostname);
-			Iterator<CrawlLogEntry> iterator = ((MongoCrawlLog) db.getCrawlLog()).getEntriesForHost(hostname, true);
-			Collection<CrawlLogEntry> entries = new ArrayDeque<CrawlLogEntry>(total);
-			
-			int tenPercent = total / 10;
-			int ctr = 0;
-			while (iterator.hasNext()) {
-				entries.add(iterator.next());
-				ctr++;
-				if (tenPercent > 0 && ctr % tenPercent == 0)
-					Logger.info(ctr / tenPercent + "0% fetched from DB");
-			}
-			
-			long took = System.currentTimeMillis() - fetchStart;
-			Logger.info("Done - took " + took + "ms");			
-			return ok(views.html.hosts.hostinfo.render(knownHost, entries, took));
+			return ok(views.html.hosts.hostinfo.render(knownHost, db.getCrawlLog()));
 		}
 	}
 	

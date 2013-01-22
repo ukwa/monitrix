@@ -1,4 +1,4 @@
-@(knownHost: uk.bl.monitrix.model.KnownHost, logEntries: Collection[uk.bl.monitrix.model.CrawlLogEntry], took: Long)
+@(knownHost: uk.bl.monitrix.model.KnownHost, crawlLog: uk.bl.monitrix.model.CrawlLog)
 
 @import tags.{heritrixStatus, navbar}
 
@@ -7,120 +7,98 @@
 }{
   <h1 style="padding:0px 0px 10px 5px;">
     @knownHost.getHostname() 
-    <span class="pull-right">@logEntries.size <span class="monitrix-h1-subline">URLs Crawled</span></span>
+    <span class="pull-right">@crawlLog.countEntriesForHost(knownHost.getHostname()) <span class="monitrix-h1-subline">URLs Crawled</span></span>
   </h1>
     
-  @defining(uk.bl.monitrix.analytics.LogAnalytics.getFetchStatusDistribution(logEntries.iterator)) { httpCodes =>   
-    <table class="table monitrix-hostinfo">
-      <tr>
-        <td class="monitrix-hostinfo-label">Last Accessed</td>
-        <td>@{new Date(knownHost.getLastAccess()).format("dd MMM yy, HH:mm")}</td>
-        <td>(@uk.bl.monitrix.NumberFormat.since(knownHost.getLastAccess()) ago)</td>
-        <td/>
-      </tr>
-      <tr>
-        <td class="monitrix-hostinfo-label">First Accessed</td>
-        <td>@{new Date(knownHost.getFirstAccess()).format("dd MMM yy, HH:mm")}</td>
-        <td>(@uk.bl.monitrix.NumberFormat.since(knownHost.getFirstAccess()) ago)</td>
-        <td style="width:50%"/>
-      </tr>
-      <tr>
-        <td/>
-        <td colspan="3">
-          <div class="monitrix-host-piechart">
-            <strong>Fetch Status</strong>
-            <div class="monitrix-host-piechart-inner" id="pie-result-codes"></div>
-          </div>
+  <table class="table monitrix-hostinfo">
+    <tr>
+      <td class="monitrix-hostinfo-label">Last Accessed</td>
+      <td>@{new Date(knownHost.getLastAccess()).format("dd MMM yy, HH:mm")}</td>
+      <td>(@uk.bl.monitrix.NumberFormat.since(knownHost.getLastAccess()) ago)</td>
+      <td/>
+    </tr>
+    <tr>
+      <td class="monitrix-hostinfo-label">First Accessed</td>
+      <td>@{new Date(knownHost.getFirstAccess()).format("dd MMM yy, HH:mm")}</td>
+      <td>(@uk.bl.monitrix.NumberFormat.since(knownHost.getFirstAccess()) ago)</td>
+      <td style="width:50%"/>
+    </tr>
+    <tr>
+      <td/>
+      <td colspan="3">
+        <div class="monitrix-host-piechart">
+          <strong>Fetch Status</strong>
+          <div class="monitrix-host-piechart-inner" id="pie-result-codes"></div>
+        </div>
           
-          <div class="monitrix-host-piechart">
-            <strong>Virus Scan</strong>
-            <div class="monitrix-host-piechart-inner" id="pie-viruscheck"></div>
-          </div>
+        <div class="monitrix-host-piechart">
+          <strong>Virus Scan</strong>
+          <div class="monitrix-host-piechart-inner" id="pie-viruscheck"></div>
+        </div>
           
-          <div class="monitrix-host-piechart">
-            <strong>Content Types</strong>
-            <div class="monitrix-host-piechart-inner" id="pie-mimetypes"></div>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        @defining(knownHost.getSubdomains) { subdomains =>
-          <td class="monitrix-hostinfo-label">Subdomains (@subdomains.size)</td>
-          <td colspan="3" class="monitrix-three-column-text">
-            @for(subdomain <- subdomains) {
-              @if(subdomain.isEmpty) {
-                @knownHost.getHostname
-              } else {
-                @{subdomain}.@knownHost.getHostname<br/>
-              }
+        <div class="monitrix-host-piechart">
+          <strong>Content Types</strong>
+          <div class="monitrix-host-piechart-inner" id="pie-mimetypes"></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      @defining(knownHost.getSubdomains) { subdomains =>
+        <td class="monitrix-hostinfo-label">Subdomains (@subdomains.size)</td>
+        <td colspan="3" class="monitrix-three-column-text">
+          @for(subdomain <- subdomains) {
+            @if(subdomain.isEmpty) {
+              @knownHost.getHostname
+            } else {
+              @{subdomain}.@knownHost.getHostname<br/>
             }
-          </td>
-        }
-      </tr>
-      @defining(uk.bl.monitrix.analytics.LogAnalytics.getCrawlerIDs(logEntries.iterator)) { crawlers =>
-        <tr><td class="monitrix-hostinfo-label">Crawlers (@crawlers.size())</td><td colspan="3">@crawlers.mkString(", ")</td></tr>
-      }
-      <tr>
-        <td class="monitrix-hostinfo-label">Alerts</td>
-        <td colspan="3"></td>
-      </tr>
-      
-<!--         
-        <td style="vertical-align:middle; padding-right:50px;">
-          <small>
-            <table class="table table-condensed table-striped" style="text-align:left;">
-              <thead>
-                <tr><th># of URLs</th><th>%</th><th>Result</th><th>Code</th></tr>
-              </thead>
-              <tbody>
-              @defining(httpCodes.map(_.getValue()).foldLeft(0l)(_ + _)) { sum =>
-                @for(result <- httpCodes.sortWith(_.getValue() > _.getValue())) {
-                  <tr><td>@result.getValue()</td><td>@{(result.getValue() * 100) / sum}</td><td>@heritrixStatus(result.getLabel())</td><td>@result.getLabel()</td></tr>
-                }
-              }
-              </tbody>
-            </table>
-          </small>
+          }
         </td>
-      </tr>
-  -->
-    </table>
-    <p class="pull-right"><small><span style="color:#888">Took @took ms</span></small></p>
-  
-    <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
-    <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>
-    <script>
-      window.onload = function() {
-    	  Morris.Donut({
-            data: [
-   		      @{httpCodes.map(code =>
-   		        "{'label':'" + code.getLabel() + "','value':" + code.getValue()  + "}" 
-   		      ).mkString(", ") }
-            ],
-            element: 'pie-result-codes',
-            colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
-    	  });
-    	  
-    	  Morris.Donut({
-            data: [
-              @{uk.bl.monitrix.analytics.LogAnalytics.getVirusDistribution(logEntries.iterator).map(code =>
-                "{'label':'" + code.getLabel() + "','value':" + code.getValue()  + "}" 
-              ).mkString(", ") }
-            ],
-            element: 'pie-viruscheck',
-            colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
-    	  });
-    	  
-    	  Morris.Donut({
-              data: [
-                @{uk.bl.monitrix.analytics.LogAnalytics.getMimeTypeDistribution(logEntries.iterator).map(code =>
-                  "{'label':'" + code.getLabel() + "','value':" + code.getValue()  + "}" 
-                ).mkString(", ") }
-              ],
-              element: 'pie-mimetypes',
-              colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
-      	  });
       }
-    </script>
-  }
+    </tr>
+    @defining(knownHost.getCrawlerIDs()) { crawlers =>
+      <tr><td class="monitrix-hostinfo-label">Crawlers (@crawlers.size())</td><td colspan="3">@crawlers.mkString(", ")</td></tr>
+    }
+    <tr>
+      <td class="monitrix-hostinfo-label">Alerts</td>
+      <td colspan="3"></td>
+    </tr>
+  </table>
+  
+  <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
+  <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>
+  <script>
+    window.onload = function() {
+    	
+        Morris.Donut({
+                       data: [
+                               @{knownHost.getFetchStatusDistribution().map { case (code, value) =>
+   		                          "{'label':'" + code + "','value':" + value  + "}" 
+                                }.mkString(", ") }
+                             ],
+                       element: 'pie-result-codes',
+                       colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
+    	             });
+    	  
+    	Morris.Donut({
+                       data: [
+                               @{knownHost.getVirusStats().map { case (name, count) =>
+                                  "{'label':'" + name + "','value':" + count  + "}" 
+                                }.mkString(", ") }
+                             ],
+                       element: 'pie-viruscheck',
+                       colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
+    	             });
+    	  
+        Morris.Donut({
+                       data: [
+                               @{knownHost.getContentTypeDistribution().map { case (mime, count) =>
+                                  "{'label':'" + mime + "','value':" + count  + "}" 
+                                }.mkString(", ") }
+                             ],
+                       element: 'pie-mimetypes',
+                       colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
+                     });
+    }
+  </script>
 }

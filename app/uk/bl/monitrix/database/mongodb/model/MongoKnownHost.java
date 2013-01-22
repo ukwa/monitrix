@@ -79,6 +79,13 @@ public class MongoKnownHost extends KnownHost {
 	public void setLastAccess(long lastAccess) {
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, lastAccess);
 	}
+	
+
+	@Override
+	public List<String> getCrawlerIDs() {
+		// TODO dummy - implement!
+		return new ArrayList<String>();
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")

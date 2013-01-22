@@ -34,6 +34,8 @@ public abstract class KnownHost {
 	 */
 	public abstract long getLastAccess();
 	
+	public abstract List<String> getCrawlerIDs();
+	
 	/**
 	 * The distribution of Heritrix fetch status codes for the URLs crawled at
 	 * this host. The return value is a map that has the encountered fetch status

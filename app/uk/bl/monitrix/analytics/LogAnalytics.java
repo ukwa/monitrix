@@ -23,6 +23,9 @@ public class LogAnalytics {
 	// String constant - 'text' prefix for checking MIME types
 	private static final String TEXT = "text";
 	
+	// Virus flag 'FOUND'
+	private static final String FOUND = "FOUND";
+	
 	/**
 	 * Extracts the unique crawler IDs from the log entries. 
 	 * @param log the log entries
@@ -103,9 +106,13 @@ public class LogAnalytics {
 	}
 	
 	public static String extractVirusName(CrawlLogEntry entry) {
-		// TODO dummy implementation - finish!
-		if (entry.getAnnotations().contains("FOUND"))
-			return "VIRUS";
+		String annotations = entry.getAnnotations();
+		if (annotations.contains(FOUND)) {
+			// Example: 84.45.47.58,1: stream: JS.Redir-11 FOUND
+			String virusName = annotations.substring(0, annotations.indexOf(FOUND)).trim();
+			virusName = virusName.substring(virusName.lastIndexOf(' ') + 1);
+			return virusName;
+		}
 		
 		return null;
 	}

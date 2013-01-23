@@ -121,13 +121,23 @@
           Morris.Donut({
                        data: [
                                @{knownHost.getFetchStatusDistribution().map { case (code, value) =>
-   		                          "{'label':'" + code + "','value':" + value  + "}" 
+   		                          "{'label':'" + code + "','value':" + value + "}" 
                                 }.mkString(", ") }
                              ],
                        element: 'pie-result-codes',
                        colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
     	             });
-    	  
+          
+          Morris.Donut({
+              data: [
+                      @{knownHost.getContentTypeDistribution().map { case (mime, count) =>
+                         "{'label':'" + mime.replace('\'', '"') + "','value':" + count  + "}" 
+                       }.mkString(", ") }
+                    ],
+              element: 'pie-mimetypes',
+              colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
+            });
+          
     	  Morris.Donut({
                        data: [
                               @defining(knownHost.getVirusStats()) { virusStats =>
@@ -143,16 +153,6 @@
                        element: 'pie-viruscheck',
                        colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
     	             });
-    	  
-          Morris.Donut({
-                       data: [
-                               @{knownHost.getContentTypeDistribution().map { case (mime, count) =>
-                                  "{'label':'" + mime + "','value':" + count  + "}" 
-                                }.mkString(", ") }
-                             ],
-                       element: 'pie-mimetypes',
-                       colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
-                     });
       }
     </script>
   }

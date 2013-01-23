@@ -78,14 +78,23 @@ html, body {
 }
 
 .monitrix-host-piechart {
+  margin:20px 30px 0px 0px;
   display:inline-block;
   text-align:center;
   font-size:13px;
 }
 
 .monitrix-host-piechart-inner {
-  width:190px; 
+  width:240px; 
   height:150px;
+}
+
+.monitrix-host-pielchart-legend {
+  margin:30px 0px 50px 0px;
+}
+
+.monitrix-host-pielchart-legend td {
+  font-size:10px;
 }
 
 .monitrix-three-column-text {

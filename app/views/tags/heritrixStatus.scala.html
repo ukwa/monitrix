@@ -56,7 +56,7 @@
   
   case "-9998" => { <span>Robots.txt rules precluded fetch</span> } 
   
-  case status if (Integer.parseInt(status) > 0) => { <span>HTTP @status (@{org.apache.commons.httpclient.HttpStatus.getStatusText(Integer.parseInt(status))})</span> }
+  case status if (Integer.parseInt(status) > 0) => { <span>@{org.apache.commons.httpclient.HttpStatus.getStatusText(Integer.parseInt(status))}</span> }
   
   case status => { <span>@status</span> }
     

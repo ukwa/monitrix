@@ -34,6 +34,10 @@ public abstract class KnownHost {
 	 */
 	public abstract long getLastAccess();
 	
+	/**
+	 * The list of crawlers that have been crawling this host.
+	 * @return the list of crawler IDs
+	 */
 	public abstract List<String> getCrawlerIDs();
 	
 	/**

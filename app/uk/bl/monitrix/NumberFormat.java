@@ -21,30 +21,36 @@ public class NumberFormat {
     private static final String DAYS_NORMAL = " days ";
     private static final String DAYS_COMPACT = "d ";
     
-    public static final String since(long timestamp) {
+    public static String since(long timestamp) {
     	return since(timestamp, false);
     }
     
-	public static final String since(long timestamp, boolean compact) {
-		long since = System.currentTimeMillis() - timestamp;
+	public static String since(long timestamp, boolean compact) {
+		return formatDuration(System.currentTimeMillis() - timestamp, compact);
+	}
+	
+	public static String formatDuration(long durationMillis) {
+		return formatDuration(durationMillis, false);
+	}
 		
-		if (since < MINUTE)
+	public static String formatDuration(long durationMillis, boolean compact) {
+		if (durationMillis < MINUTE)
 			return JUST_NOW;
 		
-		if (since < HOUR)
-			return (since / MINUTE) + MINUTES_NORMAL;
+		if (durationMillis < HOUR)
+			return (durationMillis / MINUTE) + MINUTES_NORMAL;
 		
-		if (since < DAY) {
+		if (durationMillis < DAY) {
 			if (compact)
-				return (since / HOUR) + HOURS_COMPACT + ((since % HOUR) / MINUTE) + MINUTES_COMPACT;
+				return (durationMillis / HOUR) + HOURS_COMPACT + ((durationMillis % HOUR) / MINUTE) + MINUTES_COMPACT;
 			else
-				return (since / HOUR) + HOURS_NORMAL + ((since % HOUR) / MINUTE) + MINUTES_NORMAL;
+				return (durationMillis / HOUR) + HOURS_NORMAL + ((durationMillis % HOUR) / MINUTE) + MINUTES_NORMAL;
 		}
 		
 		if (compact)
-			return (since / DAY) + DAYS_COMPACT + ((since % DAY) / HOUR) + HOURS_COMPACT;
+			return (durationMillis / DAY) + DAYS_COMPACT + ((durationMillis % DAY) / HOUR) + HOURS_COMPACT;
 		else
-			return (since / DAY) + DAYS_NORMAL + ((since % DAY) / HOUR) + HOURS_NORMAL + ((since % MINUTE) / MINUTE) + MINUTES_NORMAL;
+			return (durationMillis / DAY) + DAYS_NORMAL + ((durationMillis % DAY) / HOUR) + HOURS_NORMAL + ((durationMillis % MINUTE) / MINUTE) + MINUTES_NORMAL;
 	}
 
 }

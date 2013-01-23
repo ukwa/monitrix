@@ -21,10 +21,13 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 	
 	private MongoKnownHostImporter knownHosts;
 	
-	public MongoCrawlStatsImporter(DB db, MongoKnownHostImporter knownHosts) {
+	private MongoVirusLogImporter virusLog;
+	
+	public MongoCrawlStatsImporter(DB db, MongoKnownHostImporter knownHosts, MongoVirusLogImporter virusLog) {
 		super(db);
 		
 		this.knownHosts = knownHosts;
+		this.virusLog = virusLog;
 	}
 	
 	/**
@@ -88,9 +91,11 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		knownHosts.incrementContentTypeCounter(hostname, contentType);
 		
 		String virusName = LogAnalytics.extractVirusName(entry);
-		if (virusName != null)
+		if (virusName != null) {
 			// MongoDB says: fields stored in the db can't have . in them.
 			knownHosts.incrementVirusStats(hostname, virusName.replace('.', '@'));
+			virusLog.recordOccurence(virusName, hostname);
+		}
 				
 		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable

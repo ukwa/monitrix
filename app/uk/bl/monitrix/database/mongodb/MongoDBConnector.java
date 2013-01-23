@@ -11,11 +11,13 @@ import uk.bl.monitrix.database.mongodb.model.MongoAlertLog;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLog;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlStats;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHostList;
+import uk.bl.monitrix.database.mongodb.model.MongoVirusLog;
 import uk.bl.monitrix.model.AlertLog;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
 import uk.bl.monitrix.model.KnownHost;
 import uk.bl.monitrix.model.KnownHostList;
+import uk.bl.monitrix.model.VirusLog;
 
 /**
  * A MongoDB-backed implementation of {@link DBConnector}.
@@ -41,6 +43,9 @@ public class MongoDBConnector implements DBConnector {
 	// Alert log
 	private AlertLog alertLog;
 	
+	// Virus log
+	private VirusLog virusLog;
+	
 	public MongoDBConnector() throws IOException {
 		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
 	}
@@ -57,6 +62,7 @@ public class MongoDBConnector implements DBConnector {
 		this.crawlStats = new MongoCrawlStats(db);
 		this.knownHosts = new MongoKnownHostList(db);
 		this.alertLog = new MongoAlertLog(db);
+		this.virusLog = new MongoVirusLog(db);
 	}
 
 	@Override
@@ -70,18 +76,23 @@ public class MongoDBConnector implements DBConnector {
 	}
 
 	@Override
-	public List<String> searchHosts(String query) {
-		return knownHosts.searchHost(query);
-	}
-
-	@Override
 	public AlertLog getAlertLog() {
 		return alertLog;
+	}
+	
+	@Override
+	public VirusLog getVirusLog() {
+		return virusLog;
 	}
 
 	@Override
 	public KnownHost getKnownHost(String hostname) {
 		return knownHosts.getKnownHost(hostname);
+	}
+	
+	@Override
+	public List<String> searchHosts(String query) {
+		return knownHosts.searchHost(query);
 	}
 
 	@Override

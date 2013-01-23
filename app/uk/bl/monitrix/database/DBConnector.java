@@ -6,6 +6,7 @@ import uk.bl.monitrix.model.AlertLog;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
 import uk.bl.monitrix.model.KnownHost;
+import uk.bl.monitrix.model.VirusLog;
 
 /**
  * A connection interface for read access to the Monitrix DB.
@@ -26,25 +27,31 @@ public interface DBConnector {
 	public CrawlStats getCrawlStats();
 
 	/**
-	 * Searches the known hosts list. Supported types of queries depend
-	 * on the type of backend!
-	 * @param query the query
-	 * @return list of host names
-	 */
-	public List<String> searchHosts(String query);
-
-	/**
 	 * Returns the DB-backed alert log.
 	 * @return the alert log
 	 */
 	public AlertLog getAlertLog();
 
 	/**
-	 * Returns DB-backed known host record.
+	 * Returns the DB-backed known host record.
 	 * @param hostname the hostname
 	 * @return the host record
 	 */
 	public KnownHost getKnownHost(String hostname);
+	
+	/**
+	 * Searches the known hosts list. Supported types of queries depend
+	 * on the type of backend!
+	 * @param query the query
+	 * @return list of host names
+	 */
+	public List<String> searchHosts(String query);
+	
+	/**
+	 * Returns the DB-backed virus log.
+	 * @return the virus log
+	 */
+	public VirusLog getVirusLog();
 
 	/**
 	 * Closes the connection

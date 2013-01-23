@@ -22,6 +22,7 @@ public class MongoProperties {
 	public static final String COLLECTION_CRAWL_LOG = "crawl_log";
 	public static final String COLLECTION_CRAWL_STATS = "crawl_stats";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
+	public static final String COLLECTION_VIRUS_LOG = "virus_log";
 	
 	/** Database field keys (Alert Log collection) **/
 	public static final String FIELD_ALERT_LOG_TIMESTAMP = "timestamp";
@@ -56,6 +57,10 @@ public class MongoProperties {
 	public static final String FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES = "fetch_status_codes";
 	public static final String FIELD_KNOWN_HOSTS_CONTENT_TYPES = "content_types";
 	public static final String FIELD_KNOWN_HOSTS_VIRUS_STATS = "virus_stats";
+	
+	/** Database field keys (Virus Log collection **/
+	public static final String FIELD_VIRUS_LOG_NAME = "virus_name";
+	public static final String FIELD_VIRUS_LOG_OCCURENCES = "occurences";
 	
 	/** Bulk insert chunk size **/
 	public static final int BULK_INSERT_CHUNK_SIZE = 500000;

@@ -1,37 +1,33 @@
 # monitrix
 
-A monitoring system for Heritrix 3.
+monitrix is a monitoring/analytics frontend for the Heritrix 3 Web crawler. Visit the [Wiki](http://github.com/ukwa/monitrix/wiki) 
+for information about: 
 
-## Getting Started
+* [installing monitrix](http://github.com/ukwa/monitrix/wiki/Installation)
+* [using monitrix](http://github.com/ukwa/monitrix/wiki/A-Guided-Tour-of-monitrix)
+* monitrix internals:
+  * [Technical Overview](http://github.com/ukwa/monitrix/wiki/Technical-Overview)
+  * [Source code layout](http://github.com/ukwa/monitrix/wiki/Project-Layout)
+  * [the monitrix JSON API](http://github.com/ukwa/monitrix/wiki/JSON-API) 
 
-To start the application in development mode, change into the project root folder and type 
+## Developers: Quick Start
 
-    play run
+To __start monitrix__ in development mode, change into the project root folder and type  ``play run``.
+The application will be at [http://localhost:9000](http://localhost:9000). 
+
+To __generate an Eclipse project__, type ``play eclipsify``.
+
+monitrix doesn't load data into MongoDB by itself (yet). At the moment, you need to use the ``uk.bl.monitrix.util.BatchLogProcessor``
+Java utility, located in the /test folder of the project. Edit the path to the Heritrix log you want to load, and start the application 
+(e.g. from your IDE). 
+
+__Warning:__ Loading data takes time! On my machine, a 10 GB log sample currently takes about 50 minutes to process!
     
-The application will be at [http://localhost:9000](http://localhost:9000). To (properly) shut down, hit CTRL-D. 
-
-To generate an Eclipse project, type
-
-    play eclipsify
-    
-## Using MongoDB
-
-monitrix needs access to a [MongoDB](http://www.mongodb.org) NoSQL database server.
+## MongoDB Cheat Sheet
 
 * Use the ``mongod`` command to start MongoDB (hint: ``mongod --help``)
-* MongoDB provides a Web admin dashboard  at [http://localhost:28017](http://localhost:28017). Make sure
+* The MongoDB admin dashboard is at  [http://localhost:28017](http://localhost:28017). Make sure
   you start MongoDB with the ``--rest`` option (when in dev mode) to enable full dashboard functionality. (Note: on my system
   ``sudo mongod --dbpath /var/lib/mongodb --rest`` works fine.)
-* Use ``mongo <dbname> --eval "db.dropDatabase()"`` to drop a DB 
-* Docs of MongoDB's simple REST interface are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface).
-
-## Loading Test Data into MongoDB
-
-monitrix doesn't load data into MongoDB by itself yet. You need to load data manually with the the following Java application
-class, located in the /test folder:
-
-    uk.bl.monitrix.util.LogProcessor
-    
-Edit the path to the Heritrix log you want to load, and start the application (e.g. from your IDE). Warning: Loading data takes time! On
-my machine, a 10 GB log sample currently takes about 30 minutes to process. There will be just enough log output to show you whether things
-are progressing. 
+* Use ``mongo monitrix --eval "db.dropDatabase()"`` to drop a DB (replacing 'monitrix' with your database name, in case you changed the default.) 
+* MongoDB REST interface docs are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface).

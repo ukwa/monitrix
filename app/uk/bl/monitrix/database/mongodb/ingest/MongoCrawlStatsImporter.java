@@ -76,6 +76,9 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 			currentUnit.setNumberOfNewHostsCrawled(currentUnit.getNumberOfNewHostsCrawled() + 1);
 			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 		}
+		
+		// Note: it's a little confusing that these aggregation steps are in this class
+		// TODO move into the main MongoBatchImporter
 		knownHosts.addSubdomain(hostname, entry.getSubdomain());
 		knownHosts.addCrawlerID(hostname, entry.getCrawlerID());
 		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());

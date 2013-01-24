@@ -1,0 +1,31 @@
+@(virusLog: uk.bl.monitrix.model.VirusLog)
+
+@import tags.navbar
+
+@main("Monitrix - Virus Log") {
+  @navbar("/viruses")
+} {
+  @defining(virusLog.getVirusRecords.toSeq) { viruses =>
+    <h3>@viruses.size Viruses Detected During Crawl</h3>
+    <table class="table table-condensed table-striped">
+      <thead>
+        <tr><th>Name</th><th># of Detections</th><th>Affected Hosts</th></tr>
+      </thead>
+      <tbody>
+        @for(virusRecord <- viruses) {
+          @defining(virusRecord.getOccurences.toSeq) { occurences =>
+            <tr>
+              <td>@virusRecord.getName</td>
+              <td>@occurences.foldLeft(0)(_ + _._2)</td>
+              <td>
+                @virusRecord.getOccurences.map { case (hostname, occurences) =>
+                  <a href="@routes.Hosts.getHostInfo(hostname)">@hostname</a> (@occurences)<br/>
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  }
+}

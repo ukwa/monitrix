@@ -24,6 +24,9 @@ GET     /crawl-parameters                  controllers.CrawlParameters.index()
 # Alerts
 GET     /alerts                            controllers.Alerts.index()
 
+# Viruses
+GET     /viruses                           controllers.Viruses.index()
+
 # Hosts
 GET     /hosts/:hostname                   controllers.Hosts.getHostInfo(hostname: String)
 GET     /hosts                             controllers.Hosts.searchHosts()

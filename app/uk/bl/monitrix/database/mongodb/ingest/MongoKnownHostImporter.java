@@ -133,7 +133,7 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 				virusMap.put(virusName, 1);
 			else
 				virusMap.put(virusName, value.intValue() + 1);
-			host.setContentTypeDistribution(virusMap);
+			host.setVirusStats(virusMap);
 		} else {
 			Logger.warn("Attempt to write virus stats info to unknown host: " + hostname);
 		}			

@@ -26,6 +26,7 @@ GET     /alerts                            controllers.Alerts.index()
 
 # Viruses
 GET     /viruses                           controllers.Viruses.index()
+GET     /viruses.pdf                       controllers.Viruses.pdf()
 
 # Hosts
 GET     /hosts/:hostname                   controllers.Hosts.getHostInfo(hostname: String)

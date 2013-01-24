@@ -6,8 +6,8 @@ for information about:
 * [installing monitrix](http://github.com/ukwa/monitrix/wiki/Installation)
 * [using monitrix](http://github.com/ukwa/monitrix/wiki/A-Guided-Tour-of-monitrix)
 * monitrix internals:
-  * [Technical Overview](http://github.com/ukwa/monitrix/wiki/Technical-Overview)
-  * [Source code layout](http://github.com/ukwa/monitrix/wiki/Project-Layout)
+  * [technical overview](http://github.com/ukwa/monitrix/wiki/Technical-Overview)
+  * [source code layout](http://github.com/ukwa/monitrix/wiki/Project-Layout)
   * [the monitrix JSON API](http://github.com/ukwa/monitrix/wiki/JSON-API) 
 
 ## Developers: Quick Start

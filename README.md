@@ -31,5 +31,5 @@ __Warning:__ Loading data takes time! On my machine, a 10 GB log sample currentl
 * The MongoDB admin dashboard is at  [http://localhost:28017](http://localhost:28017). Make sure
   you start MongoDB with the ``--rest`` option (when in dev mode) to enable full dashboard functionality. (Note: on my system
   ``sudo mongod --dbpath /var/lib/mongodb --rest`` works fine.)
-* Use ``mongo monitrix --eval "db.dropDatabase()"`` to drop a DB (replacing 'monitrix' with your database name, in case you changed the default.) 
+* Use ``mongo monitrix --eval "db.dropDatabase()"`` to drop the monitrix DB (replacing 'monitrix' with your database name, in case you changed the default.) 
 * MongoDB REST interface docs are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface).

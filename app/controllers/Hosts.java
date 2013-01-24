@@ -35,7 +35,7 @@ public class Hosts extends Controller {
 		if (knownHost == null) {
 			return notFound(); // TODO error handling
 		} else {
-			return ok(views.html.hosts.hostinfo.render(knownHost, db.getCrawlLog()));
+			return ok(views.html.hosts.hostinfo.render(knownHost, db.getCrawlLog(), db.getAlertLog()));
 		}
 	}
 	

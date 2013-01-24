@@ -1,6 +1,6 @@
-@(knownHost: uk.bl.monitrix.model.KnownHost, crawlLog: uk.bl.monitrix.model.CrawlLog)
+@(knownHost: uk.bl.monitrix.model.KnownHost, crawlLog: uk.bl.monitrix.model.CrawlLog, alertLog: uk.bl.monitrix.model.AlertLog)
 
-@import tags.{heritrixStatus, navbar}
+@import tags.{heritrixStatus, navbar, alertTag}
 
 @main("Monitrix - Host Information") {
   @navbar("")
@@ -110,7 +110,11 @@
       }
       <tr>
         <td class="monitrix-hostinfo-label">Alerts</td>
-        <td colspan="3"></td>
+        <td colspan="3">
+          @for(alertType <- alertLog.getAlertTypesForHost(knownHost.getHostname)) {
+            @alertTag(alertType)          
+          }
+        </td>
       </tr>
     </table>
   

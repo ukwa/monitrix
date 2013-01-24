@@ -17,12 +17,14 @@ The application will be at [http://localhost:9000](http://localhost:9000).
 
 To __generate an Eclipse project__, type ``play eclipsify``.
 
-monitrix doesn't load data into MongoDB by itself (yet). At the moment, you need to use the ``uk.bl.monitrix.util.BatchLogProcessor``
-Java utility, located in the /test folder of the project. Edit the path to the Heritrix log you want to load, and start the application 
-(e.g. from your IDE). 
+## Getting Data into monitrix
+
+monitrix doesn't load by itself (yet). At the moment, you need to load data 'manually', using the ``uk.bl.monitrix.util.BatchLogProcessor``
+Java utility. The utility is located in the /test folder of the project. Edit the path to the Heritrix log you want to load,
+and start the application (e.g. from your IDE). 
 
 __Warning:__ Loading data takes time! On my machine, a 10 GB log sample currently takes about 50 minutes to process!
-    
+
 ## MongoDB Cheat Sheet
 
 * Use the ``mongod`` command to start MongoDB (hint: ``mongod --help``)

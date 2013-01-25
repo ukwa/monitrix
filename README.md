@@ -19,7 +19,7 @@ To __generate an Eclipse project__, type ``play eclipsify``.
 
 ## Getting Data into monitrix
 
-monitrix doesn't load by itself (yet). At the moment, you need to load data 'manually', using the Java utility 
+monitrix doesn't load data by itself (yet). At the moment, you need to load data 'manually', using the Java utility 
 ``uk.bl.monitrix.util.BatchLogProcessor`` that's located in the /test folder of the project. Edit the path to
 the Heritrix log you want to load, and start the application (e.g. from your IDE). 
 

@@ -29,6 +29,15 @@
         <td colspan="2">@uk.bl.monitrix.NumberFormat.formatDuration(knownHost.getLastAccess - knownHost.getFirstAccess)</td>
         <td style="width:50%"/>
       </tr>
+      <tr>
+        <td class="monitrix-hostinfo-label">URL History</td>
+        <td colspan="2">
+          <div class="graph-thumb-container">
+            <div class="graph-thumb graph-tumb-loading" id="graph-urls"></div>
+          </div>
+        </td>
+        <td style="width:50%" />
+      </tr>
     
       <tr>
         <td/>
@@ -159,5 +168,52 @@
     	             });
       }
     </script>
+    <script>
+    function loadGraph(url, divId, name, color, opt_show_hover_detail, opt_total_callback) {
+      $.getJSON(url, function(data) {
+        if (data) {
+          var total = 0;
+          var graph = new Rickshaw.Graph({
+            element: document.querySelector('#' + divId), 
+            renderer: 'line',
+            series: [{
+              color: color,
+              data: data,
+              name: name
+            }]
+          });
+          
+          new Rickshaw.Graph.Axis.Time({ graph: graph });
+          
+          new Rickshaw.Graph.Axis.Y({
+              graph: graph,
+              tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+              orientation:'left',
+              element: document.getElementById(divId + '-axis')
+          });
+          
+          if (opt_show_hover_detail) {
+            new Rickshaw.Graph.HoverDetail({
+              graph: graph,
+              // yFormatter: function(y) { return (y / (1024 * 1024 * 1024)).toPrecision(2) + ' GB'; }
+            });
+          }
+              
+          $('#' + divId).removeClass('graph-tumb-loading');
+          graph.render();
+          
+          if (opt_total_callback) {
+            var total = 0;
+            $.each(data, function(idx, value) {
+              total += value.y;
+            });      	  
+            opt_total_callback(total);
+          }
+        }
+      });    	
+    }
+        
+    loadGraph('/api/hosts/@knownHost.getHostname()/urls-crawled?maxpoints=100', 'graph-urls', 'Completed Hosts', '#c05020', false);
+  </script>
   }
 }

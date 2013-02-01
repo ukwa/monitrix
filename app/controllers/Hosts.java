@@ -5,9 +5,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.codehaus.jackson.node.ObjectNode;
+
+import akka.util.Duration;
+
 import controllers.mapping.TimeseriesValueMapper;
 
 import play.Logger;
+import play.cache.Cache;
+import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
@@ -24,7 +30,7 @@ public class Hosts extends AbstractController {
 	private static DBConnector db = Global.getBackend();
 	
 	public static Result searchHosts() {
-		String query = getQueryParam(QUERY);
+		String query = getStringParam(QUERY);
 		if (query == null) {
 			// TODO error handling
 			return notFound();
@@ -48,33 +54,59 @@ public class Hosts extends AbstractController {
 		}
 	}
 	
-	public static Result getURLHistoryForHost(String hostname) {
-		int total = (int) db.getCrawlLog().countEntriesForHost(hostname);
-		Iterator<CrawlLogEntry> iterator = db.getCrawlLog().getEntriesForHost(hostname);
-		Collection<CrawlLogEntry> entries = new ArrayDeque<CrawlLogEntry>(total);
+	public static Result getURLHistoryForHost(final String hostname) {
+		// This computation may take LONG. We'll run it in the background and store status (and result) in the Play cache
+		final int maxpoints = getIntParam("maxpoints", 100);
+		URLHistoryComputation progress = (URLHistoryComputation) Cache.get(hostname);
+		
+		if (progress == null) {
+			final URLHistoryComputation cachedProgress = new URLHistoryComputation();
+			Cache.set(hostname, cachedProgress);
+			
+			// Start async computation
+			Akka.system().scheduler().scheduleOnce(Duration.fromNanos(0), new Runnable() {
+				@Override
+				public void run() {
+					int total = (int) db.getCrawlLog().countEntriesForHost(hostname);
+					Iterator<CrawlLogEntry> iterator = db.getCrawlLog().getEntriesForHost(hostname);
+					Collection<CrawlLogEntry> entries = new ArrayDeque<CrawlLogEntry>(total);
 
-		int tenPercent = total / 10;
-		int ctr = 0;
-		while (iterator.hasNext()) {
-			entries.add(iterator.next());
-			ctr++;
-			if (tenPercent > 0 && ctr % tenPercent == 0)
-				Logger.info(ctr / tenPercent + "0% fetched from DB");
+					int tenPercent = total / 10;
+					int ctr = 0;
+					while (iterator.hasNext()) {
+						entries.add(iterator.next());
+						ctr++;
+						if (tenPercent > 0 && ctr % tenPercent == 0) {
+							cachedProgress.progress = (ctr / tenPercent) * 10;
+							Logger.info(ctr / tenPercent + "0% fetched from DB");
+						}
+					}
+					
+					List<TimeseriesValue> result = LogAnalytics.getCrawledURLsHistory(entries, maxpoints);
+					cachedProgress.result = result;
+				}
+			});
+			
+			progress = cachedProgress;
+		} else {
+			if (progress.result != null) {
+				List<TimeseriesValue> timeseries = progress.result;
+				Cache.set(hostname, null);
+				return ok(Json.toJson(TimeseriesValueMapper.map(timeseries)));
+			}
 		}
 		
-		List<TimeseriesValue> timeseries = LogAnalytics.getCrawledURLsHistory(entries, getIntParam("maxpoints", 100));
-		return ok(Json.toJson(TimeseriesValueMapper.map(timeseries)));
+		ObjectNode json = Json.newObject();
+		json.put("progress", progress.progress);
+		return ok(json);
 	}
 	
-	private static String getQueryParam(String key) {
-		String[] value = request().queryString().get(key);
-		if (value == null)
-			return null;
+	private static class URLHistoryComputation {
 		
-		if (value.length == 0)
-			return null;
+		int progress = 0;
 		
-		return value[0];
+		List<TimeseriesValue> result = null;
+			
 	}
 
 }

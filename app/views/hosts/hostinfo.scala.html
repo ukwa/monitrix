@@ -171,7 +171,14 @@
     <script>
     function loadGraph(url, divId, name, color, opt_show_hover_detail, opt_total_callback) {
       $.getJSON(url, function(data) {
-        if (data) {
+        if (data.hasOwnProperty('progress')) {
+         $('#' + divId).html(data.progress + '%');
+         
+         setTimeout(function() {
+             loadGraph(url, divId, name, color, opt_show_hover_detail, opt_total_callback);        	 
+         }, 1000);
+        } else {
+          $('#' + divId).html('');
           var total = 0;
           var graph = new Rickshaw.Graph({
             element: document.querySelector('#' + divId), 

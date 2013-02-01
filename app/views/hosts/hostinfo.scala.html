@@ -172,7 +172,7 @@
     function loadGraph(url, divId, name, color, opt_show_hover_detail, opt_total_callback) {
       $.getJSON(url, function(data) {
         if (data.hasOwnProperty('progress')) {
-         $('#' + divId).html(data.progress + '%');
+         $('#' + divId).html('<span class="load-progress">' + data.progress + '%</span>');
          
          setTimeout(function() {
              loadGraph(url, divId, name, color, opt_show_hover_detail, opt_total_callback);        	 

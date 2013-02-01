@@ -119,6 +119,13 @@ html, body {
   border-width:0px 1px 0px 0px;
   border-style: solid;
   border-color: #ccc;
+  text-align:center;
+}
+
+.graph-thumb .load-progress {
+	display:block;
+	padding-top:40px;
+	font-weight:bold;
 }
 
 .monitrix-graph-thumb-fullscreen {

@@ -19,8 +19,16 @@ public class TimeseriesValue implements Comparable<TimeseriesValue> {
 		return timestamp;
 	}
 	
+	void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+	
 	public long getValue() {
 		return value;
+	}
+	
+	void setValue(long value) {
+		this.value = value;
 	}
 	
 	@Override

@@ -1,6 +1,7 @@
 package uk.bl.monitrix.analytics;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -229,6 +230,45 @@ public class LogAnalytics {
 		
 		Logger.info("Computed virus distribution - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return pieChart;
+	}
+	
+	public static List<TimeseriesValue> getCrawledURLsHistory(Collection<CrawlLogEntry> log, int maxDatapoints) {
+		Logger.info("Computing URL history timeseries for " + log.size() + " log entries");
+		
+		// Get log start and end time
+		long logStartTime = Long.MAX_VALUE;
+		long logEndTime = 0;
+		for (CrawlLogEntry entry : log) {
+			long timestamp = entry.getTimestamp().getTime();
+			
+			if (timestamp > logEndTime)
+				logEndTime = timestamp;
+			
+			if (timestamp < logStartTime)
+				logStartTime = timestamp;
+		}
+		
+		// Compute timeseries resolution (= # of millis in one data point bucket)
+		long resolution = (logEndTime - logStartTime) / maxDatapoints;
+		
+		// (timeslot -> # of URLs)
+		Map<Long, TimeseriesValue> graph = new HashMap<Long, TimeseriesValue>(maxDatapoints);
+		
+		for (CrawlLogEntry entry : log) {
+			long timeslot = entry.getTimestamp().getTime() / resolution;
+			
+			TimeseriesValue urlCount = graph.get(timeslot);
+			if (urlCount == null)
+				graph.put(timeslot, new TimeseriesValue(timeslot * resolution, 1));
+			else
+				urlCount.setValue(urlCount.getValue() + 1);
+		}
+				
+		List<TimeseriesValue> timeseries = new ArrayList<TimeseriesValue>(graph.values());
+		Collections.sort(timeseries);
+		
+		Logger.info("Done.");
+		return timeseries;
 	}
 
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import controllers.mapping.TimeseriesValueMapper;
 
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
 import uk.bl.monitrix.analytics.CrawlStatsAnalytics;
@@ -13,7 +12,7 @@ import uk.bl.monitrix.analytics.TimeseriesValue;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
 
-public class Timeline extends Controller {
+public class Timeline extends AbstractController {
 
 	private static CrawlLog log = Global.getBackend().getCrawlLog();
 	
@@ -44,22 +43,7 @@ public class Timeline extends Controller {
 	}
 	
 	private static int getMaxPoints() {
-		String[] param = request().queryString().get("maxpoints");
-		if (param == null)
-			return 100;
-		
-		if (param.length < 1)
-			return 100;
-		
-		try {
-			int maxPoints = Integer.parseInt(param[0]);
-			if (maxPoints < 100)
-				maxPoints = 100;
-			
-			return maxPoints;
-		} catch (Throwable t) {
-			return 100;
-		}
+		return getIntParam("maxpoints", 100);
 	}
 	
 }

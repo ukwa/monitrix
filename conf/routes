@@ -31,6 +31,7 @@ GET     /viruses.pdf                       controllers.Viruses.pdf()
 # Hosts
 GET     /hosts/:hostname                   controllers.Hosts.getHostInfo(hostname: String)
 GET     /hosts                             controllers.Hosts.searchHosts()
+GET     /api/hosts/:hostname/urls-crawled  controllers.Hosts.getURLHistoryForHost(hostname: String)
 
 # Admin
 GET     /admin                             controllers.Admin.index()

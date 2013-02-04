@@ -6,7 +6,7 @@ import sbtbuildinfo.Plugin._
 object ApplicationBuild extends Build {
 
     val appName         = "monitrix"
-    val appVersion      = "1.0-SNAPSHOT"
+    val appVersion      = "0.1"
 
     val appDependencies = Seq(
       "org.mongodb" % "mongo-java-driver" % "2.9.1",
@@ -28,6 +28,7 @@ object ApplicationBuild extends Build {
           version,
           scalaVersion,
           sbtVersion,
+          resolvers,
           libraryDependencies in Compile),
       buildInfoPackage := "uk.bl.monitrix"
     )

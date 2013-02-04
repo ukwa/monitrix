@@ -4,7 +4,29 @@
   @navbar("/about")
 }{
   @defining(uk.bl.monitrix.BuildInfo) { info =>
-    <h2>Library Dependencies</h2>
+    <h2>Version Info</h2>
+    <table class="table">
+      <tr><td class="monitrix-hostinfo-label">monitrix Version:</td><td>@info.version</td><td style="width:80%" /></tr>
+      <tr><td class="monitrix-hostinfo-label">Java Version:</td><td>@System.getProperty("java.version")</td><td style="width:80%" /></tr>
+      <tr><td class="monitrix-hostinfo-label">Scala Version:</td><td>@info.scalaVersion</td><td style="width:80%" /></tr>
+      <tr><td class="monitrix-hostinfo-label">SBT Version:</td><td>@info.sbtVersion</td><td style="width:80%" /></tr>
+    </table>
+    
+    <h3>Managed Dependency Repositories</h3>
+    <table class="table">
+      <thead>
+        <tr><th>Repository</th><th>URL</th></tr>
+      </thead>
+      <tbody>
+        @for(resolver <- info.resolvers) {
+          @defining(resolver.split(": ")) { repo =>
+            <tr><td>@repo(0)</td><td>@repo(1)</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+    
+    <h3>Library Dependencies</h3>
     <table class="table">
       <thead>
         <tr><th>Group ID</th><th>Artifact ID</th><th>Version</th><th>Scope</th></tr>

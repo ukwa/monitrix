@@ -1,11 +1,9 @@
 package uk.bl.monitrix.database;
 
-import java.util.List;
-
 import uk.bl.monitrix.model.AlertLog;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
-import uk.bl.monitrix.model.KnownHost;
+import uk.bl.monitrix.model.KnownHostList;
 import uk.bl.monitrix.model.VirusLog;
 
 /**
@@ -33,19 +31,10 @@ public interface DBConnector {
 	public AlertLog getAlertLog();
 
 	/**
-	 * Returns the DB-backed known host record.
-	 * @param hostname the hostname
-	 * @return the host record
+	 * Returns the DB-backed known host list.
+	 * @return the known host list
 	 */
-	public KnownHost getKnownHost(String hostname);
-	
-	/**
-	 * Searches the known hosts list. Supported types of queries depend
-	 * on the type of backend!
-	 * @param query the query
-	 * @return list of host names
-	 */
-	public List<String> searchHosts(String query);
+	public KnownHostList getKnownHostList();
 	
 	/**
 	 * Returns the DB-backed virus log.

@@ -35,13 +35,22 @@ public class MongoKnownHost extends KnownHost {
 
 	@Override
 	public String getHostname() {
-		return dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME).toString();
+		return (String) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME);
 	}
 	
 	public void setHostname(String hostname) {
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname);
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED,
 				Arrays.asList(KnownHost.tokenizeName(hostname)));
+	}
+	
+	@Override
+	public String getTopLevelDomain() {
+		return (String) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_TLD);
+	}
+	
+	public void setTopLevelDomain(String tld) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_TLD, tld);
 	}
 	
 	@Override

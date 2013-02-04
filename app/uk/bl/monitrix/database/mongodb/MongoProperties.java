@@ -49,6 +49,7 @@ public class MongoProperties {
 	/** Database field keys (Known Hosts collection) **/
 	public static final String FIELD_KNOWN_HOSTS_HOSTNAME = "host_name";
 	public static final String FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED = "host_name_tokenized";
+	public static final String FIELD_KNOWN_HOSTS_TLD = "tld";
 	public static final String FIELD_KNOWN_HOSTS_SUBDOMAINS = "subdomains";
 	public static final String FIELD_KNOWN_HOSTS_SUBDOMAINS_TOKENIZED = "subdomains_tokenized";
 	public static final String FIELD_KNOWN_HOSTS_FIRST_ACCESS = "first_access";

@@ -13,6 +13,7 @@ import uk.bl.monitrix.model.AlertLog;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
 import uk.bl.monitrix.model.CrawlStatsUnit;
+import uk.bl.monitrix.model.KnownHostList;
 
 public class Home extends Controller {
 	
@@ -22,10 +23,12 @@ public class Home extends Controller {
 	
 	private static CrawlStats stats = backend.getCrawlStats();
 	
+	private static KnownHostList knownHosts = backend.getKnownHostList();
+	
 	private static AlertLog alerts = backend.getAlertLog();
 	
 	public static Result index() {
-		return ok(views.html.home.index.render(log, stats, alerts));
+		return ok(views.html.home.index.render(log, stats, knownHosts, alerts));
 	}
 	
 	// TODO not sure where to put this API method...

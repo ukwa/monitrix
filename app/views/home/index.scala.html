@@ -1,4 +1,4 @@
-@(log: uk.bl.monitrix.model.CrawlLog, stats: uk.bl.monitrix.model.CrawlStats, alerts: uk.bl.monitrix.model.AlertLog)
+@(log: uk.bl.monitrix.model.CrawlLog, stats: uk.bl.monitrix.model.CrawlStats, knownHosts: uk.bl.monitrix.model.KnownHostList, alerts: uk.bl.monitrix.model.AlertLog)
 
 @import tags.{navbar, alertTag}
 
@@ -38,6 +38,13 @@
      </div>      
       
       <div class="span7 offset1">
+        <h5>Hosts by Top Level Domain</h5>
+        <table class="table table-condensed">
+          @for(tld <- knownHosts.getTopLevelDomains) {
+            <tr><td>.@tld</td><td>@knownHosts.countForTopLevelDomain(tld)</td></tr>
+          }
+        </table>
+        
         <h5>Recent Alerts (out of @alerts.countAll alerts total) <a class="pull-right" style="font-weight:normal" href="@routes.Alerts.index">Details »</a></h5>
         <table class="table table-condensed">
           @for(alert <- alerts.getMostRecent(10)) {

@@ -17,6 +17,12 @@ public abstract class KnownHost {
 	public abstract String getHostname();
 	
 	/**
+	 * The top level domain (e.g. "com" or "uk")
+	 * @return the top level domain
+	 */
+	public abstract String getTopLevelDomain();
+	
+	/**
 	 * The list of subdomains encountered during the crawl.
 	 * @return the subdomains
 	 */

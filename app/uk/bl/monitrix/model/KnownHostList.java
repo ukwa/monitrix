@@ -40,4 +40,17 @@ public interface KnownHostList {
 	 */
 	public List<KnownHost> getCrawledHosts(long since);
 	
+	/**
+	 * Counts the number of hosts registered under a specific top-level domain.
+	 * @param tld the top level domain
+	 * @return
+	 */
+	public long countForTopLevelDomain(String tld);
+	
+	/**
+	 * Returns the top-level domains encountered during the crawl.
+	 * @return the list of top-level domains
+	 */
+	public List<String> getTopLevelDomains();
+	
 }

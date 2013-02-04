@@ -37,9 +37,10 @@ public class MongoKnownHostList implements KnownHostList {
 	public MongoKnownHostList(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
 		
-		// Known Hosts collection is indexed by hostname, tokenized host name and last-visit timestamp
+		// Known Hosts collection is indexed by hostname, tokenized host name, top-level domain and last-visit timestamp
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, 1));
 	}
 
@@ -96,6 +97,17 @@ public class MongoKnownHostList implements KnownHostList {
 			hostnames.add(new MongoKnownHost(cursor.next()));
 		
 		return hostnames;
+	}
+
+	@Override
+	public long countForTopLevelDomain(String tld) {
+		return collection.count(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, tld));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<String> getTopLevelDomains() {
+		return (List<String>) collection.distinct(MongoProperties.FIELD_KNOWN_HOSTS_TLD);
 	}
 
 }

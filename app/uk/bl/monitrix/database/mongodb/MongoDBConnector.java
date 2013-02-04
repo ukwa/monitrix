@@ -1,7 +1,6 @@
 package uk.bl.monitrix.database.mongodb;
 
 import java.io.IOException;
-import java.util.List;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
@@ -15,7 +14,6 @@ import uk.bl.monitrix.database.mongodb.model.MongoVirusLog;
 import uk.bl.monitrix.model.AlertLog;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
-import uk.bl.monitrix.model.KnownHost;
 import uk.bl.monitrix.model.KnownHostList;
 import uk.bl.monitrix.model.VirusLog;
 
@@ -86,13 +84,8 @@ public class MongoDBConnector implements DBConnector {
 	}
 
 	@Override
-	public KnownHost getKnownHost(String hostname) {
-		return knownHosts.getKnownHost(hostname);
-	}
-	
-	@Override
-	public List<String> searchHosts(String query) {
-		return knownHosts.searchHost(query);
+	public KnownHostList getKnownHostList() {
+		return knownHosts;
 	}
 
 	@Override

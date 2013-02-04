@@ -36,16 +36,16 @@ public class Hosts extends AbstractController {
 			return notFound();
 		} else {
 			long startTime = System.currentTimeMillis();
-			List<String> hosts = db.searchHosts(query);
+			List<String> hosts = db.getKnownHostList().searchHost(query);
 			if (hosts.size() == 1)
 				return redirect(routes.Hosts.getHostInfo(hosts.get(0)));
 			else
-				return ok(views.html.hosts.searchResult.render(query, db.searchHosts(query), (System.currentTimeMillis() - startTime), db.getCrawlLog()));
+				return ok(views.html.hosts.searchResult.render(query, db.getKnownHostList().searchHost(query), (System.currentTimeMillis() - startTime), db.getCrawlLog()));
 		}
 	}
 	
 	public static Result getHostInfo(String hostname) {
-		KnownHost knownHost = db.getKnownHost(hostname);
+		KnownHost knownHost = db.getKnownHostList().getKnownHost(hostname);
 		
 		if (knownHost == null) {
 			return notFound(); // TODO error handling

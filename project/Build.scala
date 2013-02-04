@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import PlayProject._
+import sbtbuildinfo.Plugin._
 
 object ApplicationBuild extends Build {
 
@@ -15,8 +16,20 @@ object ApplicationBuild extends Build {
       "net.sf.jasperreports" % "jasperreports" % "4.1.2"
     )
 
-    val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
-      // Add your own project settings here      
+    // We're using the SBT BuildInfo plugin to make library version numbers available to the view
+    // https://github.com/sbt/sbt-buildinfo
+    
+    val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA,
+      settings = Defaults.defaultSettings ++ buildInfoSettings)
+    .settings(
+      sourceGenerators in Compile <+= buildInfo,
+      buildInfoKeys := Seq[BuildInfoKey](
+          name,
+          version,
+          scalaVersion,
+          sbtVersion,
+          libraryDependencies in Compile),
+      buildInfoPackage := "uk.bl.monitrix"
     )
 
 }

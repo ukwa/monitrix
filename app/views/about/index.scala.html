@@ -1,0 +1,33 @@
+@import tags.navbar
+
+@main("Monitrix - About") {
+  @navbar("/about")
+}{
+  @defining(uk.bl.monitrix.BuildInfo) { info =>
+    <h2>Library Dependencies</h2>
+    <table class="table">
+      <thead>
+        <tr><th>Group ID</th><th>Artifact ID</th><th>Version</th><th>Scope</th></tr>
+      </thead>
+      <tbody>
+        @for(sbt <- info.libraryDependencies) {
+          @defining(sbt.split(':')) { dependency =>
+            <tr>
+            @if(dependency.size > 2) {
+              <td>@dependency(0)</td>
+              <td>@dependency(1)</td>
+              <td>@dependency(2)</td>
+            }
+            
+            @if(dependency.size > 3) {
+              <td>@dependency(3)</td>
+            } else {
+              <td></td>
+            }
+          }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+}

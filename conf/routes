@@ -28,6 +28,9 @@ GET     /alerts                            controllers.Alerts.index()
 GET     /viruses                           controllers.Viruses.index()
 GET     /viruses.pdf                       controllers.Viruses.pdf()
 
+# About
+GET     /about                             controllers.About.index()
+
 # Hosts
 GET     /hosts/:hostname                   controllers.Hosts.getHostInfo(hostname: String)
 GET     /hosts                             controllers.Hosts.searchHosts()

@@ -1,7 +1,11 @@
 package uk.bl.monitrix.ingest;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.Callable;
 
 import uk.bl.monitrix.database.DBBatchImporter;
@@ -25,6 +29,10 @@ public class IngestActor extends UntypedActor {
 	
 	private ActorSystem system;
 	
+	private IncrementalLogfileReader logReader;
+	
+	private long linesInLogfile;
+	
 	private IngestorStatus status = new IngestorStatus(IngestorStatus.Phase.CATCHING_UP);
 	
 	private boolean keepRunning = true;
@@ -36,35 +44,38 @@ public class IngestActor extends UntypedActor {
 	}
 	
 	@Override
+	public void preStart() {
+		try {
+			this.logReader = new IncrementalLogfileReader(heritrixLog.getAbsolutePath());
+			this.linesInLogfile = countLines(heritrixLog);
+		} catch (IOException e) {
+			// Should never happen
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@Override
 	public void onReceive(Object message) throws Exception {
 		if (message.equals(Messages.START)) {
 			// Start the async ingest
 			future(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
-					/* Count lines first, so that we can track progress
-					Logger.info("Ingesting log file: " + heritrixLog.getAbsolutePath());
-					long startTime = System.currentTimeMillis();
-					int totalLines = countLines(heritrixLog);
-					Logger.info(totalLines + " lines (counting took " + (System.currentTimeMillis() - startTime) + "ms)");
-					*/
-					
-					// Ingest until the end of the file					
-					IncrementalLogfileReader reader = new IncrementalLogfileReader(heritrixLog.getAbsolutePath());
-					
 					while (keepRunning) {
-						System.out.println("Next batch");
 						status.phase = IngestorStatus.Phase.CATCHING_UP;
-						importer.insert(reader.newIterator());						
+						importer.insert(logReader.newIterator());						
 						status.phase = IngestorStatus.Phase.TRACKING;
+						status.progress = 0;
 						Thread.sleep(15000);
 					}
-					
 					return null;
-					
 				}
 			}, system.dispatcher());
 		} else if (message.equals(Messages.GET_STATUS)) {
+			// While in CATCHING_UP phase, update progress
+			if (status.phase.equals(IngestorStatus.Phase.CATCHING_UP))
+				status.progress = (int) ((100 * logReader.getNumberOfLinesRead()) / linesInLogfile);
+				
 			getSender().tell(status);
 		} else if (message.equals(Messages.STOP)) {
 			this.keepRunning = false;
@@ -80,7 +91,7 @@ public class IngestActor extends UntypedActor {
 	 * @param file the file
 	 * @return the number of lines in the file
 	 * @throws IOException if anything goes wrong
-	 *
+	 */
 	private static int countLines(File file) throws IOException {
 		InputStream is = new BufferedInputStream(new FileInputStream(file));
 		
@@ -101,6 +112,5 @@ public class IngestActor extends UntypedActor {
 	        is.close();
 	    }
 	}
-	*/
 
 }

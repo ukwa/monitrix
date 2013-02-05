@@ -10,7 +10,7 @@ public class DummyBatchImporter implements DBBatchImporter {
 	@Override
 	public void insert(Iterator<LogFileEntry> iterator) {
 		while (iterator.hasNext())
-			System.out.println(iterator.next());
+			iterator.next();
 	}
 
 }

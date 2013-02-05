@@ -14,6 +14,8 @@ import java.util.Iterator;
 public class IncrementalLogfileReader {
 	
 	private BufferedReader reader;
+	
+	private long linesRead = 0;
 
 	public IncrementalLogfileReader(String filename) throws FileNotFoundException {
 		File log = new File(filename);
@@ -39,6 +41,10 @@ public class IncrementalLogfileReader {
 		}
 	}
 	
+	public long getNumberOfLinesRead() {
+		return linesRead;
+	}
+	
 	private class FollowingLogIterator implements Iterator<LogFileEntry> {
 		
 		private BufferedReader reader;
@@ -60,6 +66,7 @@ public class IncrementalLogfileReader {
 			try {
 				LogFileEntry next = new LogFileEntry(nextLine);
 				nextLine = reader.readLine();
+				linesRead++;
 				return next;
 			} catch (IOException e) {
 				// Should never happen as we've already checked that the file exists

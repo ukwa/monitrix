@@ -51,6 +51,15 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	public DBObject getBackingDBO() {
 		return dbo;
 	}
+	
+	@Override
+	public String getLogPath() {
+		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH);
+	}
+	
+	public void setLogPath(String logPath) {
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH, logPath);
+	}
 
 	@Override
 	public Date getTimestamp() {

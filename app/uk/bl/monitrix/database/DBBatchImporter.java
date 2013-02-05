@@ -6,6 +6,6 @@ import uk.bl.monitrix.heritrix.LogFileEntry;
 
 public interface DBBatchImporter {
 	
-	public void insert(Iterator<LogFileEntry> iterator);
+	public void insert(String logPath, Iterator<LogFileEntry> iterator);
 
 }

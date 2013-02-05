@@ -13,6 +13,8 @@ import java.util.Iterator;
  */
 public class IncrementalLogfileReader {
 	
+	private String logPath;
+	
 	private BufferedReader reader;
 	
 	private long linesRead = 0;
@@ -22,6 +24,7 @@ public class IncrementalLogfileReader {
 		if (!log.exists())
 			throw new FileNotFoundException(filename + " not found");
 		
+		this.logPath = log.getAbsolutePath();
 		this.reader = new BufferedReader(new FileReader(log));
 	}
 
@@ -64,7 +67,7 @@ public class IncrementalLogfileReader {
 		@Override
 		public LogFileEntry next() {
 			try {
-				LogFileEntry next = new LogFileEntry(nextLine);
+				LogFileEntry next = new LogFileEntry(logPath, nextLine);
 				nextLine = reader.readLine();
 				linesRead++;
 				return next;

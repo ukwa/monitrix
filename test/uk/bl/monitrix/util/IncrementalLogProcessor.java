@@ -15,7 +15,7 @@ public class IncrementalLogProcessor {
 		
 		while (true) {
 			System.out.println("Loading next batch");
-			mongo.insert(reader.newIterator());
+			mongo.insert(LOG_FILE, reader.newIterator());
 			System.out.println("Done - waiting 15s");
 			Thread.sleep(15000);
 		}

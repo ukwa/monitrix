@@ -58,7 +58,7 @@ public class MongoBatchImporter implements DBBatchImporter {
 	}
 	
 	@Override
-	public void insert(Iterator<LogFileEntry> iterator) {
+	public void insert(String logPath, Iterator<LogFileEntry> iterator) {
 		Logger.info("Writing log to MongoDB");
 		long start = System.currentTimeMillis();
 		
@@ -80,6 +80,7 @@ public class MongoBatchImporter implements DBBatchImporter {
 
 				// Assemble MongoDB entity
 				MongoCrawlLogEntry dbo = new MongoCrawlLogEntry(new BasicDBObject());
+				dbo.setLogPath(logPath);
 				dbo.setTimestamp(timestamp);
 				dbo.setHost(next.getHost());
 				dbo.setSubdomain(next.getSubdomain());

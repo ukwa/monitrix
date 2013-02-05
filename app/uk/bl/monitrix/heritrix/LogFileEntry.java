@@ -35,6 +35,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	private static DateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	
+	private String logPath;
+	
 	private String line;
 	
 	private List<String> fields = new ArrayList<String>();
@@ -45,7 +47,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	private List<Alert> alerts = new ArrayList<Alert>();
 	
-	public LogFileEntry(String line) {
+	public LogFileEntry(String logPath, String line) {
+		this.logPath = logPath;
 		this.line = line;
 
 		String[] split = line.split(" ");
@@ -111,6 +114,11 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	public List<Alert> getAlerts() {
 		return alerts;
+	}
+	
+	@Override
+	public String getLogPath() {
+		return logPath;
 	}
 	
 	@Override

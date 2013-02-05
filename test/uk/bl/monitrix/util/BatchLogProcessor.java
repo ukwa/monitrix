@@ -20,7 +20,7 @@ public class BatchLogProcessor {
 	public static void main(String[] args) throws IOException {
 		MongoBatchImporter mongo = new MongoBatchImporter("localhost", "monitrix", 27017);
 		SimpleLogfileReader reader = new SimpleLogfileReader(LOG_FILE);
-		mongo.insert(reader.iterator());
+		mongo.insert(LOG_FILE, reader.iterator());
 	}
 
 }

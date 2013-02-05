@@ -31,6 +31,7 @@ public class MongoProperties {
 	public static final String FIELD_ALERT_LOG_DESCRIPTION = "alert_description";
 
 	/** Database field keys (Crawl Log collection) **/
+	public static final String FIELD_CRAWL_LOG_LOG_PATH = "log_path";
 	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "timestamp";
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	public static final String FIELD_CRAWL_LOG_HOST = "host";

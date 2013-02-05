@@ -36,7 +36,7 @@ public class Global extends GlobalSettings {
 			// TODO attach MongoDB rather than the dummy! 
 			ingestorPool = new IngestorPool(new DBBatchImporter() {
 				@Override
-				public void insert(Iterator<LogFileEntry> iterator) {
+				public void insert(String logPath, Iterator<LogFileEntry> iterator) {
 					while (iterator.hasNext())
 						iterator.next();
 				}

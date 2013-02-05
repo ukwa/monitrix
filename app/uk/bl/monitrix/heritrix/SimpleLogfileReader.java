@@ -36,6 +36,8 @@ public class SimpleLogfileReader  {
 	
 	private class LogIterator implements Iterator<LogFileEntry> {
 		
+		private String logPath;
+		
 		private FileInputStream is;
 		
 		private BufferedReader reader;
@@ -43,6 +45,7 @@ public class SimpleLogfileReader  {
 		private String nextLine;
 		
 		LogIterator(File log) throws IOException {
+			logPath = log.getAbsolutePath();
 			is = new FileInputStream(log);
 			reader = new BufferedReader(new InputStreamReader(is));
 			nextLine = reader.readLine();
@@ -56,7 +59,7 @@ public class SimpleLogfileReader  {
 		@Override
 		public LogFileEntry next() {
 			try {
-				LogFileEntry next = new LogFileEntry(nextLine);
+				LogFileEntry next = new LogFileEntry(logPath, nextLine);
 				nextLine = reader.readLine();
 				if (nextLine == null)
 					is.close();

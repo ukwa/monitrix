@@ -10,6 +10,12 @@ import java.util.Date;
 public abstract class CrawlLogEntry {
 	
 	/**
+	 * The file path of the log this entry is from.
+	 * @return the log file path
+	 */
+	public abstract String getLogPath();
+	
+	/**
 	 * Column #1 - ISO timestamp.
 	 * @return the crawl time
 	 */

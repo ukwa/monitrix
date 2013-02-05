@@ -8,7 +8,7 @@ import uk.bl.monitrix.heritrix.LogFileEntry;
 public class DummyBatchImporter implements DBBatchImporter {
 
 	@Override
-	public void insert(Iterator<LogFileEntry> iterator) {
+	public void insert(String logPath, Iterator<LogFileEntry> iterator) {
 		while (iterator.hasNext())
 			iterator.next();
 	}

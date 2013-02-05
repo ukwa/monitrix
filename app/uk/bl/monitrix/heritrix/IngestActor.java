@@ -62,7 +62,7 @@ public class IngestActor extends UntypedActor {
 				public Void call() throws Exception {
 					while (keepRunning) {
 						status.phase = IngestorStatus.Phase.CATCHING_UP;
-						importer.insert(logReader.newIterator());						
+						importer.insert(heritrixLog.getAbsolutePath(), logReader.newIterator());						
 						status.phase = IngestorStatus.Phase.TRACKING;
 						status.progress = 0;
 						Thread.sleep(15000);

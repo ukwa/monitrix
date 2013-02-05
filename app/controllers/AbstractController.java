@@ -1,10 +1,12 @@
 package controllers;
 
+import java.util.Map;
+
 import play.mvc.Controller;
 
 public class AbstractController extends Controller {
 	
-	protected static String getStringParam(String name) {
+	protected static String getQueryParam(String name) {
 		String[] value = request().queryString().get(name);
 		if (value == null)
 			return null;
@@ -15,7 +17,7 @@ public class AbstractController extends Controller {
 		return value[0];
 	}
 	
-	protected static int getIntParam(String name, int defaultValue) {
+	protected static int getQueryParamAsInt(String name, int defaultValue) {
 		String[] param = request().queryString().get(name);
 		if (param == null)
 			return defaultValue;
@@ -28,6 +30,21 @@ public class AbstractController extends Controller {
 		} catch (Throwable t) {
 			return defaultValue;
 		}
+	}
+	
+	protected static String getFormParam(String name) {
+		Map<String, String[]> formParams = request().body().asFormUrlEncoded();
+		if (formParams == null)
+			return null;
+		
+		String[] values = formParams.get(name);
+		if (values == null)
+			return null;
+		
+		if (values.length < 1)
+			return null;
+		
+		return values[0];
 	}
 	
 }

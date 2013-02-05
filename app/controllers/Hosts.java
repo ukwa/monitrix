@@ -30,7 +30,7 @@ public class Hosts extends AbstractController {
 	private static DBConnector db = Global.getBackend();
 	
 	public static Result searchHosts() {
-		String query = getStringParam(QUERY);
+		String query = getQueryParam(QUERY);
 		if (query == null) {
 			// TODO error handling
 			return notFound();
@@ -56,7 +56,7 @@ public class Hosts extends AbstractController {
 	
 	public static Result getURLHistoryForHost(final String hostname) {
 		// This computation may take LONG. We'll run it in the background and store status (and result) in the Play cache
-		final int maxpoints = getIntParam("maxpoints", 100);
+		final int maxpoints = getQueryParamAsInt("maxpoints", 100);
 		URLHistoryComputation progress = (URLHistoryComputation) Cache.get(hostname);
 		
 		if (progress == null) {

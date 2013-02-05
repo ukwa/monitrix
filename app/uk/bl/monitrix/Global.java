@@ -1,6 +1,7 @@
 package uk.bl.monitrix;
 
 import java.lang.reflect.Method;
+import java.util.Iterator;
 
 import play.Application;
 import play.GlobalSettings;
@@ -12,9 +13,10 @@ import play.mvc.Result;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Results;
+import uk.bl.monitrix.database.DBBatchImporter;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.mongodb.MongoDBConnector;
-import uk.bl.monitrix.database.mongodb.ingest.MongoBatchImporter;
+import uk.bl.monitrix.heritrix.LogFileEntry;
 import uk.bl.monitrix.ingest.IngestorPool;
 
 /**
@@ -30,7 +32,15 @@ public class Global extends GlobalSettings {
 	private void connectBackend() {
 		try {
 			db = new MongoDBConnector();
-			ingestorPool = new IngestorPool(new MongoBatchImporter(), Akka.system());
+			
+			// TODO attach MongoDB rather than the dummy! 
+			ingestorPool = new IngestorPool(new DBBatchImporter() {
+				@Override
+				public void insert(Iterator<LogFileEntry> iterator) {
+					while (iterator.hasNext())
+						iterator.next();
+				}
+			}, Akka.system());
 			Logger.info("Database connected");
 		} catch (Exception e) {
 			Logger.error("FATAL - could not connect to MongoDB");

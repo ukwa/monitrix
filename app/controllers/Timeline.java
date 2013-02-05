@@ -43,7 +43,7 @@ public class Timeline extends AbstractController {
 	}
 	
 	private static int getMaxPoints() {
-		return getIntParam("maxpoints", 100);
+		return getQueryParamAsInt("maxpoints", 100);
 	}
 	
 }

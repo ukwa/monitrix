@@ -6,16 +6,39 @@
   <h2>Monitored Heritrix Logs</h2>
   <table class="table">
     <thead>
-      <tr><th>Path</th><th>Status</th></tr>
+      <tr><th>Path</th><th>Status</th><th>Progress</th></tr>
     </thead>
     <tbody>
     @defining(uk.bl.monitrix.Global.getIngestorPool) { pool =>
       @for(log <- pool.getTrackedLogs) {
-        <tr><td>log</td><td class="monitrix-log-ingest-status"></td></tr>
+        <tr class="monitrix-log-ingest-status"><td>@log</td><td></td><td><div class="progress progress-striped"><div class="bar"></div></div></td></tr>
       }
     }
     </tbody>
   </table>
   
-  <span class="btn"><i class="icon-file"></i> Add Log</span>
+  <form class="form-inline" action="@routes.Admin.addLog()" method="POST">
+    <button type="submit" class="btn btn-small"><i class="icon-file"></i> Add Log</button>
+    <input type="text" name="path" style="font-size:12px;height:16px;" placeholder="Enter File Path..." autocomplete="off">
+  </form>
+  
+  <script>
+    function pollStatusInfo() {
+      $.getJSON('/api/admin/logs/status', function(data) {
+    	var table = $('.monitrix-log-ingest-status');
+    	$.each(data, function(idx, log_status) {
+    	  $.each(table, function(idx, table_row) {
+    	    if (table_row.firstChild.innerHTML == log_status.path) {
+    	      table_row.childNodes[1].innerHTML = log_status.status.phase;
+    	      table_row.childNodes[2].firstChild.firstChild.style.width = log_status.status.progress + '%';
+    	    }
+    	  });
+    	});
+    	
+    	window.setTimeout(pollStatusInfo, 1000);
+      });
+    }
+    
+    pollStatusInfo();
+  </script>
 }

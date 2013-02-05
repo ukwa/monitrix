@@ -3,5 +3,19 @@
 @main("Monitrix - Administration") {
   @navbar("/admin")
 }{
-    
+  <h2>Monitored Heritrix Logs</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Path</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+    @defining(uk.bl.monitrix.Global.getIngestorPool) { pool =>
+      @for(log <- pool.getTrackedLogs) {
+        <tr><td>log</td><td class="monitrix-log-ingest-status"></td></tr>
+      }
+    }
+    </tbody>
+  </table>
+  
+  <span class="btn"><i class="icon-file"></i> Add Log</span>
 }

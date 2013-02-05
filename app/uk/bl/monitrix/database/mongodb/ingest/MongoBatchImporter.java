@@ -11,6 +11,7 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.BasicDBObject;
 
+import uk.bl.monitrix.database.DBBatchImporter;
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
@@ -22,7 +23,7 @@ import uk.bl.monitrix.model.Alert;
  * data aggregation computations. 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class MongoBatchImporter {
+public class MongoBatchImporter implements DBBatchImporter {
 	
 	// MongoDB host
 	private Mongo mongo;
@@ -56,6 +57,7 @@ public class MongoBatchImporter {
 		this.crawlStatsImporter = new MongoCrawlStatsImporter(db,  new MongoKnownHostImporter(db, this.alertLogImporter), new MongoVirusLogImporter(db));
 	}
 	
+	@Override
 	public void insert(Iterator<LogFileEntry> iterator) {
 		Logger.info("Writing log to MongoDB");
 		long start = System.currentTimeMillis();

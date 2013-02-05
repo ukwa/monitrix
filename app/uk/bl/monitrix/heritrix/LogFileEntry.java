@@ -242,6 +242,10 @@ public class LogFileEntry extends CrawlLogEntry {
 			}
 
 			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+		} catch (IllegalStateException e) {
+			// Will be thrown by InternetDomainName.from in case the host name looks weird
+			Logger.warn(e.getMessage());
+			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (Throwable e) {
 			Logger.warn("Offending host: " + host);
 			Logger.warn("Extracted subdomain: " + subdomain);

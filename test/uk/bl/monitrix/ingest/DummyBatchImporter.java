@@ -1,0 +1,16 @@
+package uk.bl.monitrix.ingest;
+
+import java.util.Iterator;
+
+import uk.bl.monitrix.database.DBBatchImporter;
+import uk.bl.monitrix.heritrix.LogFileEntry;
+
+public class DummyBatchImporter implements DBBatchImporter {
+
+	@Override
+	public void insert(Iterator<LogFileEntry> iterator) {
+		while (iterator.hasNext())
+			System.out.println(iterator.next());
+	}
+
+}

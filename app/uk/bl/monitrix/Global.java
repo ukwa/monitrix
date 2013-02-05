@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
+import play.libs.Akka;
 import play.mvc.Action;
 import play.mvc.Http.RequestHeader;
 import play.mvc.Result;
@@ -13,18 +14,23 @@ import play.mvc.Http.Request;
 import play.mvc.Results;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.mongodb.MongoDBConnector;
+import uk.bl.monitrix.database.mongodb.ingest.MongoBatchImporter;
+import uk.bl.monitrix.ingest.IngestorPool;
 
 /**
  * The Play! Global object.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class Global extends GlobalSettings {
-
+	
 	private static DBConnector db = null;
+	
+	private static IngestorPool ingestorPool = null;
 	
 	private void connectBackend() {
 		try {
 			db = new MongoDBConnector();
+			ingestorPool = new IngestorPool(new MongoBatchImporter(), Akka.system());
 			Logger.info("Database connected");
 		} catch (Exception e) {
 			Logger.error("FATAL - could not connect to MongoDB");
@@ -33,6 +39,10 @@ public class Global extends GlobalSettings {
 	
 	public static DBConnector getBackend() {
 		return db;
+	}
+	
+	public static IngestorPool getIngestorPool() {
+		return ingestorPool;
 	}
 	
 	@Override

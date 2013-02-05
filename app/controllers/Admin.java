@@ -8,8 +8,8 @@ import controllers.mapping.LogTrackerStatusMapper;
 import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
-import uk.bl.monitrix.ingest.IngestorPool;
-import uk.bl.monitrix.ingest.IngestorStatus;
+import uk.bl.monitrix.heritrix.IngestorPool;
+import uk.bl.monitrix.heritrix.IngestorStatus;
 
 public class Admin extends AbstractController{
 

@@ -16,8 +16,8 @@ import play.mvc.Results;
 import uk.bl.monitrix.database.DBBatchImporter;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.mongodb.MongoDBConnector;
+import uk.bl.monitrix.heritrix.IngestorPool;
 import uk.bl.monitrix.heritrix.LogFileEntry;
-import uk.bl.monitrix.ingest.IngestorPool;
 
 /**
  * The Play! Global object.

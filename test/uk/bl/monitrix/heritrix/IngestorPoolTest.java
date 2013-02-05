@@ -1,8 +1,11 @@
-package uk.bl.monitrix.ingest;
+package uk.bl.monitrix.heritrix;
 
 import java.io.File;
 
 import org.junit.Test;
+
+import uk.bl.monitrix.heritrix.IngestorPool;
+import uk.bl.monitrix.heritrix.IngestorStatus;
 
 import akka.actor.ActorSystem;
 

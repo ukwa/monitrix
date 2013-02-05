@@ -1,4 +1,4 @@
-package uk.bl.monitrix.ingest;
+package uk.bl.monitrix.heritrix;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.util.concurrent.Callable;
 
 import uk.bl.monitrix.database.DBBatchImporter;
-import uk.bl.monitrix.heritrix.IncrementalLogfileReader;
 import akka.actor.ActorSystem;
 import akka.actor.UntypedActor;
 

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import uk.bl.monitrix.ingest.IngestorStatus;
+import uk.bl.monitrix.heritrix.IngestorStatus;
 
 public class LogTrackerStatusMapper {
 	

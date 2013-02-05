@@ -1,4 +1,4 @@
-package uk.bl.monitrix.ingest;
+package uk.bl.monitrix.heritrix;
 
 /**
  * Encapsulates the current status of an {@link IngestActor}.

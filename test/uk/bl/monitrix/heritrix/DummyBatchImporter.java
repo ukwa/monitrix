@@ -1,4 +1,4 @@
-package uk.bl.monitrix.ingest;
+package uk.bl.monitrix.heritrix;
 
 import java.util.Iterator;
 

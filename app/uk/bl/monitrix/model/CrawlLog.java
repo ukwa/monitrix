@@ -55,6 +55,13 @@ public abstract class CrawlLog {
 	public abstract long countEntries();
 	
 	/**
+	 * Returns the total number of log entries received from a specific crawler log file.
+	 * @param logPath the path to the source log file
+	 * @return the number of entries in the DB originating from that file
+	 */
+	public abstract long countEntriesForCrawler(String logPath);
+	
+	/**
 	 * Counts the log entries for a specific host.
 	 * @param hostname the host name
 	 * @return the number of log entries for the host

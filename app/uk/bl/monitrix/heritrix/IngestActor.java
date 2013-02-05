@@ -6,7 +6,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.concurrent.Callable;
+
+import play.Logger;
 
 import uk.bl.monitrix.database.DBBatchImporter;
 import akka.actor.ActorSystem;
@@ -54,15 +57,30 @@ public class IngestActor extends UntypedActor {
 	}
 	
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceive(Object message) throws Exception {		
 		if (message.equals(Messages.START)) {
+			final String logPath = heritrixLog.getAbsolutePath();
+			
 			// Start the async ingest
 			future(new Callable<Void>() {
 				@Override
 				public Void call() throws Exception {
+					status.phase = IngestorStatus.Phase.CATCHING_UP;
+					
+					Iterator<LogFileEntry> iterator = logReader.newIterator();
+					
+					// Skip as many lines in the log as are already in the DB
+					long linesToSkip = importer.countEntriesForCrawler(logPath);
+					Logger.info("Skipping " + linesToSkip + " of " + linesInLogfile + " log lines");
+					for (long i=0; i<linesToSkip; i++) {
+						if (iterator.hasNext()) {
+							iterator.next();
+						}
+					}
+
+					Logger.info("Starting import initial import");
 					while (keepRunning) {
-						status.phase = IngestorStatus.Phase.CATCHING_UP;
-						importer.insert(heritrixLog.getAbsolutePath(), logReader.newIterator());						
+						importer.insert(logPath, logReader.newIterator());
 						status.phase = IngestorStatus.Phase.TRACKING;
 						status.progress = 0;
 						Thread.sleep(15000);
@@ -72,8 +90,9 @@ public class IngestActor extends UntypedActor {
 			}, system.dispatcher());
 		} else if (message.equals(Messages.GET_STATUS)) {
 			// While in CATCHING_UP phase, update progress
-			if (status.phase.equals(IngestorStatus.Phase.CATCHING_UP))
+			if (status.phase.equals(IngestorStatus.Phase.CATCHING_UP)) {
 				status.progress = (int) ((100 * logReader.getNumberOfLinesRead()) / linesInLogfile);
+			}
 				
 			getSender().tell(status);
 		} else if (message.equals(Messages.STOP)) {

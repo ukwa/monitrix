@@ -58,6 +58,11 @@ public class MongoBatchImporter implements DBBatchImporter {
 	}
 	
 	@Override
+	public long countEntriesForCrawler(String logPath) {
+		return crawlLogImporter.countEntriesForCrawler(logPath);
+	}
+	
+	@Override
 	public void insert(String logPath, Iterator<LogFileEntry> iterator) {
 		Logger.info("Writing log to MongoDB");
 		long start = System.currentTimeMillis();

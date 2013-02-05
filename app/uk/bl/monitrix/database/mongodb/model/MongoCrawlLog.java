@@ -8,7 +8,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.model.CrawlLog;
@@ -23,20 +22,11 @@ public class MongoCrawlLog extends CrawlLog {
 	
 	protected DBCollection collection;
 	
-	private static DBObject PROJECTION;
-	
-	static {
-		PROJECTION = new BasicDBObject(); 
-		PROJECTION.put(MongoProperties.FIELD_CRAWL_LOG_CRAWLER_ID, 1);
-		PROJECTION.put(MongoProperties.FIELD_CRAWL_LOG_HTTP_CODE, 1);
-		PROJECTION.put(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS, 1);
-		PROJECTION.put(MongoProperties.FIELD_CRAWL_LOG_LINE, 1);
-	}
-	
 	public MongoCrawlLog(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_CRAWL_LOG);
 		
-		// The Heritrix Log collection is indexed by timestamp and hostname (will be skipped automatically if index exists)
+		// The Heritrix Log collection is indexed by crawl log path, timestamp and hostname (will be skipped automatically if index exists)
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, 1));
 	}
@@ -80,34 +70,22 @@ public class MongoCrawlLog extends CrawlLog {
 	}
 
 	@Override
+	public long countEntriesForCrawler(String logPath) {
+		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH, logPath));
+	}
+
+	@Override
 	public long countEntriesForHost(String hostname) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname));
 	}
 
 	@Override
 	public Iterator<CrawlLogEntry> getEntriesForHost(String hostname) {
-		return getEntriesForHost(hostname, false);
-	}
-	
-	/**
-	 * An internal helper method that can return full as well as truncated versions of the log entries.
-	 * Truncated log entries only contain crawler ID, HTTP fetch code, annotations
-	 * The {@link Hosts} controller uses the truncated version in order to gain a slight speed improvement
-	 * over the full log entries.
-	 * @param hostname the hostname
-	 * @param truncated if <code>true</code> the log entries will only contain a subset of the fields.
-	 * @return
-	 */
-	public Iterator<CrawlLogEntry> getEntriesForHost(String hostname, boolean truncated) {
 		long limit = collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname));		
 		
 		// We're using a count first to improve performance (?)
 		// Cf. http://docs.mongodb.org/manual/applications/optimization/
-		final DBCursor cursor = (truncated) ? collection
-				.find(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname), PROJECTION)
-				.hint(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, 1))
-				.limit((int) limit)
-			: collection
+		final DBCursor cursor = collection
 				.find(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname))
 				.hint(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, 1))
 				.limit((int) limit);	

@@ -1,19 +1,15 @@
 package controllers;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import controllers.mapping.LogTrackerStatusMapper;
+import controllers.mapping.IngestStatusMapper;
 
 import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
-import uk.bl.monitrix.heritrix.IngestorPool;
-import uk.bl.monitrix.heritrix.IngestorStatus;
+import uk.bl.monitrix.heritrix.IngestWatcher;
 
 public class Admin extends AbstractController{
 
-	private static IngestorPool pool = Global.getIngestorPool();
+	private static IngestWatcher ingestWatcher = Global.getIngestWatcher();
 	
 	public static Result index() {
 		return ok(views.html.admin.index.render());
@@ -21,17 +17,12 @@ public class Admin extends AbstractController{
 	
 	public static Result addLog() {
 		String path = getFormParam("path");
-		pool.addHeritrixLog(path);
+		ingestWatcher.addLog(path);
 		return redirect(routes.Admin.index());
 	}
 	
 	public static Result getLogTrackerStatus() {
-		Map<String, IngestorStatus> trackerStatus = new HashMap<String, IngestorStatus>();
-		for (String log : pool.getTrackedLogs()) {
-			trackerStatus.put(log, pool.getStatus(log));
-		}
-		
-		return ok(Json.toJson(LogTrackerStatusMapper.map(trackerStatus)));
+		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus())));
 	}
 	
 }

@@ -68,9 +68,15 @@ public class MongoCrawlLog extends CrawlLog {
 	public long countEntries() {
 		return collection.count();
 	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<String> getIngestedLogs() {
+		return (List<String>) collection.distinct(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH);
+	}
 
 	@Override
-	public long countEntriesForCrawler(String logPath) {
+	public long countEntriesForLog(String logPath) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH, logPath));
 	}
 

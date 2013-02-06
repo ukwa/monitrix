@@ -3,15 +3,44 @@
 @main("Monitrix - Administration") {
   @navbar("/admin")
 }{
+  <style>
+    .progress {
+      margin-top:5px;
+      height:8px;
+      width:180px;
+    }
+    
+    .circle {
+      display:inline-block;
+      border-radius:50%;
+      width:12px;
+      height:12px;
+      margin:right:20px;
+    }
+    
+    .monitrix-log-ingest-status-trafficlight {
+      text-align:center;
+    }
+  </style>
+  
   <h2>Monitored Heritrix Logs</h2>
-  <table class="table">
+  <table class="table table-bordered">
     <thead>
-      <tr><th>Path</th><th>Status</th><th>Progress</th></tr>
+      <tr><th>Crawler ID</th><th>Log File Path</th><th>Lines Ingested</th><th style="width:30px;">Status</th><th style="width:180px;"></th><th style="width:220px;"></th></tr>
     </thead>
     <tbody>
-    @defining(uk.bl.monitrix.Global.getIngestorPool) { pool =>
-      @for(log <- pool.getTrackedLogs) {
-        <tr class="monitrix-log-ingest-status"><td>@log</td><td></td><td><div class="progress progress-striped"><div class="bar"></div></div></td></tr>
+    @defining(uk.bl.monitrix.Global.getIngestWatcher.getWatchedLogs) { logs =>
+      @for(log <- logs) {
+        <tr class="monitrix-log-ingest-status">
+          <td></td>
+          <td class="monitrix-log-ingest-status-logpath">@log</td>
+          <td>@uk.bl.monitrix.Global.getBackend.getCrawlLog.countEntriesForLog(log)</td>
+          <td class="monitrix-log-ingest-status-trafficlight"></td>
+          <td class="monitrix-log-ingest-status-message"></td>
+          <td class="monitrix-log-ingest-status-progress">
+            <div class="progress"><div class="bar bar-warning" style="width:0%"></div></div>
+          </td>
+        </tr>
       }
     }
     </tbody>
@@ -19,6 +48,7 @@
   
   <form class="form-inline" action="@routes.Admin.addLog()" method="POST">
     <button type="submit" class="btn btn-small"><i class="icon-file"></i> Add Log</button>
+    <input type="text" name="crawler_id" style="font-size:12px;height:16px;" placeholder="Enter Crawler ID..." autocomplete="off">
     <input type="text" name="path" style="font-size:12px;height:16px;" placeholder="Enter File Path..." autocomplete="off">
   </form>
   
@@ -28,9 +58,23 @@
     	var table = $('.monitrix-log-ingest-status');
     	$.each(data, function(idx, log_status) {
     	  $.each(table, function(idx, table_row) {
-    	    if (table_row.firstChild.innerHTML == log_status.path) {
-    	      table_row.childNodes[1].innerHTML = log_status.status.phase;
-    	      table_row.childNodes[2].firstChild.firstChild.style.width = log_status.status.progress + '%';
+    	    if ($('.monitrix-log-ingest-status-logpath', table_row).first().html() == log_status.path) {
+    	    	
+    	      // Update traffic light
+    	      $('.monitrix-log-ingest-status-trafficlight', table_row).first().html(getTrafficLight(log_status.status.phase));
+    	      
+    	      // Update status message
+    	      $('.monitrix-log-ingest-status-message', table_row).first().html(getMessage(log_status.status.phase));
+    	      
+    	      // Update progress bar
+    	      var progress = $('.progress', table_row).first();
+    	      var bar = progress.children('.bar').first();    	      
+    	      if (log_status.status.progress != 0) {
+    	    	progress.css('display', 'block');
+    	        bar.css('width', log_status.status.progress + '%');
+    	      } else {
+    	    	progress.css('display', 'none');
+    	      }
     	    }
     	  });
     	});
@@ -39,6 +83,38 @@
       });
     }
     
+    function getTrafficLight(phase) {
+    	if (phase == 'PENDING')
+    		return '<span class="circle" style="background-color:#888;"></span>';
+  
+    	if (phase == 'CATCHING_UP')
+    		return '<span class="circle" style="background-color:#ff7d40;"></span>';
+    		
+    	if (phase == 'IDLE')
+    		return '<span class="circle" style="background-color:#080;"></span>';
+    		
+    	if (phase == 'SYNCHRONIZING')
+    		return '<span class="circle" style="background-color:#ff7d40;"></span>';
+    		
+    	return '';
+    }
+    
+    
+    function getMessage(phase) {
+    	if (phase == 'PENDING')
+    		return 'PENDING';
+    	
+    	if (phase == 'CATCHING_UP')
+    		return 'CATCHING UP';
+    		
+    	if (phase == 'IDLE')
+    		return 'IDLE';
+    		
+    	if (phase == 'SYNCHRONIZING')
+    		return 'SYNCHRONIZING';
+    		
+    	return '';
+    }
     pollStatusInfo();
   </script>
 }

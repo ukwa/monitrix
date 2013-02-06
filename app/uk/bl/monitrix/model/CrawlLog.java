@@ -55,11 +55,17 @@ public abstract class CrawlLog {
 	public abstract long countEntries();
 	
 	/**
+	 * Returns the list of log files (absolute path names) that are ingested in the DB.
+	 * @return the list of log file paths
+	 */
+	public abstract List<String> getIngestedLogs();
+	
+	/**
 	 * Returns the total number of log entries received from a specific crawler log file.
 	 * @param logPath the path to the source log file
 	 * @return the number of entries in the DB originating from that file
 	 */
-	public abstract long countEntriesForCrawler(String logPath);
+	public abstract long countEntriesForLog(String logPath);
 	
 	/**
 	 * Counts the log entries for a specific host.

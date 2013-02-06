@@ -11,7 +11,7 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.BasicDBObject;
 
-import uk.bl.monitrix.database.DBBatchImporter;
+import uk.bl.monitrix.database.DBIngestConnector;
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
@@ -21,9 +21,12 @@ import uk.bl.monitrix.model.Alert;
 /**
  * An importer class that ingests a batch of crawl log entries, performing all necessary
  * data aggregation computations. 
+ * 
+ * IMPORTANT: the ingest process is not thread safe!
+ * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class MongoBatchImporter implements DBBatchImporter {
+public class MongoBatchImporter implements DBIngestConnector {
 	
 	// MongoDB host
 	private Mongo mongo;
@@ -58,8 +61,13 @@ public class MongoBatchImporter implements DBBatchImporter {
 	}
 	
 	@Override
-	public long countEntriesForCrawler(String logPath) {
-		return crawlLogImporter.countEntriesForCrawler(logPath);
+	public List<String> getIngestedLogs() {
+		return crawlLogImporter.getIngestedLogs();
+	}
+	
+	@Override
+	public long countEntriesForLog(String logPath) {
+		return crawlLogImporter.countEntriesForLog(logPath);
 	}
 	
 	@Override

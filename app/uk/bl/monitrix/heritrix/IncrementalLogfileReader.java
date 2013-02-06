@@ -27,6 +27,10 @@ public class IncrementalLogfileReader {
 		this.logPath = log.getAbsolutePath();
 		this.reader = new BufferedReader(new FileReader(log));
 	}
+	
+	public String getPath() {
+		return logPath;
+	}
 
 	/**
 	 * Returns an iterator over all log entries that have not yet been consumed through

@@ -15,7 +15,7 @@ import play.mvc.Results;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.mongodb.MongoDBConnector;
 import uk.bl.monitrix.database.mongodb.ingest.MongoBatchImporter;
-import uk.bl.monitrix.heritrix.IngestorPool;
+import uk.bl.monitrix.heritrix.IngestWatcher;
 
 /**
  * The Play! Global object.
@@ -25,14 +25,15 @@ public class Global extends GlobalSettings {
 	
 	private static DBConnector db = null;
 	
-	private static IngestorPool ingestorPool = null;
+	private static IngestWatcher ingestWatcher = null;
 	
 	private void connectBackend() {
 		try {
 			db = new MongoDBConnector();
 			
-			// TODO attach MongoDB rather than the dummy! 
-			ingestorPool = new IngestorPool(new MongoBatchImporter(), Akka.system());
+			ingestWatcher = new IngestWatcher(new MongoBatchImporter(), Akka.system());
+			ingestWatcher.startWatching();
+			
 			Logger.info("Database connected");
 		} catch (Exception e) {
 			Logger.error("FATAL - could not connect to MongoDB");
@@ -43,8 +44,8 @@ public class Global extends GlobalSettings {
 		return db;
 	}
 	
-	public static IngestorPool getIngestorPool() {
-		return ingestorPool;
+	public static IngestWatcher getIngestWatcher() {
+		return ingestWatcher;
 	}
 	
 	@Override

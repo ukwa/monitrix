@@ -1,103 +1,146 @@
 package uk.bl.monitrix.heritrix;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import play.Logger;
+import uk.bl.monitrix.database.DBIngestConnector;
+import uk.bl.monitrix.heritrix.IngestStatus.Phase;
 
-import uk.bl.monitrix.database.DBBatchImporter;
 import akka.actor.ActorSystem;
 import akka.actor.UntypedActor;
+import akka.dispatch.Futures;
 
-import static akka.dispatch.Futures.future;
-
-/**
- * An actor that handles ingest for a single Heritrix log file.
- * @author Rainer Simon <rainer.simon@ait.ac.at>
- */
-public class IngestActor extends UntypedActor {	
+public class IngestActor extends UntypedActor {
 	
-	public enum Messages { START, GET_STATUS, STOP }
-	
-	private File heritrixLog;
-	
-	private DBBatchImporter importer;
+	private DBIngestConnector db;
 	
 	private ActorSystem system;
 	
-	private IncrementalLogfileReader logReader;
+	private static long sleepInterval = 15000;
 	
-	private long linesInLogfile;
+	private Map<String, IncrementalLogfileReader> newLogs = new HashMap<String, IncrementalLogfileReader>(); 
 	
-	private IngestorStatus status = new IngestorStatus(IngestorStatus.Phase.CATCHING_UP);
+	private Map<String, IncrementalLogfileReader> watchedLogs = new HashMap<String, IncrementalLogfileReader>();
+	
+	private Map<String, IngestStatus> statusList = new HashMap<String, IngestStatus>();
+
+	private boolean isRunning = false;
 	
 	private boolean keepRunning = true;
 	
-	public IngestActor(File heritrixLog, DBBatchImporter importer, ActorSystem system) throws FileNotFoundException {
-		this.heritrixLog = heritrixLog;
-		this.importer = importer;
+	public IngestActor(DBIngestConnector db, ActorSystem system) {
+		this.db = db;
 		this.system = system;
 	}
 	
 	@Override
-	public void preStart() {
-		try {
-			this.logReader = new IncrementalLogfileReader(heritrixLog.getAbsolutePath());
-			this.linesInLogfile = countLines(heritrixLog);
-		} catch (IOException e) {
-			// Should never happen
-			throw new RuntimeException(e);
+	public void onReceive(Object arg) throws Exception {
+		IngestControlMessage msg = (IngestControlMessage) arg;
+		if (msg.getCommand().equals(IngestControlMessage.Command.START)) {
+			if (!isRunning) {
+				isRunning = true;
+				startSynchronizationLoop();
+			}
+		} else if (msg.getCommand().equals(IngestControlMessage.Command.STOP)) {
+			keepRunning = false;
+		} else if (msg.getCommand().equals(IngestControlMessage.Command.GET_STATUS)) {
+			// Compute progress for logs in CATCHING_UP phase
+			for (Entry<String, IngestStatus> entry : statusList.entrySet()) {
+				IngestStatus status = entry.getValue();
+				if (status.phase.equals(IngestStatus.Phase.CATCHING_UP)) {
+					IncrementalLogfileReader reader = newLogs.get(entry.getKey());
+					status.progress = (int) ((100 * reader.getNumberOfLinesRead()) / countLines(reader.getPath()));
+				}
+			}
+			getSender().tell(statusList);
+		} else if (msg.getCommand().equals(IngestControlMessage.Command.ADD_WATCHED_LOG)) {
+			String path = (String) msg.getPayload();
+			statusList.put(path, new IngestStatus(Phase.PENDING));
+			IncrementalLogfileReader reader = new IncrementalLogfileReader(path);
+			newLogs.put(path, reader);
+		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHANGE_SLEEP_INTERVAL)) {
+			Long newInterval = (Long) msg.getPayload();
+			sleepInterval = newInterval.longValue();
 		}
 	}
 	
-	@Override
-	public void onReceive(Object message) throws Exception {		
-		if (message.equals(Messages.START)) {
-			final String logPath = heritrixLog.getAbsolutePath();
-			
-			// Start the async ingest
-			future(new Callable<Void>() {
-				@Override
-				public Void call() throws Exception {
-					status.phase = IngestorStatus.Phase.CATCHING_UP;
+	private void startSynchronizationLoop() throws InterruptedException, IOException {
+		Futures.future(new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				Logger.info("Starting log synchronization loop");
+				while (keepRunning) {
+					// Check if there are new logs to watch - and ingest if any
+					List<IncrementalLogfileReader> toAdd = new ArrayList<IncrementalLogfileReader>();
+					for (IncrementalLogfileReader reader : newLogs.values())
+						toAdd.add(reader);
 					
-					Iterator<LogFileEntry> iterator = logReader.newIterator();
+					for (IncrementalLogfileReader reader : toAdd) {
+						Logger.info("Catching up with log file: " + reader.getPath());
+						catchUpWithLog(reader);
+						newLogs.remove(reader.getPath());
+					}
 					
-					// Skip as many lines in the log as are already in the DB
-					long linesToSkip = importer.countEntriesForCrawler(logPath);
-					Logger.info("Skipping " + linesToSkip + " of " + linesInLogfile + " log lines");
-					for (long i=0; i<linesToSkip; i++) {
-						if (iterator.hasNext()) {
-							iterator.next();
-						}
+					// Sync all other logs
+					for (IncrementalLogfileReader reader : watchedLogs.values()) {
+						Logger.info("Synchronizing log: " + reader.getPath());
+						synchronizeWithLog(reader);
 					}
-
-					Logger.info("Starting import initial import");
-					while (keepRunning) {
-						importer.insert(logPath, logReader.newIterator());
-						status.phase = IngestorStatus.Phase.TRACKING;
-						status.progress = 0;
-						Thread.sleep(15000);
-					}
-					return null;
+					
+					// Add new Logs to synchroniziation loop
+					for (IncrementalLogfileReader reader : toAdd)
+						watchedLogs.put(reader.getPath(), reader);
+					
+					// Go to sleep
+					Thread.sleep(sleepInterval);
 				}
-			}, system.dispatcher());
-		} else if (message.equals(Messages.GET_STATUS)) {
-			// While in CATCHING_UP phase, update progress
-			if (status.phase.equals(IngestorStatus.Phase.CATCHING_UP)) {
-				status.progress = (int) ((100 * logReader.getNumberOfLinesRead()) / linesInLogfile);
-			}
 				
-			getSender().tell(status);
-		} else if (message.equals(Messages.STOP)) {
-			this.keepRunning = false;
+				return null;
+			}
+		}, system.dispatcher());
+	}
+	
+	private void catchUpWithLog(IncrementalLogfileReader reader) throws IOException {
+		long linesTotal = countLines(reader.getPath());
+		long linesToSkip = db.countEntriesForLog(reader.getPath());
+		
+		IngestStatus status = statusList.get(reader.getPath());
+		if (linesToSkip < linesTotal) {
+			Logger.info("Skipping " + linesToSkip + " of " + linesTotal + " log lines");
+			
+			status.phase = IngestStatus.Phase.CATCHING_UP;
+			
+			Iterator<LogFileEntry> iterator = reader.newIterator();
+			for (long i=0; i<linesToSkip; i++) {
+				if (iterator.hasNext())
+					iterator.next();
+			}
+		
+			Logger.info("Catching up with log file contents");
+			db.insert(reader.getPath(), reader.newIterator());
+		} else {
+			Logger.info("Log is fully ingested - no need to catch up.");
 		}
+		
+		status.phase = IngestStatus.Phase.IDLE;
+		status.progress = 0;
+	}
+	
+	private void synchronizeWithLog(IncrementalLogfileReader reader) {
+		IngestStatus status = statusList.get(reader.getPath());
+		status.phase = IngestStatus.Phase.SYNCHRONIZING;		
+		db.insert(reader.getPath(), reader.newIterator());		
+		status.phase = IngestStatus.Phase.IDLE;
 	}
 	
 	/**
@@ -110,8 +153,8 @@ public class IngestActor extends UntypedActor {
 	 * @return the number of lines in the file
 	 * @throws IOException if anything goes wrong
 	 */
-	private static int countLines(File file) throws IOException {
-		InputStream is = new BufferedInputStream(new FileInputStream(file));
+	private static int countLines(String path) throws IOException {
+		InputStream is = new BufferedInputStream(new FileInputStream(path));
 		
 	    try {
 	        byte[] c = new byte[1024];

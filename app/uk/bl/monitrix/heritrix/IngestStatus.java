@@ -1,13 +1,13 @@
 package uk.bl.monitrix.heritrix;
 
 /**
- * Encapsulates the current status of an {@link IngestActor}.
+ * Encapsulates the current status of an {@link OldIngestActor}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class IngestorStatus {
+public class IngestStatus {
 		
 	/**
-	 * The phase of operation the {@link IngestActor} is currently in
+	 * The phase of operation the {@link OldIngestActor} is currently in
 	 */
 	public Phase phase;
 	
@@ -16,18 +16,23 @@ public class IngestorStatus {
 	 */
 	public int progress;
 	
-	public IngestorStatus(Phase phase) {
+	public IngestStatus(Phase phase) {
 		this.phase = phase;
 		this.progress = 0;
 	}
 	
 	public enum Phase {
+		
+		PENDING,
 	
 		/** The ingestor is currently ingesting the next batch of data into the DB **/
 		CATCHING_UP,
 		
-		/** The ingestor is tracking the log, i.e. idle & waiting for the next batch, according to plan **/ 
-		TRACKING,
+		/** The ingestor has caught up and is idle, waiting for the next synchronization ingest **/ 
+		IDLE,
+		
+		/** The ingestor is ingesting the next batch to synchronize the DB with the log **/
+		SYNCHRONIZING,
 		
 		/** The ingestor has terminated **/
 		TERMINATED,

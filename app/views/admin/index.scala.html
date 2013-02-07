@@ -86,7 +86,7 @@
     	      // Update progress bar
     	      var progress = $('.progress', table_row).first();
     	      var bar = progress.children('.bar').first();    	      
-    	      if (log_status.status.progress != 0) {
+    	      if (log_status.status.phase == 'CATCHING_UP') {
     	    	progress.css('display', 'block');
     	        bar.css('width', log_status.status.progress + '%');
     	      } else {
@@ -97,7 +97,8 @@
     	});
     	
     	window.setTimeout(pollStatusInfo, 1000);
-      });
+      })
+      .error(function() { window.setTimeout(pollStatusInfo, 5000); });
     }
     
     function getTrafficLight(phase) {

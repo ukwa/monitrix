@@ -35,7 +35,9 @@ public class IngestActor extends UntypedActor {
 	
 	private static long sleepInterval = 15000;
 	
-	private Map<String, IncrementalLogfileReader> newLogs = new HashMap<String, IncrementalLogfileReader>(); 
+	private Map<String, IncrementalLogfileReader> newLogs = new HashMap<String, IncrementalLogfileReader>();
+	
+	private Map<String, Integer> bufferedLineCounts = new HashMap<String, Integer>();
 	
 	private Map<String, IncrementalLogfileReader> watchedLogs = new HashMap<String, IncrementalLogfileReader>();
 	
@@ -65,14 +67,17 @@ public class IngestActor extends UntypedActor {
 			for (Entry<String, IngestStatus> entry : statusList.entrySet()) {
 				IngestStatus status = entry.getValue();
 				if (status.phase.equals(IngestStatus.Phase.CATCHING_UP)) {
+					System.out.println("Computing progress");
 					IncrementalLogfileReader reader = newLogs.get(entry.getKey());
-					status.progress = (int) ((100 * reader.getNumberOfLinesRead()) / countLines(reader.getPath()));
+					status.progress = (int) ((100 * reader.getNumberOfLinesRead()) / bufferedLineCounts.get(entry.getKey()));
 				}
 			}
+
 			getSender().tell(statusList);
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.ADD_WATCHED_LOG)) {
 			String path = (String) msg.getPayload();
 			statusList.put(path, new IngestStatus(Phase.PENDING));
+			bufferedLineCounts.put(path, countLines(path));
 			IncrementalLogfileReader reader = new IncrementalLogfileReader(path);
 			newLogs.put(path, reader);
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHANGE_SLEEP_INTERVAL)) {
@@ -118,7 +123,7 @@ public class IngestActor extends UntypedActor {
 	}
 	
 	private void catchUpWithLog(IncrementalLogfileReader reader) throws IOException {
-		long linesTotal = countLines(reader.getPath());
+		long linesTotal = bufferedLineCounts.get(reader.getPath());
 		long linesToSkip = db.countEntriesForLog(reader.getPath());
 		
 		IngestStatus status = statusList.get(reader.getPath());
@@ -137,6 +142,9 @@ public class IngestActor extends UntypedActor {
 			db.insert(reader.getPath(), iterator);
 		} else {
 			Logger.info("Log is fully ingested - no need to catch up.");
+			Iterator<LogFileEntry> iterator = reader.newIterator();
+			for (int i=0; i<linesTotal; i++)
+				iterator.next();
 		}
 		
 		status.phase = IngestStatus.Phase.IDLE;

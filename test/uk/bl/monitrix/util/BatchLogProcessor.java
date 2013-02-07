@@ -3,7 +3,7 @@ package uk.bl.monitrix.util;
 import java.io.IOException;
 
 import uk.bl.monitrix.heritrix.SimpleLogfileReader;
-import uk.bl.monitrix.database.mongodb.ingest.MongoBatchImporter;
+import uk.bl.monitrix.database.mongodb.ingest.MongoDBIngestConnector;
 
 /**
  * A utility class that pre-initializes MongoDB from a Heretrix log - for test/dev purposes only!
@@ -18,7 +18,7 @@ public class BatchLogProcessor {
 	private static final String LOG_FILE = "/media/My Passport/crawl.log";
 	
 	public static void main(String[] args) throws IOException {
-		MongoBatchImporter mongo = new MongoBatchImporter("localhost", "monitrix", 27017);
+		MongoDBIngestConnector mongo = new MongoDBIngestConnector("localhost", "monitrix", 27017);
 		SimpleLogfileReader reader = new SimpleLogfileReader(LOG_FILE);
 		mongo.insert(LOG_FILE, reader.iterator());
 	}

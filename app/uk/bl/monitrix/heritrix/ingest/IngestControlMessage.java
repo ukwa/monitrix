@@ -1,5 +1,9 @@
-package uk.bl.monitrix.heritrix;
+package uk.bl.monitrix.heritrix.ingest;
 
+/**
+ * A message class for use in communcation with the {@link IngestActor}.
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class IngestControlMessage {
 	
 	public enum Command { START, STOP, GET_STATUS, CHANGE_SLEEP_INTERVAL, ADD_WATCHED_LOG }

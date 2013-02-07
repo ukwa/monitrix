@@ -1,13 +1,13 @@
-package uk.bl.monitrix.heritrix;
+package uk.bl.monitrix.heritrix.ingest;
 
 /**
- * Encapsulates the current status of an {@link OldIngestActor}.
+ * Encapsulates the current status of an {@link IngestActor}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class IngestStatus {
 		
 	/**
-	 * The phase of operation the {@link OldIngestActor} is currently in
+	 * The phase of operation the {@link IngestActor} is currently in
 	 */
 	public Phase phase;
 	
@@ -23,15 +23,16 @@ public class IngestStatus {
 	
 	public enum Phase {
 		
+		/** The ingest actor is currently pending, waiting to catch up with the log **/
 		PENDING,
 	
-		/** The ingestor is currently ingesting the next batch of data into the DB **/
+		/** The ingest actor is currently ingesting the next batch of data into the DB **/
 		CATCHING_UP,
 		
-		/** The ingestor has caught up and is idle, waiting for the next synchronization ingest **/ 
+		/** The ingest actor has caught up and is idle, waiting for the next sync round **/ 
 		IDLE,
 		
-		/** The ingestor is ingesting the next batch to synchronize the DB with the log **/
+		/** The ingest actor is ingesting the next batch to sync the DB with the log **/
 		SYNCHRONIZING,
 		
 		/** The ingestor has terminated **/

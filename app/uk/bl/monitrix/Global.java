@@ -14,8 +14,8 @@ import play.mvc.Http.Request;
 import play.mvc.Results;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.mongodb.MongoDBConnector;
-import uk.bl.monitrix.database.mongodb.ingest.MongoBatchImporter;
-import uk.bl.monitrix.heritrix.IngestWatcher;
+import uk.bl.monitrix.database.mongodb.ingest.MongoDBIngestConnector;
+import uk.bl.monitrix.heritrix.ingest.IngestWatcher;
 
 /**
  * The Play! Global object.
@@ -31,7 +31,7 @@ public class Global extends GlobalSettings {
 		try {
 			db = new MongoDBConnector();
 			
-			ingestWatcher = new IngestWatcher(new MongoBatchImporter(), Akka.system());
+			ingestWatcher = new IngestWatcher(new MongoDBIngestConnector(), Akka.system());
 			ingestWatcher.startWatching();
 			
 			Logger.info("Database connected");
@@ -50,6 +50,8 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public void onStop(Application app) {
+		ingestWatcher.stopWatching();
+		
 		if (db != null) {
 			Logger.info("Database disconnected");
 			db.close();

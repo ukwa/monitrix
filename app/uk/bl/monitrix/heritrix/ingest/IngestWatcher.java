@@ -1,4 +1,4 @@
-package uk.bl.monitrix.heritrix;
+package uk.bl.monitrix.heritrix.ingest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +17,13 @@ import akka.util.Duration;
 import akka.util.Timeout;
 
 import uk.bl.monitrix.database.DBIngestConnector;
-import uk.bl.monitrix.heritrix.IngestControlMessage.Command;
+import uk.bl.monitrix.heritrix.ingest.IngestControlMessage.Command;
 
+/**
+ * The ingest provides a control entry point into the ingest system. The actual work 
+ * of monitoring and ingest is handled by the {@link IngestActor}.
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class IngestWatcher {
 	
 	private ActorRef ingestActor;
@@ -45,19 +50,33 @@ public class IngestWatcher {
 		startWatching();
 	}
 	
+	/**
+	 * Returns the names of the logs currently being watched.
+	 * @return the list of log names
+	 */
 	public List<String> getWatchedLogs() {
 		return watchedLogs;
 	}
 	
+	/**
+	 * Adds a new log to the list of watched logs.
+	 * @param path the log path
+	 */
 	public void addLog(String path) {
 		watchedLogs.add(path);
 		ingestActor.tell(new IngestControlMessage(Command.ADD_WATCHED_LOG, path));
 	}
 	
+	/**
+	 * Starts the watcher.
+	 */
 	public void startWatching() {
 		ingestActor.tell(new IngestControlMessage(Command.START));
 	}
 	
+	/**
+	 * Stops the watcher.
+	 */
 	public void stopWatching() {
 		ingestActor.tell(new IngestControlMessage(Command.STOP));
 	}

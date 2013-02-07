@@ -5,7 +5,7 @@ import controllers.mapping.IngestStatusMapper;
 import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
-import uk.bl.monitrix.heritrix.IngestWatcher;
+import uk.bl.monitrix.heritrix.ingest.IngestWatcher;
 
 public class Admin extends AbstractController{
 

@@ -1,4 +1,4 @@
-package uk.bl.monitrix.heritrix;
+package uk.bl.monitrix.heritrix.ingest;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -14,12 +14,19 @@ import java.util.concurrent.Callable;
 
 import play.Logger;
 import uk.bl.monitrix.database.DBIngestConnector;
-import uk.bl.monitrix.heritrix.IngestStatus.Phase;
+import uk.bl.monitrix.heritrix.IncrementalLogfileReader;
+import uk.bl.monitrix.heritrix.LogFileEntry;
+import uk.bl.monitrix.heritrix.ingest.IngestStatus.Phase;
 
 import akka.actor.ActorSystem;
 import akka.actor.UntypedActor;
 import akka.dispatch.Futures;
 
+/**
+ * This class coordinates the actual work of monintoring log files and
+ * running incremental ingest.
+ * @author Rainer Simon <rainer.simon@ait.ac.at>
+ */
 public class IngestActor extends UntypedActor {
 	
 	private DBIngestConnector db;

@@ -26,7 +26,7 @@ import uk.bl.monitrix.model.Alert;
  * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class MongoBatchImporter implements DBIngestConnector {
+public class MongoDBIngestConnector implements DBIngestConnector {
 	
 	// MongoDB host
 	private Mongo mongo;
@@ -43,11 +43,11 @@ public class MongoBatchImporter implements DBIngestConnector {
 	// Crawl stats
 	private MongoCrawlStatsImporter crawlStatsImporter;
 	
-	public MongoBatchImporter() throws IOException {
+	public MongoDBIngestConnector() throws IOException {
 		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
 	}
 	
-	public MongoBatchImporter(String hostName, String dbName, int dbPort) throws IOException {
+	public MongoDBIngestConnector(String hostName, String dbName, int dbPort) throws IOException {
 		init(hostName, dbName, dbPort);
 	}
 	

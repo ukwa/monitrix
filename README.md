@@ -19,11 +19,19 @@ To __generate an Eclipse project__, type ``play eclipsify``.
 
 ## Getting Data into monitrix
 
-monitrix doesn't load data by itself (yet). At the moment, you need to load data 'manually', using the Java utility 
-``uk.bl.monitrix.util.BatchLogProcessor`` that's located in the /test folder of the project. Edit the path to
-the Heritrix log you want to load, and start the application (e.g. from your IDE). 
+To load data into monitrix, enter the 'Admin' section, and enter the absolute path of a log file in the
+form. The log file should immediately appear in the list above the form, with status 'CATCHING UP' (or
+'PENDING', followed shortly thereafter by 'CATCHING UP'). monitrix will now load the log file into 
+the database. After the upload is complete, monitrix will continuously check the log file for updates.
+__Warning:__ Loading data takes time! On my machine, a 10 GB log sample currently takes about 1 hour to
+process!
 
-__Warning:__ Loading data takes time! On my machine, a 10 GB log sample currently takes about 50 minutes to process!
+Alternatively, you can also populate the database 'manually' using either of the following Java utilities,
+located in the /test folder of the project:
+
+* ``uk.bl.monitrix.util.BatchLogProcessor`` will load a log file into the database in one go and then terminate.
+* ``uk.bl.monitrix.util.IncrementalLogProcessor`` will load a log file into the database, and then continue
+  to monitor that file (and incrementally sync the DB) until it is terminated forcefully. 
 
 ## MongoDB Cheat Sheet
 

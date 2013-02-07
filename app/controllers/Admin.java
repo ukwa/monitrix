@@ -6,9 +6,12 @@ import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
 import uk.bl.monitrix.heritrix.ingest.IngestWatcher;
+import uk.bl.monitrix.model.CrawlLog;
 
 public class Admin extends AbstractController{
 
+	private static CrawlLog crawlLog = Global.getBackend().getCrawlLog();
+	
 	private static IngestWatcher ingestWatcher = Global.getIngestWatcher();
 	
 	public static Result index() {
@@ -22,7 +25,7 @@ public class Admin extends AbstractController{
 	}
 	
 	public static Result getLogTrackerStatus() {
-		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus())));
+		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus(), crawlLog)));
 	}
 	
 }

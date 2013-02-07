@@ -34,7 +34,7 @@
         <tr class="monitrix-log-ingest-status">
           <td></td>
           <td class="monitrix-log-ingest-status-logpath">@log</td>
-          <td>@uk.bl.monitrix.Global.getBackend.getCrawlLog.countEntriesForLog(log)</td>
+          <td class="monitrix-log-ingest-status-lines-ingested"></td>
           <td class="monitrix-log-ingest-status-trafficlight"></td>
           <td class="monitrix-log-ingest-status-message"></td>
           <td class="monitrix-log-ingest-status-progress">
@@ -60,6 +60,9 @@
     	  $.each(table, function(idx, table_row) {
     	    if ($('.monitrix-log-ingest-status-logpath', table_row).first().html() == log_status.path) {
     	    	
+    	      // Update no. of lines ingested
+    	      $('.monitrix-log-ingest-status-lines-ingested', table_row).first().html(log_status.lines_ingested);
+    	      
     	      // Update traffic light
     	      $('.monitrix-log-ingest-status-trafficlight', table_row).first().html(getTrafficLight(log_status.status.phase));
     	      

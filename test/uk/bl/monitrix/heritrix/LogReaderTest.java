@@ -13,7 +13,7 @@ public class LogReaderTest {
 	private static final String PATH_TO_LOGFILE = "test/sample-log-1E3.txt";
 
 	@Test
-	public void testLogRead() throws IOException {
+	public void testSimpleLogReader() throws IOException {
 		SimpleLogfileReader reader = new SimpleLogfileReader(PATH_TO_LOGFILE);
 		Iterator<LogFileEntry> entries = reader.iterator();
 		
@@ -27,6 +27,21 @@ public class LogReaderTest {
 			Assert.assertNotNull(entry.getContentType());
 			Assert.assertNotNull(entry.getCrawlerID());
 			Assert.assertNotNull(entry.getSHA1Hash());
+			counter++;
+		}
+		
+		Assert.assertEquals(1000, counter);
+		System.out.println("Done - " + counter + " lines.");
+	}
+	
+	@Test
+	public void testIncrementalLogReader() throws IOException {
+		IncrementalLogfileReader reader = new IncrementalLogfileReader(PATH_TO_LOGFILE);
+		Iterator<LogFileEntry> entries = reader.newIterator();
+		
+		int counter = 0;
+		while (entries.hasNext()) {
+			entries.next();
 			counter++;
 		}
 		

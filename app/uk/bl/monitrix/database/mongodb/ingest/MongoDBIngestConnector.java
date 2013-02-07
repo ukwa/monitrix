@@ -83,7 +83,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 			
 			int counter = 0; // Should be slightly faster than using list.size() to count
 			long timeOfFirstLogEntryInBatch = Long.MAX_VALUE;
-			while (iterator.hasNext() & counter < MongoProperties.BULK_INSERT_CHUNK_SIZE) {
+			while (iterator.hasNext() && (counter < MongoProperties.BULK_INSERT_CHUNK_SIZE)) {
 				LogFileEntry next = iterator.next();
 				counter++;
 				
@@ -116,7 +116,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 					alertBatch.add(alert);
 				}
 			}
-
+			
 			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
 			bulkStart = System.currentTimeMillis();
 			

@@ -8,6 +8,7 @@
       margin-top:5px;
       height:8px;
       width:180px;
+      margin-bottom:0px;
     }
     
     .circle {
@@ -19,14 +20,27 @@
     }
     
     .monitrix-log-ingest-status-trafficlight {
-      text-align:center;
+      text-align:center !important;
+      width:30px;
+    }
+    
+    .monitrix-log-ingest-status-progress  {
+      text-align:center !important;
+      width:220px;
     }
   </style>
   
   <h2>Monitored Heritrix Logs</h2>
   <table class="table table-bordered">
     <thead>
-      <tr><th>Crawler ID</th><th>Log File Path</th><th>Lines Ingested</th><th style="width:30px;">Status</th><th style="width:180px;"></th><th style="width:220px;"></th></tr>
+      <tr>
+        <th>Crawler ID</th>
+        <th>Log File Path</th>
+        <th>Lines Ingested</th>
+        <th class="monitrix-log-ingest-status-trafficlight">Status</th>
+        <th></th>
+        <th class="monitrix-log-ingest-status-progress"></th>
+      </tr>
     </thead>
     <tbody>
     @defining(uk.bl.monitrix.Global.getIngestWatcher.getWatchedLogs) { logs =>

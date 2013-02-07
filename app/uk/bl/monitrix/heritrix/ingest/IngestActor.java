@@ -134,7 +134,7 @@ public class IngestActor extends UntypedActor {
 			}
 		
 			Logger.info("Catching up with log file contents");
-			db.insert(reader.getPath(), reader.newIterator());
+			db.insert(reader.getPath(), iterator);
 		} else {
 			Logger.info("Log is fully ingested - no need to catch up.");
 		}

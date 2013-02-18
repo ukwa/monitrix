@@ -20,7 +20,9 @@ import uk.bl.monitrix.heritrix.ingest.IngestStatus.Phase;
 
 import akka.actor.ActorSystem;
 import akka.actor.UntypedActor;
+import akka.dispatch.Future;
 import akka.dispatch.Futures;
+import akka.dispatch.OnSuccess;
 
 /**
  * This class coordinates the actual work of monintoring log files and
@@ -37,7 +39,7 @@ public class IngestActor extends UntypedActor {
 	
 	private Map<String, IncrementalLogfileReader> newLogs = new HashMap<String, IncrementalLogfileReader>();
 	
-	private Map<String, Integer> bufferedLineCounts = new HashMap<String, Integer>();
+	private Map<String, Long> bufferedLineCounts = new HashMap<String, Long>();
 	
 	private Map<String, IncrementalLogfileReader> watchedLogs = new HashMap<String, IncrementalLogfileReader>();
 	
@@ -67,7 +69,6 @@ public class IngestActor extends UntypedActor {
 			for (Entry<String, IngestStatus> entry : statusList.entrySet()) {
 				IngestStatus status = entry.getValue();
 				if (status.phase.equals(IngestStatus.Phase.CATCHING_UP)) {
-					System.out.println("Computing progress");
 					IncrementalLogfileReader reader = newLogs.get(entry.getKey());
 					status.progress = (int) ((100 * reader.getNumberOfLinesRead()) / bufferedLineCounts.get(entry.getKey()));
 				}
@@ -77,13 +78,51 @@ public class IngestActor extends UntypedActor {
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.ADD_WATCHED_LOG)) {
 			String path = (String) msg.getPayload();
 			statusList.put(path, new IngestStatus(Phase.PENDING));
-			bufferedLineCounts.put(path, countLines(path));
-			IncrementalLogfileReader reader = new IncrementalLogfileReader(path);
-			newLogs.put(path, reader);
+			countLinesAsync(path);
+			
+			// Warning: this is a LOOOONG-RUNNING operation
+			// bufferedLineCounts.put(path, countLines(path));
+			// IncrementalLogfileReader reader = new IncrementalLogfileReader(path);
+			// newLogs.put(path, reader);
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHANGE_SLEEP_INTERVAL)) {
 			Long newInterval = (Long) msg.getPayload();
 			sleepInterval = newInterval.longValue();
 		}
+	}
+	
+	private void countLinesAsync(final String path) {
+		Future<Long> f = Futures.future(new Callable<Long>() {
+			@Override
+			public Long call() throws Exception {
+				InputStream is = new BufferedInputStream(new FileInputStream(path));
+				
+			    try {
+			        byte[] c = new byte[1024];
+			        int count = 0;
+			        int readChars = 0;
+			        boolean empty = true;
+			        while ((readChars=is.read(c)) != -1) {
+			            empty = false;
+			            for (int i=0; i<readChars; ++i) {
+			                if (c[i] == '\n')
+			                    ++count;
+			            }
+			        }
+			        return (count == 0 && !empty) ? Long.valueOf(1) : Long.valueOf(count);
+			    } finally {
+			        is.close();
+			    }
+			}
+		}, system.dispatcher());
+		
+		f.onSuccess(new OnSuccess<Long>() {
+			@Override
+			public void onSuccess(Long lineCount) throws Throwable {
+				bufferedLineCounts.put(path, lineCount);
+				IncrementalLogfileReader reader = new IncrementalLogfileReader(path);
+				newLogs.put(path, reader);
+			}
+		});
 	}
 	
 	private void startSynchronizationLoop() throws InterruptedException, IOException {
@@ -167,7 +206,7 @@ public class IngestActor extends UntypedActor {
 	 * @param file the file
 	 * @return the number of lines in the file
 	 * @throws IOException if anything goes wrong
-	 */
+	 *
 	private static int countLines(String path) throws IOException {
 		InputStream is = new BufferedInputStream(new FileInputStream(path));
 		
@@ -188,5 +227,6 @@ public class IngestActor extends UntypedActor {
 	        is.close();
 	    }
 	}
+	*/
 
 }

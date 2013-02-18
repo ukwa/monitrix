@@ -94,6 +94,8 @@ public class IngestActor extends UntypedActor {
 		Future<Long> f = Futures.future(new Callable<Long>() {
 			@Override
 			public Long call() throws Exception {
+				long startTime = System.currentTimeMillis();
+				Logger.info("Counting lines for " + path);
 				InputStream is = new BufferedInputStream(new FileInputStream(path));
 				
 			    try {
@@ -108,9 +110,11 @@ public class IngestActor extends UntypedActor {
 			                    ++count;
 			            }
 			        }
+			        Logger.info("Done - " + count + " lines");
 			        return (count == 0 && !empty) ? Long.valueOf(1) : Long.valueOf(count);
 			    } finally {
 			        is.close();
+			        Logger.info("Took " + (System.currentTimeMillis() - startTime) + " millis");
 			    }
 			}
 		}, system.dispatcher());

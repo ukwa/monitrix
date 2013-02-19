@@ -29,15 +29,17 @@
         <td colspan="2">@uk.bl.monitrix.NumberFormat.formatDuration(knownHost.getLastAccess - knownHost.getFirstAccess)</td>
         <td style="width:50%"/>
       </tr>
-      <tr>
-        <td class="monitrix-hostinfo-label">URL History</td>
-        <td colspan="2">
-          <div class="graph-thumb-container">
-            <div class="graph-thumb graph-tumb-loading" id="graph-urls"></div>
-          </div>
-        </td>
-        <td style="width:50%" />
-      </tr>
+      @if(totalURLs > 1) {
+        <tr>
+          <td class="monitrix-hostinfo-label">URL History</td>
+          <td colspan="2">
+            <div class="graph-thumb-container">
+              <div class="graph-thumb graph-tumb-loading" id="graph-urls"></div>
+            </div>
+          </td>
+          <td style="width:50%" />
+        </tr>
+      }
     
       <tr>
         <td/>
@@ -219,8 +221,10 @@
         }
       });    	
     }
-        
-    loadGraph('/api/hosts/@knownHost.getHostname()/urls-crawled?maxpoints=100', 'graph-urls', 'Completed Hosts', '#c05020', false);
+    
+    @if(totalURLs > 1) {
+      loadGraph('/api/hosts/@knownHost.getHostname()/urls-crawled?maxpoints=100', 'graph-urls', 'Completed Hosts', '#c05020', false);
+    }
   </script>
   }
 }

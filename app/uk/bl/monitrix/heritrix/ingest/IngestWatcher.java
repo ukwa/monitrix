@@ -55,8 +55,6 @@ public class IngestWatcher {
 				
 		for (String path : db.getIngestedLogs())
 			addLog(path);
-		
-		startWatching();
 	}
 	
 	private boolean doIncrementalSync() {

@@ -32,7 +32,7 @@ import akka.dispatch.OnSuccess;
 public class IngestActor extends UntypedActor {
 	
 	// The number of lines to average when estimating total no. of lines per log file
-	private static final int LINE_NUMBER_ESTIMATION_SAMPLE_SIZE = 10000;
+	private static final int LINE_NUMBER_ESTIMATION_SAMPLE_SIZE = 50000;
 	
 	private DBIngestConnector db;
 	
@@ -148,75 +148,6 @@ public class IngestActor extends UntypedActor {
 			}		
 		});
 	}
-	
-	/**
-	 * Detects a text file's charset (so that we know how many bytes are used per character
-	 * for line number estimation).
-	 * @param path the file path
-	 * @param maxChars the maximum number of characters to sample from the file
-	 * @return the charset name or <code>null</code>
-	 * @throws IOException if anything goes wrong reading the file
-	 *
-	private String detectCharset(String path, int maxChars) throws IOException  {
-		byte[] buffer = new byte[4096];
-		System.out.println("Starting charset detection");
-		
-		FileInputStream fis = new FileInputStream(path);
-		System.out.println("Got the input stream");
-		
-		UniversalDetector detector = new UniversalDetector(null);
-		
-		int charCount = 0;
-		int nread;
-		while ((nread = fis.read(buffer)) > 0 && !detector.isDone() && charCount < maxChars) {
-			charCount += nread;
-			System.out.println("charcount = " + charCount);
-			detector.handleData(buffer, 0, nread);
-		}
-		detector.dataEnd();
-		
-		System.out.println("done.");
-		
-		String charset = detector.getDetectedCharset();
-		detector.reset();
-		fis.close();
-		
-		return charset;
-	}
-	*/
-	
-	/**
-	 * Counts the number of characters contained in the first N lines of a file (or less, if the file
-	 * has less lines). 
-	 * @param path the file path
-	 * @param maxLines the number of lines for which to count characters
-	 * @return the number of characters in (up to) the first <code>maxLines</code> lines
-	 * @throws IOException if anything goes wrong reading the file
-	 *
-	private long countCharacters(String path, int maxLines) throws IOException {
-		InputStream is = new BufferedInputStream(new FileInputStream(path));
-		
-	    try {
-	        byte[] buffer = new byte[4096];
-	        
-	        long characterCount = 0;
-	        int lineCount = 0;
-	        
-	        int readChars = 0;
-	        while ((readChars = is.read(buffer)) != -1 && lineCount < maxLines) {
-	            characterCount += readChars;
-	            for (int i=0; i<readChars; ++i) {
-	                if (buffer[i] == '\n')
-	                    ++lineCount;
-	            }
-	        }
-	        
-	        return characterCount;
-	    } finally {
-	        is.close();
-	    }		
-	}
-	*/
 	
 	private void startSynchronizationLoop() throws InterruptedException, IOException {
 		Futures.future(new Callable<Void>() {

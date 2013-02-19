@@ -1,4 +1,4 @@
-@(query: String, results: List[String], took: Long, log: uk.bl.monitrix.model.CrawlLog)
+@(result: uk.bl.monitrix.model.KnownHostList.HostSearchResult, log: uk.bl.monitrix.model.CrawlLog)
 
 @import tags.navbar
 
@@ -8,17 +8,33 @@
   <div class="container-fluid" style="padding-bottom:40px;">
     <div class="row-fluid">
       <!-- Sidebar -->
-      <div class="span2" style="position:relative; left:-15px; padding-right:0px;">
+      <div class="span2" style="position:relative; left:-15px; padding-top:15px; padding-right:0px;">
         <p>
-          @results.size() Results for <strong><em>@query</em></strong><br/>
-          <small><span style="color:#888">Took @took ms</span></small>
+          @result.totalResults Results for <strong><em>@result.query</em></strong><br/>
+          <small><span style="color:#888">Took @result.took ms</span></small>
         </p>     
       </div>
       
       <!-- Result list -->
       <div class="span10">
-        @for(result <- results) {
-          <p><a href="@routes.Hosts.getHostInfo(result)">@result</a> <span class="label label-info">@log.countEntriesForHost(result)</span></p>
+        <div class="pagination">
+          <ul>
+            @if(result.offset > 0) {
+              <li><a href="/hosts?query=@result.query&limit=@result.limit&offset=@{Math.max(0, result.offset - result.limit)}">&laquo;</a></li>
+            } else {
+              <li class="disabled"><a href="#">&laquo;</a></li>
+            }
+            <li class="disabled"><a href="#">Showing Results @{result.offset + 1} - @{Math.min(result.offset + result.limit, result.totalResults)}</a></li>
+            @if(result.offset + result.limit < result.totalResults) {
+              <li><a href="/hosts?query=@result.query&limit=@result.limit&offset=@{result.offset + result.limit}">&raquo;</a></li>
+            } else {
+              <li class="disabled"><a href="#">&raquo;</a></li>
+            }
+          </ul>
+        </div>
+        
+        @for(host <- result.resultPage) {
+          <p><a href="@routes.Hosts.getHostInfo(host)">@host</a> <span class="label label-info">@log.countEntriesForHost(host)</span></p>
         }
       </div>
     </div>

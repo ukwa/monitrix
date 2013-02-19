@@ -73,17 +73,24 @@ public class MongoKnownHostList implements KnownHostList {
 	}
 
 	@Override
-	public List<String> searchHost(String query) {
+	public HostSearchResult searchHosts(String query, int limit, int offset) {
+		long startTime = System.currentTimeMillis();
+		
+		// Parse query
 		List<String> tokens = Arrays.asList(KnownHost.tokenizeName(query));
 		DBObject q = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 
 				new BasicDBObject(MONGO_QUERY_ALL, tokens));
 		
+		// Count total no. of hosts
+		long total = collection.count(q);
+		
+		// Get result page
 		List<String> hostnames = new ArrayList<String>();
-		DBCursor cursor = collection.find(q);
+		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
 		while (cursor.hasNext())
 			hostnames.add(new MongoKnownHost(cursor.next()).getHostname());
 		
-		return hostnames;
+		return new HostSearchResult(query, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
 
 	@Override

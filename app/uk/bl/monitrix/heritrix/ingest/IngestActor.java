@@ -112,7 +112,27 @@ public class IngestActor extends UntypedActor {
 				Logger.info("Estimating number of lines for " + path);
 				
 				// Count number of characters in the first N lines
-				long characters = countCharacters(path, maxLines);
+				// long characters = countCharacters(path, maxLines);
+				
+				InputStream is = new BufferedInputStream(new FileInputStream(path));
+				
+				long characters = 0;
+			    try {
+			        byte[] buffer = new byte[4096];
+			        int lineCount = 0;
+			        
+			        int readChars = 0;
+			        while ((readChars = is.read(buffer)) != -1 && lineCount < maxLines) {
+			            characters += readChars;
+			            for (int i=0; i<readChars; ++i) {
+			                if (buffer[i] == '\n')
+			                    ++lineCount;
+			            }
+			        }
+			    } finally {
+			        is.close();
+			    }
+				
 				Logger.info("Sample lines take up " + characters / (1024 * 1024) + " MB (assuming 1 byte per character)");
 				
 				File f = new File(path);
@@ -181,7 +201,7 @@ public class IngestActor extends UntypedActor {
 	 * @param maxLines the number of lines for which to count characters
 	 * @return the number of characters in (up to) the first <code>maxLines</code> lines
 	 * @throws IOException if anything goes wrong reading the file
-	 */
+	 *
 	private long countCharacters(String path, int maxLines) throws IOException {
 		InputStream is = new BufferedInputStream(new FileInputStream(path));
 		
@@ -205,6 +225,7 @@ public class IngestActor extends UntypedActor {
 	        is.close();
 	    }		
 	}
+	*/
 	
 	private void startSynchronizationLoop() throws InterruptedException, IOException {
 		Futures.future(new Callable<Void>() {

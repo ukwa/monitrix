@@ -29,9 +29,10 @@ public class Global extends GlobalSettings {
 	
 	private void connectBackend() {
 		try {
-			db = new MongoDBConnector();
 			ingestWatcher = new IngestWatcher(new MongoDBIngestConnector(), Akka.system());
 			ingestWatcher.startWatching();
+			
+			db = new MongoDBConnector();
 			Logger.info("Database connected");
 		} catch (Exception e) {
 			Logger.error("FATAL - could not connect to MongoDB");

@@ -30,6 +30,13 @@
     }
   </style>
   
+  
+  @if(flash.get("error") != null) {
+    <div class="alert alert-block alert-error">
+      <h4 class="alert-heading">Error.</h4> @flash.get("error")
+    </div>  
+  }
+  
   <h2>Monitored Heritrix Logs</h2>
   <table class="table table-bordered">
     <thead>
@@ -40,6 +47,7 @@
         <th class="monitrix-log-ingest-status-trafficlight">Status</th>
         <th></th>
         <th class="monitrix-log-ingest-status-progress"></th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -53,6 +61,9 @@
           <td class="monitrix-log-ingest-status-message"></td>
           <td class="monitrix-log-ingest-status-progress">
             <div class="progress"><div class="bar bar-warning" style="width:0%"></div></div>
+          </td>
+          <td>
+            <button class="btn btn-mini">&nbsp;<i class="icon-trash"></i>&nbsp;</button>
           </td>
         </tr>
       }

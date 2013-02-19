@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
-import org.mozilla.universalchardet.UniversalDetector;
-
 import play.Logger;
 import uk.bl.monitrix.database.DBIngestConnector;
 import uk.bl.monitrix.heritrix.IncrementalLogfileReader;
@@ -35,7 +33,7 @@ import akka.dispatch.OnSuccess;
 public class IngestActor extends UntypedActor {
 	
 	// The number of lines to average when estimating total no. of lines per log file
-	private static final int LINE_NUMBER_ESTIMATION_SAMPLE_SIZE = 50000;
+	private static final int LINE_NUMBER_ESTIMATION_SAMPLE_SIZE = 100000;
 	
 	private DBIngestConnector db;
 	
@@ -86,11 +84,6 @@ public class IngestActor extends UntypedActor {
 			String path = (String) msg.getPayload();
 			statusList.put(path, new IngestStatus(Phase.PENDING));
 			estimateLinesAsync(path, LINE_NUMBER_ESTIMATION_SAMPLE_SIZE);
-			
-			// Warning: this is a LOOOONG-RUNNING operation
-			// bufferedLineCounts.put(path, countLines(path));
-			// IncrementalLogfileReader reader = new IncrementalLogfileReader(path);
-			// newLogs.put(path, reader);
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHANGE_SLEEP_INTERVAL)) {
 			Long newInterval = (Long) msg.getPayload();
 			sleepInterval = newInterval.longValue();
@@ -101,7 +94,11 @@ public class IngestActor extends UntypedActor {
 	 * Estimates the total number of lines in a text file based on computing the byte-size of the first
 	 * <code>maxLines</code> lines, and assuming that all other lines will have the same average byte-size.
 	 * 
-	 * <strong>Warning:</strong> the result of this method will be too high if the file
+	 * <strong>Warning #1:</strong> This method assumes 8-bit-per-character encoding (e.g. UTF-8)! Detecting 
+	 * encoding would be computationally to intensive. If the log file were encoded with a N bytes-per-character,
+	 * the result of this method will be too high by the factor N. 
+	 * 
+	 * <strong>Warning #2:</strong> the result of this method will be too high if the file
 	 * is method will yield a result which is too high, if the file has less than <code>maxLines</code> lines.
 	 * (This limitation should be irrelevant for the monitrix use case, however.)
 	 * 
@@ -114,24 +111,15 @@ public class IngestActor extends UntypedActor {
 			public Long call() throws Exception {
 				Logger.info("Estimating number of lines for " + path);
 				
-				// Step 1 - determine file encoding
-				String charset = detectCharset(path);
-				
-				// Step 2 - get bytes per character
-				int bytesPerCharacter = "m".getBytes(charset).length;
-				
-				// Step 3 - count number of characters in the first N lines
+				// Count number of characters in the first N lines
 				long characters = countCharacters(path, maxLines);
-				
-				// Step 4 - compute the byte size of the first N lines
-				long bytesSample = characters * bytesPerCharacter;
-				Logger.info("Sample lines take up " + bytesSample / (1024 * 1024) + " MB");
+				Logger.info("Sample lines take up " + characters / (1024 * 1024) + " MB (assuming 1 byte per character)");
 				
 				File f = new File(path);
 				long bytesTotal = f.length();
 				Logger.info("File has " + bytesTotal / (1024 * 1024) + " MB total");
 				
-				double ratio = (double) bytesTotal / (double) bytesSample;
+				double ratio = (double) bytesTotal / (double) characters;
 				
 				long estimatedLines = (long) (maxLines * ratio);
 				Logger.info("Estimated a total number of " + estimatedLines + " lines");
@@ -154,20 +142,29 @@ public class IngestActor extends UntypedActor {
 	 * Detects a text file's charset (so that we know how many bytes are used per character
 	 * for line number estimation).
 	 * @param path the file path
+	 * @param maxChars the maximum number of characters to sample from the file
 	 * @return the charset name or <code>null</code>
 	 * @throws IOException if anything goes wrong reading the file
-	 */
-	private static String detectCharset(String path) throws IOException  {
+	 *
+	private String detectCharset(String path, int maxChars) throws IOException  {
 		byte[] buffer = new byte[4096];
+		System.out.println("Starting charset detection");
+		
 		FileInputStream fis = new FileInputStream(path);
+		System.out.println("Got the input stream");
 		
 		UniversalDetector detector = new UniversalDetector(null);
 		
+		int charCount = 0;
 		int nread;
-		while ((nread = fis.read(buffer)) > 0 && !detector.isDone()) {
+		while ((nread = fis.read(buffer)) > 0 && !detector.isDone() && charCount < maxChars) {
+			charCount += nread;
+			System.out.println("charcount = " + charCount);
 			detector.handleData(buffer, 0, nread);
 		}
 		detector.dataEnd();
+		
+		System.out.println("done.");
 		
 		String charset = detector.getDetectedCharset();
 		detector.reset();
@@ -175,6 +172,7 @@ public class IngestActor extends UntypedActor {
 		
 		return charset;
 	}
+	*/
 	
 	/**
 	 * Counts the number of characters contained in the first N lines of a file (or less, if the file
@@ -184,7 +182,7 @@ public class IngestActor extends UntypedActor {
 	 * @return the number of characters in (up to) the first <code>maxLines</code> lines
 	 * @throws IOException if anything goes wrong reading the file
 	 */
-	private static long countCharacters(String path, int maxLines) throws IOException {
+	private long countCharacters(String path, int maxLines) throws IOException {
 		InputStream is = new BufferedInputStream(new FileInputStream(path));
 		
 	    try {
@@ -207,56 +205,6 @@ public class IngestActor extends UntypedActor {
 	        is.close();
 	    }		
 	}
-	
-	/**
-	 * Counts the lines of a log file, asynchronously using a Future. Seems to be the
-	 * fastest way to implement this. Taken from:
-	 * 
-	 * http://stackoverflow.com/questions/453018/number-of-lines-in-a-file-in-java
-	 * 
-	 * @param file the file
-	 * @return the number of lines in the file
-	 * @throws IOException if anything goes wrong
-	 *
-	private void countLinesAsync(final String path) {
-		Future<Long> f = Futures.future(new Callable<Long>() {
-			@Override
-			public Long call() throws Exception {
-				long startTime = System.currentTimeMillis();
-				Logger.info("Counting number of lines for " + path);
-				InputStream is = new BufferedInputStream(new FileInputStream(path));
-				
-			    try {
-			        byte[] c = new byte[1024];
-			        int count = 0;
-			        int readChars = 0;
-			        boolean empty = true;
-			        while ((readChars=is.read(c)) != -1) {
-			            empty = false;
-			            for (int i=0; i<readChars; ++i) {
-			                if (c[i] == '\n')
-			                    ++count;
-			            }
-			        }
-			        Logger.info("Done - " + count + " lines");
-			        return (count == 0 && !empty) ? Long.valueOf(1) : Long.valueOf(count);
-			    } finally {
-			        is.close();
-			        Logger.info("Took " + (System.currentTimeMillis() - startTime) + " millis");
-			    }
-			}
-		}, system.dispatcher());
-		
-		f.onSuccess(new OnSuccess<Long>() {
-			@Override
-			public void onSuccess(Long lineCount) throws Throwable {
-				bufferedLineCounts.put(path, lineCount);
-				IncrementalLogfileReader reader = new IncrementalLogfileReader(path);
-				newLogs.put(path, reader);
-			}
-		});
-	}
-	*/
 	
 	private void startSynchronizationLoop() throws InterruptedException, IOException {
 		Futures.future(new Callable<Void>() {

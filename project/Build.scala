@@ -13,7 +13,8 @@ object ApplicationBuild extends Build {
       "commons-httpclient" % "commons-httpclient" % "3.1",
       "commons-io" % "commons-io" % "2.4",
       "com.google.guava" % "guava" % "13.0.1",
-      "net.sf.jasperreports" % "jasperreports" % "4.1.2"
+      "net.sf.jasperreports" % "jasperreports" % "4.1.2",
+      "com.googlecode.juniversalchardet" % "juniversalchardet" % "1.0.3"
     )
 
     // We're using the SBT BuildInfo plugin to make library version numbers available to the view

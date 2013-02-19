@@ -1,10 +1,9 @@
 package uk.bl.monitrix.heritrix.ingest;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,7 +32,7 @@ import akka.dispatch.OnSuccess;
 public class IngestActor extends UntypedActor {
 	
 	// The number of lines to average when estimating total no. of lines per log file
-	private static final int LINE_NUMBER_ESTIMATION_SAMPLE_SIZE = 100000;
+	private static final int LINE_NUMBER_ESTIMATION_SAMPLE_SIZE = 10000;
 	
 	private DBIngestConnector db;
 	
@@ -112,25 +111,17 @@ public class IngestActor extends UntypedActor {
 				Logger.info("Estimating number of lines for " + path);
 				
 				// Count number of characters in the first N lines
-				// long characters = countCharacters(path, maxLines);
-				
-				InputStream is = new BufferedInputStream(new FileInputStream(path));
-				
+				BufferedReader reader = new BufferedReader(new FileReader(path));
 				long characters = 0;
 			    try {
-			        byte[] buffer = new byte[4096];
-			        int lineCount = 0;
-			        
-			        int readChars = 0;
-			        while ((readChars = is.read(buffer)) != -1 && lineCount < maxLines) {
-			            characters += readChars;
-			            for (int i=0; i<readChars; ++i) {
-			                if (buffer[i] == '\n')
-			                    ++lineCount;
-			            }
+			    	int lineCount = 0;
+			    	String line;
+			        while ((line = reader.readLine()) != null && lineCount < maxLines) {
+			            characters += line.length();
+	                    lineCount++;
 			        }
 			    } finally {
-			        is.close();
+			        reader.close();
 			    }
 				
 				Logger.info("Sample lines take up " + characters / (1024 * 1024) + " MB (assuming 1 byte per character)");

@@ -22,7 +22,7 @@ import uk.bl.monitrix.heritrix.ingest.IngestWatcher;
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class Global extends GlobalSettings {
-	
+
 	private static DBConnector db = null;
 	
 	private static IngestWatcher ingestWatcher = null;
@@ -30,10 +30,8 @@ public class Global extends GlobalSettings {
 	private void connectBackend() {
 		try {
 			db = new MongoDBConnector();
-			
 			ingestWatcher = new IngestWatcher(new MongoDBIngestConnector(), Akka.system());
 			ingestWatcher.startWatching();
-			
 			Logger.info("Database connected");
 		} catch (Exception e) {
 			Logger.error("FATAL - could not connect to MongoDB");
@@ -51,7 +49,6 @@ public class Global extends GlobalSettings {
 	@Override
 	public void onStop(Application app) {
 		ingestWatcher.stopWatching();
-		
 		if (db != null) {
 			Logger.info("Database disconnected");
 			db.close();

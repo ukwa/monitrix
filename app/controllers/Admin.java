@@ -1,10 +1,13 @@
 package controllers;
 
+import java.util.Map;
+
 import controllers.mapping.IngestStatusMapper;
 
 import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
+import uk.bl.monitrix.heritrix.ingest.IngestStatus;
 import uk.bl.monitrix.heritrix.ingest.IngestWatcher;
 import uk.bl.monitrix.model.CrawlLog;
 
@@ -25,7 +28,11 @@ public class Admin extends AbstractController{
 	}
 	
 	public static Result getLogTrackerStatus() {
-		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus(), crawlLog)));
+		Map<String, IngestStatus> statusMap = ingestWatcher.getStatus();
+		if (statusMap == null)
+			return ok();
+		
+		return ok(Json.toJson(IngestStatusMapper.map(statusMap, crawlLog)));
 	}
 	
 }

@@ -1,9 +1,14 @@
 package uk.bl.monitrix.heritrix.ingest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import play.Configuration;
+import play.Logger;
+import play.Play;
 
 import akka.actor.Actor;
 import akka.actor.ActorRef;
@@ -20,11 +25,13 @@ import uk.bl.monitrix.database.DBIngestConnector;
 import uk.bl.monitrix.heritrix.ingest.IngestControlMessage.Command;
 
 /**
- * The ingest provides a control entry point into the ingest system. The actual work 
+ * The IngestWatcher provides a control entry point into the ingest system. The actual work 
  * of monitoring and ingest is handled by the {@link IngestActor}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class IngestWatcher {
+	
+	private static Configuration config = Play.application().configuration();
 	
 	private ActorRef ingestActor;
 	
@@ -37,7 +44,9 @@ public class IngestWatcher {
 			@Override
 			public Actor create() {
 				try {
-					return new IngestActor(db, system);
+					boolean doIncrementalSync = doIncrementalSync();
+					Logger.info("Incremental sync set to " + Boolean.toString(doIncrementalSync).toUpperCase());
+					return new IngestActor(db, system, doIncrementalSync);
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
@@ -48,6 +57,17 @@ public class IngestWatcher {
 			addLog(path);
 		
 		startWatching();
+	}
+	
+	private boolean doIncrementalSync() {
+		String incrementalSync = config.getString("monitrix.incremental.sync");
+		if (incrementalSync == null)
+			return true;
+		
+		if (incrementalSync.trim().toLowerCase().equals("false"))
+			return false;
+		
+		return true;
 	}
 	
 	/**
@@ -71,6 +91,7 @@ public class IngestWatcher {
 	 * Starts the watcher.
 	 */
 	public void startWatching() {
+		Logger.info("Starting ingest watcher");
 		ingestActor.tell(new IngestControlMessage(Command.START));
 	}
 	
@@ -78,19 +99,20 @@ public class IngestWatcher {
 	 * Stops the watcher.
 	 */
 	public void stopWatching() {
+		Logger.info("Stopping ingest watcher");
 		ingestActor.tell(new IngestControlMessage(Command.STOP));
 	}
 	
 	@SuppressWarnings("unchecked")
 	public Map<String, IngestStatus> getStatus() {
-		Future<Object> future = 
-				Patterns.ask(ingestActor, new IngestControlMessage(Command.GET_STATUS), new Timeout(Duration.create(5, TimeUnit.SECONDS)));
-		
 		try {
+			Future<Object> future = 
+					Patterns.ask(ingestActor, new IngestControlMessage(Command.GET_STATUS), new Timeout(Duration.create(5, TimeUnit.SECONDS)));
+
 			Object result = Await.result(future, Duration.create(30, TimeUnit.SECONDS));
 			return (Map<String, IngestStatus>) result;
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			return new HashMap<String, IngestStatus>();
 		}
 	}
 

@@ -38,7 +38,7 @@ public class IngestStatusMapper {
 
 		for (Entry<String, IngestStatus> entry : status.entrySet()) {
 			String path = entry.getKey();
-			mapped.add(new IngestStatusMapper(path, entry.getValue(), 0)); // log.countEntriesForLog(path)));
+			mapped.add(new IngestStatusMapper(path, entry.getValue(), 0));
 		}
 		
 		return mapped;

@@ -25,12 +25,18 @@ import uk.bl.monitrix.model.KnownHost;
 
 public class Hosts extends AbstractController {
 	
+	// String constants
 	private static final String QUERY = "query";
+	private static final String LIMIT = "limit";
+	private static final String OFFSET = "offest";
 	
 	private static DBConnector db = Global.getBackend();
 	
 	public static Result searchHosts() {
 		String query = getQueryParam(QUERY);
+		int limit = getQueryParamAsInt(LIMIT, 20);
+		int offest = getQueryParamAsInt(OFFSET, 0);
+		
 		if (query == null) {
 			// TODO error handling
 			return notFound();

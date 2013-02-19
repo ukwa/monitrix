@@ -72,7 +72,6 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 	
 	@Override
 	public void insert(String logPath, Iterator<LogFileEntry> iterator) {
-		Logger.info("Writing log to MongoDB");
 		long start = System.currentTimeMillis();
 		
 		while (iterator.hasNext()) {
@@ -130,7 +129,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}
 				
-		Logger.info("Done - took " + (System.currentTimeMillis() - start) + " ms");		
+		Logger.debug("Done - took " + (System.currentTimeMillis() - start) + " ms");		
 	}
 	
 }

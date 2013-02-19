@@ -38,6 +38,8 @@ public class IngestActor extends UntypedActor {
 	
 	private ActorSystem system;
 	
+	private boolean doIncrementalSync;
+	
 	private static long sleepInterval = 15000;
 	
 	private Map<String, IncrementalLogfileReader> newLogs = new HashMap<String, IncrementalLogfileReader>();
@@ -53,9 +55,10 @@ public class IngestActor extends UntypedActor {
 	
 	private boolean keepRunning = true;
 	
-	public IngestActor(DBIngestConnector db, ActorSystem system) {
+	public IngestActor(DBIngestConnector db, ActorSystem system, boolean doIncrementalSync) {
 		this.db = db;
 		this.system = system;
+		this.doIncrementalSync = doIncrementalSync;
 	}
 	
 	@Override
@@ -161,25 +164,29 @@ public class IngestActor extends UntypedActor {
 						toAdd.add(reader);
 					
 					for (IncrementalLogfileReader reader : toAdd) {
-						Logger.info("Catching up with log file: " + reader.getPath());
+						Logger.info("Catching up with log file " + reader.getPath());
 						catchUpWithLog(reader);
+						Logger.info("Caught up with log file " + reader.getPath());
 						newLogs.remove(reader.getPath());
 					}
 					
 					// Sync all other logs
 					for (IncrementalLogfileReader reader : watchedLogs.values()) {
-						Logger.info("Synchronizing log: " + reader.getPath());
+						Logger.debug("Synchronizing log: " + reader.getPath());
 						synchronizeWithLog(reader);
 					}
 					
-					// Add new Logs to synchroniziation loop
-					for (IncrementalLogfileReader reader : toAdd)
-						watchedLogs.put(reader.getPath(), reader);
+					// Add new Logs to synchroniziation loop, if sync is enabled
+					for (IncrementalLogfileReader reader : toAdd) {
+						if (doIncrementalSync)
+							watchedLogs.put(reader.getPath(), reader);
+					}
 					
 					// Go to sleep
 					Thread.sleep(sleepInterval);
 				}
-				
+			
+				Logger.info("Stopping synchronization loop");
 				return null;
 			}
 		}, system.dispatcher());

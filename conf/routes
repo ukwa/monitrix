@@ -39,7 +39,7 @@ GET     /api/hosts/:hostname/urls-crawled  controllers.Hosts.getURLHistoryForHos
 # Admin
 GET     /admin                             controllers.Admin.index()
 POST    /admin/add-log                     controllers.Admin.addLog()
-GET     /admin/drop-log                    controllers.Admin.dropLog()
+GET     /admin/toggle-watch                controllers.Admin.toggleWatch()
 GET     /api/admin/logs/status             controllers.Admin.getLogTrackerStatus()
 
 # Map static resources from the /public folder to the /assets URL path

@@ -38,6 +38,13 @@ public interface IngestSchedule {
 	public IngestedLog getLogForPath(String path);
 	
 	/**
+	 * Tests if monitoring is enabled for a specified log ID.
+	 * @param id the log ID
+	 * @return <code>true</code> if continuous monitoring is enabled for the log
+	 */
+	public boolean isMonitoringEnabled(String id);
+	
+	/**
 	 * Sets continuous monitoring for a specific log.
 	 * @param id the log ID
 	 * @param monitoringEnabled flag to toggle continuous monitoring for this log

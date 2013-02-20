@@ -13,6 +13,7 @@ import uk.bl.monitrix.model.IngestSchedule;
 
 public class Admin extends AbstractController{
 	
+	private static final String ID = "id";
 	private static final String PATH = "path";
 	private static final String CRAWLER_ID = "crawler_id";
 
@@ -56,12 +57,12 @@ public class Admin extends AbstractController{
 		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus(), ingestSchedule)));
 	}
 	
-	public static Result dropLog() {
-		String path = getQueryParam(PATH);
-		if (path.isEmpty())
-			return redirect(routes.Admin.index());
-		
-		return ok();
+	public static Result toggleWatch() {
+		String logId = getQueryParam(ID);
+		if (!logId.isEmpty())
+			ingestSchedule.setMonitoringEnabled(logId, !ingestSchedule.isMonitoringEnabled(logId));
+
+		return redirect(routes.Admin.index());
 	}
 	
 }

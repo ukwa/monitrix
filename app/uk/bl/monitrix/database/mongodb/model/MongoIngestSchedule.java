@@ -65,20 +65,31 @@ public class MongoIngestSchedule implements IngestSchedule {
 		
 		return new MongoIngestedLog(dbo);
 	}
+	
+	@Override
+	public boolean isMonitoringEnabled(String id) {
+		IngestedLog log = getLog(id);
+		if (log == null)
+			return false;
+		
+		return log.isMonitored();
+	}
 
 	@Override
 	public void setMonitoringEnabled(String id, boolean monitoringEnabled) {
-		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_INGEST_SCHEDULE_ID, id));
-		if (dbo != null) {
-			new MongoIngestedLog(dbo).setIsMonitored(monitoringEnabled);
-			collection.save(dbo);
+		MongoIngestedLog log = (MongoIngestedLog) getLog(id);
+		if (log != null) {
+			log.setIsMonitored(monitoringEnabled);
+			collection.save(log.getBackingDBO());
 		}
 	}
 	
 	public void incrementIngestedLogLines(String id, long increment) {
 		MongoIngestedLog log = (MongoIngestedLog) getLog(id);
-		log.setIngestedLines(log.getIngestedLines() + increment);
-		collection.save(log.getBackingDBO());
+		if (log != null) {
+			log.setIngestedLines(log.getIngestedLines() + increment);
+			collection.save(log.getBackingDBO());
+		}
 	}
 
 }

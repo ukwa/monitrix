@@ -46,6 +46,7 @@
         <th>Log File Path</th>
         <th>Lines Ingested</th>
         <th class="monitrix-log-ingest-status-trafficlight">Status</th>
+        <th>WATCHING</th>
         <th></th>
         <th class="monitrix-log-ingest-status-progress"></th>
         <th></th>
@@ -60,12 +61,17 @@
           <td class="monitrix-log-ingest-status-logpath">@log.getPath</td>
           <td class="monitrix-log-ingest-status-lines-ingested"></td>
           <td class="monitrix-log-ingest-status-trafficlight"></td>
+          <td>
+            @if(log.isMonitored) {
+              <i class="icon-eye-open"></i>
+            }
+          </td>
           <td class="monitrix-log-ingest-status-message"></td>
           <td class="monitrix-log-ingest-status-progress">
             <div class="progress"><div class="bar bar-warning" style="width:0%"></div></div>
           </td>
           <td>
-            <button class="btn btn-mini" onclick="javascript:dropLog('@log')">&nbsp;<i class="icon-trash"></i>&nbsp;</button>
+            <button class="btn btn-mini" onclick="javascript:toggleWatch('@log.getId')">&nbsp;<i class="icon-eye-close"></i>&nbsp;</button>
           </td>
         </tr>
       }
@@ -80,11 +86,8 @@
   </form>
   
   <script>
-    function dropLog(path) {
-      var r = confirm("Are you sure you want to drop the log " + path + " from the monitrix database?");
-      if (r == true) {
-        window.location.href = '@routes.Admin.dropLog?path=' + encodeURIComponent(path);
-      }
+    function toggleWatch(id) {
+      window.location.href = '@routes.Admin.toggleWatch?id=' + encodeURIComponent(id);
     }
     
     function pollStatusInfo() {

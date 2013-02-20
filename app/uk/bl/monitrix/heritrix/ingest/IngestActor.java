@@ -160,6 +160,8 @@ public class IngestActor extends UntypedActor {
 			public Void call() throws Exception {
 				Logger.info("Starting log synchronization loop");
 				
+				IngestSchedule schedule = db.getIngestSchedule();
+				
 				while (keepRunning) {
 					// Check if there are new logs to watch - and ingest if any
 					List<WatchedLog> toAdd = new ArrayList<WatchedLog>();
@@ -167,25 +169,27 @@ public class IngestActor extends UntypedActor {
 						toAdd.add(watchedLog);
 					
 					for (WatchedLog log : toAdd) {
-						Logger.info("Catching up with log file " + log.getReader().getPath());
-						catchUpWithLog(log);
-						Logger.info("Caught up with log file " + log.getReader().getPath());
-						newLogs.remove(log.getLogInfo().getId());
+						// TODO performance improvement
+						if (schedule.isMonitoringEnabled(log.getLogInfo().getId())) {
+							Logger.info("Catching up with log file " + log.getReader().getPath());
+							catchUpWithLog(log);
+							Logger.info("Caught up with log file " + log.getReader().getPath());
+							newLogs.remove(log.getLogInfo().getId());
+						}
 					}
 					
 					// Sync all other logs
-					for (WatchedLog watchedLog : watchedLogs.values()) {
-						Logger.debug("Synchronizing log: " + watchedLog.getLogInfo().getPath());
-						synchronizeWithLog(watchedLog);
+					for (WatchedLog log : watchedLogs.values()) {
+						// TODO performance improvement
+						if (schedule.isMonitoringEnabled(log.getLogInfo().getId())) {
+							Logger.debug("Synchronizing log: " + log.getLogInfo().getPath());
+							synchronizeWithLog(log);
+						}
 					}
 					
 					// Add new Logs to synchroniziation loop
-					IngestSchedule schedule = db.getIngestSchedule();
-					for (WatchedLog log : toAdd) {
-						String path = log.getLogInfo().getPath();
-						if (schedule.getLogForPath(path).isMonitored())
-							watchedLogs.put(log.getLogInfo().getId(), log);
-					}
+					for (WatchedLog log : toAdd)
+						watchedLogs.put(log.getLogInfo().getId(), log);
 					
 					// Go to sleep
 					Thread.sleep(sleepInterval);

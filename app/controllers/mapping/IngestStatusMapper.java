@@ -38,7 +38,8 @@ public class IngestStatusMapper {
 
 		for (Entry<String, IngestStatus> entry : status.entrySet()) {
 			String id = entry.getKey();
-			mapped.add(new IngestStatusMapper(id, entry.getValue(), 0));
+			long ingestedLines = (schedule.getLog(id) == null) ? 0 : schedule.getLog(id).getIngestedLines();
+			mapped.add(new IngestStatusMapper(id, entry.getValue(), ingestedLines));
 		}
 		
 		return mapped;

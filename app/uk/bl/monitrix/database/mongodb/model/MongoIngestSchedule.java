@@ -3,6 +3,8 @@ package uk.bl.monitrix.database.mongodb.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -47,6 +49,15 @@ public class MongoIngestSchedule implements IngestSchedule {
 	}
 	
 	@Override
+	public IngestedLog getLog(String id) {
+		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_INGEST_SCHEDULE_ID, new ObjectId(id)));
+		if (dbo == null)
+			return null;
+		
+		return new MongoIngestedLog(dbo);
+	}
+	
+	@Override
 	public IngestedLog getLogForPath(String path) {
 		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_INGEST_SCHEDULE_PATH, path));
 		if (dbo == null)
@@ -62,6 +73,12 @@ public class MongoIngestSchedule implements IngestSchedule {
 			new MongoIngestedLog(dbo).setIsMonitored(monitoringEnabled);
 			collection.save(dbo);
 		}
+	}
+	
+	public void incrementIngestedLogLines(String id, long increment) {
+		MongoIngestedLog log = (MongoIngestedLog) getLog(id);
+		log.setIngestedLines(log.getIngestedLines() + increment);
+		collection.save(log.getBackingDBO());
 	}
 
 }

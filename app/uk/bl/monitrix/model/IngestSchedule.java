@@ -24,6 +24,13 @@ public interface IngestSchedule {
 	public List<IngestedLog> getLogs();
 	
 	/**
+	 * Gets the log with the specified ID
+	 * @param id the ID
+	 * @return the log
+	 */
+	public IngestedLog getLog(String id);
+	
+	/**
 	 * Returns the log for a specified file path
 	 * @param path the file path
 	 * @return the {@link IngestedLog}

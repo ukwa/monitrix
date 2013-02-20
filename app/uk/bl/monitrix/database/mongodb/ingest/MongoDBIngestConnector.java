@@ -37,7 +37,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 	private DB db;
 	
 	// Ingest schedule
-	private IngestSchedule ingestSchedule;
+	private MongoIngestSchedule ingestSchedule;
 	
 	// Crawl log
 	private MongoCrawlLogImporter crawlLogImporter;
@@ -127,6 +127,9 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 			alertBatch.clear();		
 			
 			crawlStatsImporter.commit();
+			
+			ingestSchedule.incrementIngestedLogLines(logId, counter);
+			
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}
 				

@@ -115,7 +115,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	}
 	
 	@Override
-	public String getLogPath() {
+	public String getLogId() {
 		return logPath;
 	}
 	

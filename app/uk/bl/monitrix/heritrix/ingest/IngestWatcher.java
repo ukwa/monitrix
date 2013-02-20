@@ -1,14 +1,10 @@
 package uk.bl.monitrix.heritrix.ingest;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import play.Configuration;
 import play.Logger;
-import play.Play;
 
 import akka.actor.Actor;
 import akka.actor.ActorRef;
@@ -31,11 +27,7 @@ import uk.bl.monitrix.heritrix.ingest.IngestControlMessage.Command;
  */
 public class IngestWatcher {
 	
-	private static Configuration config = Play.application().configuration();
-	
 	private ActorRef ingestActor;
-	
-	private List<String> watchedLogs = new ArrayList<String>();
 	
 	public IngestWatcher(final DBIngestConnector db, final ActorSystem system) {
 		this.ingestActor = system.actorOf(new Props(new UntypedActorFactory() {	
@@ -43,46 +35,18 @@ public class IngestWatcher {
 
 			@Override
 			public Actor create() {
-				try {
-					boolean doIncrementalSync = doIncrementalSync();
-					Logger.info("Incremental sync set to " + Boolean.toString(doIncrementalSync).toUpperCase());
-					return new IngestActor(db, system, doIncrementalSync);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
+				return new IngestActor(db, system);
 			}
 		}), "ingest-actor");
 				
-		for (String path : db.getIngestedLogs())
-			addLog(path);
+		refresh();
 	}
-	
-	private boolean doIncrementalSync() {
-		String incrementalSync = config.getString("monitrix.incremental.sync");
-		if (incrementalSync == null)
-			return true;
-		
-		if (incrementalSync.trim().toLowerCase().equals("false"))
-			return false;
-		
-		return true;
-	}
-	
+
 	/**
-	 * Returns the names of the logs currently being watched.
-	 * @return the list of log names
+	 * Re-syncs the status of the IngestWatcher with the DB-backed IngestSchedule
 	 */
-	public List<String> getWatchedLogs() {
-		return watchedLogs;
-	}
-	
-	/**
-	 * Adds a new log to the list of watched logs.
-	 * @param path the log path
-	 */
-	public void addLog(String path) {
-		watchedLogs.add(path);
-		ingestActor.tell(new IngestControlMessage(Command.ADD_WATCHED_LOG, path));
+	public void refresh() {
+		ingestActor.tell(new IngestControlMessage(Command.SYNC_WITH_SCHEDULE));
 	}
 	
 	/**

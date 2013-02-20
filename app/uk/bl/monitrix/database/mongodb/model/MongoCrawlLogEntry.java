@@ -53,12 +53,12 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	}
 	
 	@Override
-	public String getLogPath() {
-		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH);
+	public String getLogId() {
+		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_LOG_ID);
 	}
 	
-	public void setLogPath(String logPath) {
-		dbo.put(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH, logPath);
+	public void setLogId(String logId) {
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_LOG_ID, logId);
 	}
 
 	@Override

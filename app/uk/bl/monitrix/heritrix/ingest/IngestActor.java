@@ -17,6 +17,8 @@ import uk.bl.monitrix.database.DBIngestConnector;
 import uk.bl.monitrix.heritrix.IncrementalLogfileReader;
 import uk.bl.monitrix.heritrix.LogFileEntry;
 import uk.bl.monitrix.heritrix.ingest.IngestStatus.Phase;
+import uk.bl.monitrix.model.IngestSchedule;
+import uk.bl.monitrix.model.IngestedLog;
 
 import akka.actor.ActorSystem;
 import akka.actor.UntypedActor;
@@ -38,16 +40,11 @@ public class IngestActor extends UntypedActor {
 	
 	private ActorSystem system;
 	
-	private boolean doIncrementalSync;
-	
 	private static long sleepInterval = 15000;
 	
-	private Map<String, IncrementalLogfileReader> newLogs = new HashMap<String, IncrementalLogfileReader>();
+	private Map<String, WatchedLog> newLogs = new HashMap<String, WatchedLog>();
 	
-	// private Map<String, Long> bufferedLineCounts = new HashMap<String, Long>();
-	private Map<String, Long> estimatedLineCounts = new HashMap<String, Long>();
-	
-	private Map<String, IncrementalLogfileReader> watchedLogs = new HashMap<String, IncrementalLogfileReader>();
+	private Map<String, WatchedLog> watchedLogs = new HashMap<String, WatchedLog>();
 	
 	private Map<String, IngestStatus> statusList = new HashMap<String, IngestStatus>();
 
@@ -55,10 +52,9 @@ public class IngestActor extends UntypedActor {
 	
 	private boolean keepRunning = true;
 	
-	public IngestActor(DBIngestConnector db, ActorSystem system, boolean doIncrementalSync) {
+	public IngestActor(DBIngestConnector db, ActorSystem system) {
 		this.db = db;
 		this.system = system;
-		this.doIncrementalSync = doIncrementalSync;
 	}
 	
 	@Override
@@ -76,16 +72,22 @@ public class IngestActor extends UntypedActor {
 			for (Entry<String, IngestStatus> entry : statusList.entrySet()) {
 				IngestStatus status = entry.getValue();
 				if (status.phase.equals(IngestStatus.Phase.CATCHING_UP)) {
-					IncrementalLogfileReader reader = newLogs.get(entry.getKey());
-					status.progress = (int) ((100 * reader.getNumberOfLinesRead()) / estimatedLineCounts.get(entry.getKey()));
+					WatchedLog log = newLogs.get(entry.getKey());
+					status.progress = (int) ((100 * log.getReader().getNumberOfLinesRead()) / log.getEstimatedLineCount());
 				}
 			}
 
 			getSender().tell(statusList);
-		} else if (msg.getCommand().equals(IngestControlMessage.Command.ADD_WATCHED_LOG)) {
-			String path = (String) msg.getPayload();
-			statusList.put(path, new IngestStatus(Phase.PENDING));
-			estimateLinesAsync(path, LINE_NUMBER_ESTIMATION_SAMPLE_SIZE);
+		} else if (msg.getCommand().equals(IngestControlMessage.Command.SYNC_WITH_SCHEDULE)) {
+			for (IngestedLog log : db.getIngestSchedule().getLogs()) {
+				String id = log.getId();
+				if (!watchedLogs.containsKey(id) && !newLogs.containsKey(id)) {
+					statusList.put(id, new IngestStatus(Phase.PENDING));
+					estimateLinesAsync(log, LINE_NUMBER_ESTIMATION_SAMPLE_SIZE);
+				}
+			}
+			
+			// TODO update monitored/not-monitored info
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHANGE_SLEEP_INTERVAL)) {
 			Long newInterval = (Long) msg.getPayload();
 			sleepInterval = newInterval.longValue();
@@ -107,14 +109,14 @@ public class IngestActor extends UntypedActor {
 	 * @param path the file path
 	 * @param maxLines the maximum number of lines to sample from the file
 	 */
-	private void estimateLinesAsync(final String path, final int maxLines) {
+	private void estimateLinesAsync(final IngestedLog log, final int maxLines) {
 		Future<Long> f = Futures.future(new Callable<Long>() {
 			@Override
 			public Long call() throws Exception {
-				Logger.info("Estimating number of lines for " + path);
+				Logger.info("Estimating number of lines for " + log.getPath());
 				
 				// Count number of characters in the first N lines
-				BufferedReader reader = new BufferedReader(new FileReader(path));
+				BufferedReader reader = new BufferedReader(new FileReader(log.getPath()));
 				long characters = 0;
 			    try {
 			    	int lineCount = 0;
@@ -129,7 +131,7 @@ public class IngestActor extends UntypedActor {
 				
 				Logger.info("Sample lines take up " + characters / (1024 * 1024) + " MB (assuming 1 byte per character)");
 				
-				File f = new File(path);
+				File f = new File(log.getPath());
 				long bytesTotal = f.length();
 				Logger.info("File has " + bytesTotal / (1024 * 1024) + " MB total");
 				
@@ -145,9 +147,9 @@ public class IngestActor extends UntypedActor {
 		f.onSuccess(new OnSuccess<Long>() {
 			@Override
 			public void onSuccess(Long estimatedLineCount) throws Throwable {
-				estimatedLineCounts.put(path, estimatedLineCount);
-				IncrementalLogfileReader reader = new IncrementalLogfileReader(path);
-				newLogs.put(path, reader);
+				WatchedLog watchedLog = new WatchedLog(log, new IncrementalLogfileReader(log.getPath()));
+				watchedLog.setEstimatedLineCount(estimatedLineCount);
+				newLogs.put(log.getId(), watchedLog);
 			}		
 		});
 	}
@@ -157,29 +159,32 @@ public class IngestActor extends UntypedActor {
 			@Override
 			public Void call() throws Exception {
 				Logger.info("Starting log synchronization loop");
+				
 				while (keepRunning) {
 					// Check if there are new logs to watch - and ingest if any
-					List<IncrementalLogfileReader> toAdd = new ArrayList<IncrementalLogfileReader>();
-					for (IncrementalLogfileReader reader : newLogs.values())
-						toAdd.add(reader);
+					List<WatchedLog> toAdd = new ArrayList<WatchedLog>();
+					for (WatchedLog watchedLog : newLogs.values())
+						toAdd.add(watchedLog);
 					
-					for (IncrementalLogfileReader reader : toAdd) {
-						Logger.info("Catching up with log file " + reader.getPath());
-						catchUpWithLog(reader);
-						Logger.info("Caught up with log file " + reader.getPath());
-						newLogs.remove(reader.getPath());
+					for (WatchedLog log : toAdd) {
+						Logger.info("Catching up with log file " + log.getReader().getPath());
+						catchUpWithLog(log);
+						Logger.info("Caught up with log file " + log.getReader().getPath());
+						newLogs.remove(log.getLogInfo().getId());
 					}
 					
 					// Sync all other logs
-					for (IncrementalLogfileReader reader : watchedLogs.values()) {
-						Logger.debug("Synchronizing log: " + reader.getPath());
-						synchronizeWithLog(reader);
+					for (WatchedLog watchedLog : watchedLogs.values()) {
+						Logger.debug("Synchronizing log: " + watchedLog.getLogInfo().getPath());
+						synchronizeWithLog(watchedLog);
 					}
 					
-					// Add new Logs to synchroniziation loop, if sync is enabled
-					for (IncrementalLogfileReader reader : toAdd) {
-						if (doIncrementalSync)
-							watchedLogs.put(reader.getPath(), reader);
+					// Add new Logs to synchroniziation loop
+					IngestSchedule schedule = db.getIngestSchedule();
+					for (WatchedLog log : toAdd) {
+						String path = log.getLogInfo().getPath();
+						if (schedule.getLogForPath(path).isMonitored())
+							watchedLogs.put(log.getLogInfo().getId(), log);
 					}
 					
 					// Go to sleep
@@ -192,13 +197,13 @@ public class IngestActor extends UntypedActor {
 		}, system.dispatcher());
 	}
 	
-	private void catchUpWithLog(IncrementalLogfileReader reader) throws IOException {
-		long estimatedLinesTotal = estimatedLineCounts.get(reader.getPath());
-		long linesToSkip = db.countEntriesForLog(reader.getPath());
+	private void catchUpWithLog(WatchedLog log) throws IOException {
+		IncrementalLogfileReader reader = log.getReader();
+		long linesToSkip = db.getIngestSchedule().getLogForPath(reader.getPath()).getIngestedLines();
 		
-		IngestStatus status = statusList.get(reader.getPath());
-		Logger.info("Skipping " + linesToSkip + " (of estimated " + estimatedLinesTotal + " log lines)");
-					
+		Logger.info("Skipping " + linesToSkip + " (of estimated " + log.getEstimatedLineCount() + " log lines)");
+		
+		IngestStatus status = statusList.get(log.getLogInfo().getId());			
 		status.phase = IngestStatus.Phase.CATCHING_UP;
 			
 		Iterator<LogFileEntry> iterator = reader.newIterator();
@@ -208,16 +213,16 @@ public class IngestActor extends UntypedActor {
 		}
 	
 		Logger.info("Catching up with log file contents");
-		db.insert(reader.getPath(), iterator);
+		db.insert(log.getLogInfo().getId(), iterator);
 		
 		status.phase = IngestStatus.Phase.IDLE;
 		status.progress = 0;
 	}
 	
-	private void synchronizeWithLog(IncrementalLogfileReader reader) {
-		IngestStatus status = statusList.get(reader.getPath());
+	private void synchronizeWithLog(WatchedLog log) {
+		IngestStatus status = statusList.get(log.getLogInfo().getId());
 		status.phase = IngestStatus.Phase.SYNCHRONIZING;		
-		db.insert(reader.getPath(), reader.newIterator());		
+		db.insert(log.getLogInfo().getId(), log.getReader().newIterator());		
 		status.phase = IngestStatus.Phase.IDLE;
 	}
 

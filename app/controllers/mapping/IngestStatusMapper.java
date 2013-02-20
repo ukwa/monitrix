@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import controllers.Admin;
 
 import uk.bl.monitrix.heritrix.ingest.IngestStatus;
-import uk.bl.monitrix.model.CrawlLog;
+import uk.bl.monitrix.model.IngestSchedule;
 
 /**
  * JSON serialization wrapper for ingest status information (as used in the {@link Admin} controller).
@@ -16,14 +16,14 @@ import uk.bl.monitrix.model.CrawlLog;
  */
 public class IngestStatusMapper {
 	
-	public String path;
+	public String id;
 	
 	public IngestStatus status;
 	
 	public long lines_ingested;
 	
-	public IngestStatusMapper(String path, IngestStatus status, long linesIngested) {
-		this.path = path;
+	public IngestStatusMapper(String id, IngestStatus status, long linesIngested) {
+		this.id = id;
 		this.status = status;
 		this.lines_ingested = linesIngested;
 	}
@@ -33,12 +33,12 @@ public class IngestStatusMapper {
 	 * @param status ingest status information
 	 * @return the wrapped list
 	 */
-	public static List<IngestStatusMapper> map(Map<String, IngestStatus> status, CrawlLog log) {
+	public static List<IngestStatusMapper> map(Map<String, IngestStatus> status, IngestSchedule schedule) {
 		List<IngestStatusMapper> mapped = new ArrayList<IngestStatusMapper>();
 
 		for (Entry<String, IngestStatus> entry : status.entrySet()) {
-			String path = entry.getKey();
-			mapped.add(new IngestStatusMapper(path, entry.getValue(), 0));
+			String id = entry.getKey();
+			mapped.add(new IngestStatusMapper(id, entry.getValue(), 0));
 		}
 		
 		return mapped;

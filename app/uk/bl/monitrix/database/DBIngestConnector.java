@@ -1,9 +1,9 @@
 package uk.bl.monitrix.database;
 
 import java.util.Iterator;
-import java.util.List;
 
 import uk.bl.monitrix.heritrix.LogFileEntry;
+import uk.bl.monitrix.model.IngestSchedule;
 
 /**
  * A connection interface for write/ingest access to the Monitrix DB.
@@ -12,17 +12,10 @@ import uk.bl.monitrix.heritrix.LogFileEntry;
 public interface DBIngestConnector {
 	
 	/**
-	 * Returns the list of log files (absolute path names) that are ingested in the DB.
-	 * @return the list of log file paths
+	 * Returns the ingest schedule.
+	 * @return the ingest schedule
 	 */
-	public List<String> getIngestedLogs();
-	
-	/**
-	 * Returns the number of log entries that have been ingested for a specific log
-	 * @param logPath the absolute log file path
-	 * @return the number of entries ingested from that log
-	 */
-	public long countEntriesForLog(String logPath);
+	public IngestSchedule getIngestSchedule();
 	
 	/**
 	 * Ingests a batch of log entries.

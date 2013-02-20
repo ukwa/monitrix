@@ -15,8 +15,10 @@ import uk.bl.monitrix.database.DBIngestConnector;
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
+import uk.bl.monitrix.database.mongodb.model.MongoIngestSchedule;
 import uk.bl.monitrix.heritrix.LogFileEntry;
 import uk.bl.monitrix.model.Alert;
+import uk.bl.monitrix.model.IngestSchedule;
 
 /**
  * An importer class that ingests a batch of crawl log entries, performing all necessary
@@ -33,6 +35,9 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 
 	// Monitrix database
 	private DB db;
+	
+	// Ingest schedule
+	private IngestSchedule ingestSchedule;
 	
 	// Crawl log
 	private MongoCrawlLogImporter crawlLogImporter;
@@ -55,23 +60,19 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 		this.mongo = new Mongo(hostName, dbPort);
 		this.db = mongo.getDB(dbName);
 
+		this.ingestSchedule = new MongoIngestSchedule(db);
 		this.crawlLogImporter = new MongoCrawlLogImporter(db);
 		this.alertLogImporter = new MongoAlertLogImporter(db);
 		this.crawlStatsImporter = new MongoCrawlStatsImporter(db,  new MongoKnownHostImporter(db, this.alertLogImporter), new MongoVirusLogImporter(db));
 	}
 	
 	@Override
-	public List<String> getIngestedLogs() {
-		return crawlLogImporter.getIngestedLogs();
+	public IngestSchedule getIngestSchedule() {
+		return ingestSchedule;
 	}
 	
 	@Override
-	public long countEntriesForLog(String logPath) {
-		return crawlLogImporter.countEntriesForLog(logPath);
-	}
-	
-	@Override
-	public void insert(String logPath, Iterator<LogFileEntry> iterator) {
+	public void insert(String logId, Iterator<LogFileEntry> iterator) {
 		long start = System.currentTimeMillis();
 		
 		while (iterator.hasNext()) {
@@ -92,7 +93,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 
 				// Assemble MongoDB entity
 				MongoCrawlLogEntry dbo = new MongoCrawlLogEntry(new BasicDBObject());
-				dbo.setLogPath(logPath);
+				dbo.setLogId(logId);
 				dbo.setTimestamp(timestamp);
 				dbo.setHost(next.getHost());
 				dbo.setSubdomain(next.getSubdomain());

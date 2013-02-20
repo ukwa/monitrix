@@ -9,11 +9,13 @@ import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.mongodb.model.MongoAlertLog;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLog;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlStats;
+import uk.bl.monitrix.database.mongodb.model.MongoIngestSchedule;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHostList;
 import uk.bl.monitrix.database.mongodb.model.MongoVirusLog;
 import uk.bl.monitrix.model.AlertLog;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
+import uk.bl.monitrix.model.IngestSchedule;
 import uk.bl.monitrix.model.KnownHostList;
 import uk.bl.monitrix.model.VirusLog;
 
@@ -28,6 +30,9 @@ public class MongoDBConnector implements DBConnector {
 
 	// Monitrix database
 	private DB db;
+	
+	// Ingest schedule
+	private IngestSchedule ingestSchedule;
 	
 	// Crawl log
 	private CrawlLog crawlLog;
@@ -56,11 +61,17 @@ public class MongoDBConnector implements DBConnector {
 		this.mongo = new Mongo(hostName, dbPort);
 		this.db = mongo.getDB(dbName);
 		
+		this.ingestSchedule = new MongoIngestSchedule(db);
 		this.crawlLog = new MongoCrawlLog(db);
 		this.crawlStats = new MongoCrawlStats(db);
 		this.knownHosts = new MongoKnownHostList(db);
 		this.alertLog = new MongoAlertLog(db);
 		this.virusLog = new MongoVirusLog(db);
+	}
+	
+	@Override
+	public IngestSchedule getIngestSchedule() {
+		return ingestSchedule;
 	}
 
 	@Override

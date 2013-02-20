@@ -3,6 +3,7 @@ package uk.bl.monitrix.database;
 import uk.bl.monitrix.model.AlertLog;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
+import uk.bl.monitrix.model.IngestSchedule;
 import uk.bl.monitrix.model.KnownHostList;
 import uk.bl.monitrix.model.VirusLog;
 
@@ -11,6 +12,12 @@ import uk.bl.monitrix.model.VirusLog;
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public interface DBConnector {
+	
+	/**
+	 * Returns the DB-backed ingest schedule.
+	 * @return the ingest schedule
+	 */
+	public IngestSchedule getIngestSchedule();
 	
 	/**
 	 * Returns DB-backed crawl log.

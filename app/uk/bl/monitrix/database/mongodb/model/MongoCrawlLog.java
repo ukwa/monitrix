@@ -26,7 +26,7 @@ public class MongoCrawlLog extends CrawlLog {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_CRAWL_LOG);
 		
 		// The Heritrix Log collection is indexed by crawl log path, timestamp and hostname (will be skipped automatically if index exists)
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_ID, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, 1));
 	}
@@ -71,13 +71,13 @@ public class MongoCrawlLog extends CrawlLog {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<String> getIngestedLogs() {
-		return (List<String>) collection.distinct(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH);
+	public List<String> listLogIds() {
+		return (List<String>) collection.distinct(MongoProperties.FIELD_CRAWL_LOG_LOG_ID);
 	}
 
 	@Override
-	public long countEntriesForLog(String logPath) {
-		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_PATH, logPath));
+	public long countEntriesForLog(String logId) {
+		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_ID, logId));
 	}
 
 	@Override

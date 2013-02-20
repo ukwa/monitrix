@@ -9,12 +9,15 @@ import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
 import uk.bl.monitrix.heritrix.ingest.IngestWatcher;
-import uk.bl.monitrix.model.CrawlLog;
+import uk.bl.monitrix.model.IngestSchedule;
 
 public class Admin extends AbstractController{
-
-	private static CrawlLog crawlLog = Global.getBackend().getCrawlLog();
 	
+	private static final String PATH = "path";
+	private static final String CRAWLER_ID = "crawler_id";
+
+	private static IngestSchedule ingestSchedule = Global.getBackend().getIngestSchedule(); 
+		
 	private static IngestWatcher ingestWatcher = Global.getIngestWatcher();
 	
 	public static Result index() {
@@ -22,9 +25,17 @@ public class Admin extends AbstractController{
 	}
 	
 	public static Result addLog() {
-		String path = getFormParam("path");
-		if (path.isEmpty())
+		String crawlerId = getFormParam(CRAWLER_ID);
+		if (crawlerId.isEmpty()) {
+			flash("error", "Crawler ID may not be empty");
 			return redirect(routes.Admin.index());
+		}
+		
+		String path = getFormParam(PATH);
+		if (path.isEmpty()) {
+			flash("error", "Log file path may not be empty");
+			return redirect(routes.Admin.index());
+		}
 		
 		File file = new File(path);
 		if (!file.exists()) {
@@ -33,7 +44,8 @@ public class Admin extends AbstractController{
 			return redirect(routes.Admin.index());
 		}
 		
-		ingestWatcher.addLog(path);
+		ingestSchedule.addLog(path, crawlerId, true);
+		ingestWatcher.refresh();
 		return redirect(routes.Admin.index());
 	}
 	
@@ -41,7 +53,15 @@ public class Admin extends AbstractController{
 		if (ingestWatcher == null)
 			return ok();
 		
-		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus(), crawlLog)));
+		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus(), ingestSchedule)));
+	}
+	
+	public static Result dropLog() {
+		String path = getQueryParam(PATH);
+		if (path.isEmpty())
+			return redirect(routes.Admin.index());
+		
+		return ok();
 	}
 	
 }

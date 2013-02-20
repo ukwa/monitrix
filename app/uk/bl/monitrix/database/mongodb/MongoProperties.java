@@ -18,11 +18,19 @@ public class MongoProperties {
 	public static final String DB_NAME = config.getString("mongo.db.name");
 	
 	/** Database collection names **/
+	public static final String COLLECTION_INGEST_SCHEDULE = "ingest_schedule";
 	public static final String COLLECTION_ALERT_LOG = "alert_log";
 	public static final String COLLECTION_CRAWL_LOG = "crawl_log";
 	public static final String COLLECTION_CRAWL_STATS = "crawl_stats";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
 	public static final String COLLECTION_VIRUS_LOG = "virus_log";
+	
+	/** Database field keys (Ingest Schedule collection) **/
+	public static final String FIELD_INGEST_SCHEDULE_ID = "_id";
+	public static final String FIELD_INGEST_SCHEDULE_PATH = "path";
+	public static final String FIELD_INGEST_SCHEDULE_CRAWLER_ID = "crawler_id";
+	public static final String FIELD_INGEST_SCHEDULE_LINES = "ingested_lines";
+	public static final String FIELD_INGEST_SCHEDULE_MONITORED = "is_monitored";
 	
 	/** Database field keys (Alert Log collection) **/
 	public static final String FIELD_ALERT_LOG_TIMESTAMP = "timestamp";
@@ -31,7 +39,7 @@ public class MongoProperties {
 	public static final String FIELD_ALERT_LOG_DESCRIPTION = "alert_description";
 
 	/** Database field keys (Crawl Log collection) **/
-	public static final String FIELD_CRAWL_LOG_LOG_PATH = "log_path";
+	public static final String FIELD_CRAWL_LOG_LOG_ID = "log_id";
 	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "timestamp";
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	public static final String FIELD_CRAWL_LOG_HOST = "host";

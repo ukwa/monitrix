@@ -6,7 +6,7 @@ package uk.bl.monitrix.heritrix.ingest;
  */
 public class IngestControlMessage {
 	
-	public enum Command { START, STOP, GET_STATUS, CHANGE_SLEEP_INTERVAL, ADD_WATCHED_LOG }
+	public enum Command { START, STOP, GET_STATUS, CHANGE_SLEEP_INTERVAL, SYNC_WITH_SCHEDULE }
 	
 	private Command cmd;
 	

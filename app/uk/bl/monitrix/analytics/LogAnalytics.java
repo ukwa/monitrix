@@ -51,9 +51,7 @@ public class LogAnalytics {
 	 * @param log the log entries
 	 * @return average download crawl rate in URLs/minute
 	 */
-	public static long getAverageCrawlRate(Iterator<CrawlLogEntry> log) {
-		long computeStart = System.currentTimeMillis();
-		
+	public static long getAverageCrawlRate(Iterator<CrawlLogEntry> log) {		
 		long startTime = Long.MAX_VALUE;
 		long endTime = Long.MIN_VALUE;
 		long totalURLs = 0;
@@ -72,7 +70,6 @@ public class LogAnalytics {
 		
 		double urlsPerMillisecond = ((double) totalURLs) / ((double) (endTime - startTime));
 		
-		Logger.info("Computed average crawl rate - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return Math.round(urlsPerMillisecond * 60000);
 	}
 	
@@ -81,9 +78,7 @@ public class LogAnalytics {
 	 * @param log the log entries
 	 * @return average download rate in MB/minute
 	 */	
-	public static long getAverageDownloadRate(Iterator<CrawlLogEntry> log) {
-		long computeStart = System.currentTimeMillis();
-		
+	public static long getAverageDownloadRate(Iterator<CrawlLogEntry> log) {		
 		long startTime = Long.MAX_VALUE;
 		long endTime = Long.MIN_VALUE;
 		long downloadVolume = 0;
@@ -102,7 +97,6 @@ public class LogAnalytics {
 		
 		double bytesPerMillisecond = ((double) downloadVolume) / ((double) (endTime - startTime));
 		
-		Logger.info("Computed average download rate - took " + (System.currentTimeMillis() - computeStart) + "ms");
 		return Math.round(bytesPerMillisecond * 60000);
 	}
 	

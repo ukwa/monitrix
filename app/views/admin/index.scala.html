@@ -16,7 +16,16 @@
       border-radius:50%;
       width:12px;
       height:12px;
-      margin:right:20px;
+    }
+    
+    .circle-large {
+      display:inline-block;
+      position:relative;
+      top:4px;
+      border-radius:50%;
+      width:18px;
+      height:18px;
+      margin-left:4px;
     }
     
     .monitrix-log-ingest-status-trafficlight {
@@ -36,18 +45,40 @@
       <h4 class="alert-heading">Error.</h4> @flash.get("error")
     </div>  
   }
-  <h3>
-    Database Integrity:
-    @defining(uk.bl.monitrix.Global.getBackend) { backend =>
-      @if(backend.getIngestSchedule.getLinesIngested == backend.getCrawlLog.countEntries) {
-        OK
-      } else {
-        NOPE
+  <div style="text-align:right;margin-bottom:20px;" class="pull-right">
+    <p>
+      Database Integrity
+      @defining(uk.bl.monitrix.Global.getBackend) { backend =>
+        @if(backend.getIngestSchedule.getLinesIngested == backend.getCrawlLog.countEntries) {
+          <span class="circle-large" style="background-color:#080;"></span>
+        } else {
+          <span class="circle-large" style="background-color:#d00;"></span>
+        }
       }
+    </p>
+    
+    @defining(uk.bl.monitrix.Global.getIngestWatcher) { watcher =>
+      <p>
+        Ingest Watcher Health
+        @if(watcher.isAlive) {
+          <span class="circle-large" style="background-color:#080;"></span>
+        } else {
+          <span class="circle-large" style="background-color:#d00;"></span>
+        }      
+      </p>
+      
+      <p>
+        Ingest Watch Loop Running
+        @if(watcher.isRunning) {
+          <span class="circle-large" style="background-color:#080;"></span>
+        } else {
+          <span class="circle-large" style="background-color:#d00;"></span>
+        }     
+      </p>
     }
-  </h3> 
+  </div> 
   
-  <h2>Monitored Heritrix Logs</h2>
+  <h2 style="clear:both">Monitored Heritrix Logs</h2>
   <table class="table table-bordered">
     <thead>
       <tr>

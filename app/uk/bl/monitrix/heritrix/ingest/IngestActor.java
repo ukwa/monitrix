@@ -91,6 +91,8 @@ public class IngestActor extends UntypedActor {
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHANGE_SLEEP_INTERVAL)) {
 			Long newInterval = (Long) msg.getPayload();
 			sleepInterval = newInterval.longValue();
+		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHECK_RUNNING)) {
+			getSender().tell(isRunning);
 		}
 	}
 	

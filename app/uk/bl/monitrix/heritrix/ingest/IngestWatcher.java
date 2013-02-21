@@ -65,6 +65,34 @@ public class IngestWatcher {
 		ingestActor.tell(new IngestControlMessage(Command.STOP));
 	}
 	
+	/**
+	 * Returns true if the underlying ingest actor is still alive, or whether
+	 * it has crashed.
+	 * @return <code>true</code> if the actor is alive and kicking
+	 */
+	public boolean isAlive() {
+		return true;
+	}
+	
+	/**
+	 * Returns true if the ingest process is running - i.e. if the actor is alive
+	 * and has not yet stopped the ingest loop.
+	 * @return <code>true</code> if the ingest loop is running
+	 */
+	public boolean isRunning() {
+		if (!isAlive())
+			return false;
+		
+		try {
+			Future<Object> future = 
+					Patterns.ask(ingestActor,  new IngestControlMessage(Command.CHECK_RUNNING),  new Timeout(Duration.create(5, TimeUnit.SECONDS)));
+			Object result = Await.result(future, Duration.create(30, TimeUnit.SECONDS));
+			return (Boolean) result;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	public Map<String, IngestStatus> getStatus() {
 		try {

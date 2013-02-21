@@ -14,76 +14,80 @@
     <script src="@routes.Assets.at("javascripts/d3.v2.min.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/rickshaw.min.js")" type="text/javascript"></script>
   </head>
-  <body>   
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="monitrix-row">
-          @navigation
-          <form class="navbar-form pull-right" action="@routes.Hosts.searchHosts()" method="GET" style="margin-top:1px;">
-            <input type="text" name="query" style="font-size:12px;height:16px;" placeholder="Enter Host or URL..." autocomplete="off">
-            <button type="submit" class="btn btn-small">Go!</button>
-          </form>
+  <body>  
+    @if(request.queryString.get("embeddable") == null) {
+      <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="monitrix-row">
+            @navigation
+            <form class="navbar-form pull-right" action="@routes.Hosts.searchHosts()" method="GET" style="margin-top:1px;">
+              <input type="text" name="query" style="font-size:12px;height:16px;" placeholder="Enter Host or URL..." autocomplete="off">
+              <button type="submit" class="btn btn-small">Go!</button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
     
-    <div class="monitrix-header">
-      <div class="monitrix-row">
-        <h1>monitrix</h1>
-        <p>
-        @if(uk.bl.monitrix.Global.getBackend() != null) {
-          @crawlFactoid()
-        } else {
-          Database not connected.
-        }
-        </p>
+      <div class="monitrix-header">
+        <div class="monitrix-row">
+          <h1>monitrix</h1>
+          <p>
+          @if(uk.bl.monitrix.Global.getBackend() != null) {
+            @crawlFactoid()
+          } else {
+            Database not connected.
+          }
+          </p>
+        </div>
       </div>
-    </div>
     
-    <div class="monitrix-row">
-      @content
-    </div>
+      <div class="monitrix-row">
+        @content
+      </div>
     
-    <div id="monitrix-flash-panel">
+      <div id="monitrix-flash-panel">
       
-    </div>
+      </div>
     
-    <!-- TODO move into separate .js file (and possibly optimize) -->
-    <script>   
-      var maxX = $('#monitrix-flash-panel').width();
-      var maxY = $('#monitrix-flash-panel').height();
+      <!-- TODO move into separate .js file (and possibly optimize) -->
+      <script>   
+        var maxX = $('#monitrix-flash-panel').width();
+        var maxY = $('#monitrix-flash-panel').height();
     	  
-      var fade = function(el, opacity, callback) {
+        var fade = function(el, opacity, callback) {
     	  el.animate({ opacity: opacity }, 5000, callback);
-      };
+        };
       
-      var showRandomURL = function() {
-        $.getJSON('/api/log/recent', function(data) {
-          var randomIndex = Math.floor(Math.random() * data.length);
+        var showRandomURL = function() {
+          $.getJSON('/api/log/recent', function(data) {
+            var randomIndex = Math.floor(Math.random() * data.length);
           
-          var displayURL = data[randomIndex].url;
-          if (displayURL.length > 70)
+            var displayURL = data[randomIndex].url;
+            if (displayURL.length > 70)
         	  displayURL = displayURL.substring(0, 70) + '...';
           
-          var div = $('<div class="monitrix-flash-url"></div>');
-          div.html('<a href="' + data[randomIndex].url + '" target="_blank">' + displayURL + '</a>');
-          $('#monitrix-flash-panel').append(div);
+            var div = $('<div class="monitrix-flash-url"></div>');
+            div.html('<a href="' + data[randomIndex].url + '" target="_blank">' + displayURL + '</a>');
+            $('#monitrix-flash-panel').append(div);
           
-          div.css({
-        	'left' : Math.floor(Math.random() * (maxX - div.width())),
-            'top' : Math.floor(Math.random() * (maxY - div.height())),
-          });
+            div.css({
+        	  'left' : Math.floor(Math.random() * (maxX - div.width())),
+              'top' : Math.floor(Math.random() * (maxY - div.height())),
+            });
 
-          fade(div, 0.4, function() {
+            fade(div, 0.4, function() {
         	  showRandomURL();
         	  fade(div, 0, function() {
         	    div.remove();
         	  }); 
+            });
           });
-        });
-      }
+        }
       
-      showRandomURL();
-    </script>
-  </body>
+        showRandomURL();
+      </script>
+    } else {
+      @content
+    }
+    </body>
 </html>

@@ -36,6 +36,16 @@
       <h4 class="alert-heading">Error.</h4> @flash.get("error")
     </div>  
   }
+  <h3>
+    Database Integrity:
+    @defining(uk.bl.monitrix.Global.getBackend) { backend =>
+      @if(backend.getIngestSchedule.getLinesIngested == backend.getCrawlLog.countEntries) {
+        OK
+      } else {
+        NOPE
+      }
+    }
+  </h3> 
   
   <h2>Monitored Heritrix Logs</h2>
   <table class="table table-bordered">

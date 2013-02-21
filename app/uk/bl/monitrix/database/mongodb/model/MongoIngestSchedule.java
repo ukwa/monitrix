@@ -19,7 +19,7 @@ import uk.bl.monitrix.model.IngestedLog;
  * A MongoDB-backed implementation of {@link IngestSchedule}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-public class MongoIngestSchedule implements IngestSchedule {
+public class MongoIngestSchedule extends IngestSchedule {
 	
 	protected DBCollection collection; 
 	

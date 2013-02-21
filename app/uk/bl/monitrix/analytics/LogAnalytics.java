@@ -37,7 +37,7 @@ public class LogAnalytics {
 		Set<String> crawlers = new HashSet<String>();
 
 		while (log.hasNext())
-			crawlers.add(log.next().getCrawlerID());
+			crawlers.add(log.next().getWorkerThread());
 		
 		List<String> sorted = new ArrayList<String>(crawlers);
 		Collections.sort(sorted);

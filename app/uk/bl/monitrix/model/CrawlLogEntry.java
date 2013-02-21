@@ -82,10 +82,10 @@ public abstract class CrawlLogEntry {
 	public abstract String getContentType();
 	
 	/**
-	 * Column #8 - crawler ID.
-	 * @return the crawler ID
+	 * Column #8 - worker thread ID.
+	 * @return the worker thread ID
 	 */
-	public abstract String getCrawlerID();
+	public abstract String getWorkerThread();
 	
 	/**
 	 * Column #10 - file SHA1 hash.

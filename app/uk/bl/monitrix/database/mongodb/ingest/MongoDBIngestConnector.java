@@ -45,6 +45,9 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 	// Alert log
 	private MongoAlertLogImporter alertLogImporter;
 	
+	// Known host list
+	private MongoKnownHostImporter knownHostImporter;
+	
 	// Crawl stats
 	private MongoCrawlStatsImporter crawlStatsImporter;
 	
@@ -63,7 +66,8 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 		this.ingestSchedule = new MongoIngestSchedule(db);
 		this.crawlLogImporter = new MongoCrawlLogImporter(db);
 		this.alertLogImporter = new MongoAlertLogImporter(db);
-		this.crawlStatsImporter = new MongoCrawlStatsImporter(db,  new MongoKnownHostImporter(db, this.alertLogImporter), new MongoVirusLogImporter(db));
+		this.knownHostImporter = new MongoKnownHostImporter(db, this.alertLogImporter);
+		this.crawlStatsImporter = new MongoCrawlStatsImporter(db, knownHostImporter, new MongoVirusLogImporter(db));
 	}
 	
 	@Override
@@ -74,6 +78,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 	@Override
 	public void insert(String logId, Iterator<LogFileEntry> iterator) {
 		long start = System.currentTimeMillis();
+		String crawlerId = ingestSchedule.getLog(logId).getCrawlerId();
 		
 		while (iterator.hasNext()) {
 			long bulkStart = System.currentTimeMillis();
@@ -97,7 +102,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 				dbo.setTimestamp(timestamp);
 				dbo.setHost(next.getHost());
 				dbo.setSubdomain(next.getSubdomain());
-				dbo.setCrawlerID(next.getCrawlerID());
+				dbo.setCrawlerID(next.getWorkerThread());
 				dbo.setHTTPCode(next.getHTTPCode());
 				dbo.setAnnotations(next.getAnnotations());
 				dbo.setLogLine(next.toString());
@@ -105,6 +110,9 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 								
 				// Update pre-aggregated stats
 				crawlStatsImporter.update(next);
+				
+				// Host info
+				knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
 				
 				// Log-entry-level alerts
 				for (Alert a : next.getAlerts()) {

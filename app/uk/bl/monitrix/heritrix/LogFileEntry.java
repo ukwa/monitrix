@@ -179,7 +179,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	}
 	
 	@Override
-	public String getCrawlerID() {
+	public String getWorkerThread() {
 		return fields.get(7);
 	}
 

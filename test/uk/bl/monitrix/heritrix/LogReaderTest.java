@@ -25,7 +25,7 @@ public class LogReaderTest {
 			Assert.assertTrue(entry.getDownloadSize() > -1);
 			Assert.assertFalse(entry.getURL().isEmpty());
 			Assert.assertNotNull(entry.getContentType());
-			Assert.assertNotNull(entry.getCrawlerID());
+			Assert.assertNotNull(entry.getWorkerThread());
 			Assert.assertNotNull(entry.getSHA1Hash());
 			counter++;
 		}

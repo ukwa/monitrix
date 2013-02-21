@@ -141,7 +141,7 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	}
 
 	@Override
-	public String getCrawlerID() {
+	public String getWorkerThread() {
 		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_CRAWLER_ID);
 	}
 	

@@ -80,7 +80,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		// Note: it's a little confusing that these aggregation steps are in this class
 		// TODO move into the main MongoBatchImporter
 		knownHosts.addSubdomain(hostname, entry.getSubdomain());
-		knownHosts.addCrawlerID(hostname, entry.getCrawlerID());
+		// knownHosts.addCrawlerID(hostname, entry.getWorkerThread());
 		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
 		
 		// Warning: there seems to be a bug in Heritrix which sometimes leaves a 'content type template' (?)

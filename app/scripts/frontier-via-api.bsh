@@ -1,0 +1,10 @@
+setAccessibility(true);
+
+rawOut.println("GOT:"+job.crawlController.frontier.pendingUris);
+
+urislist = job.crawlController.frontier.getURIsList(null, 8, ".*\\.com.*", true);
+rawOut.println("["+urislist.getMarker()+"]");
+
+for( item : urislist.getUrls() ) {
+  rawOut.println(item);
+}

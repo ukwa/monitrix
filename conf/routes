@@ -28,6 +28,9 @@ GET     /alerts                            controllers.Alerts.index()
 GET     /viruses                           controllers.Viruses.index()
 GET     /viruses.pdf                       controllers.Viruses.pdf()
 
+# Heritrix remote control
+GET     /heritrix                          controllers.Heritrix.index()
+
 # About
 GET     /about                             controllers.About.index()
 

@@ -15,7 +15,7 @@
     <script src="@routes.Assets.at("javascripts/rickshaw.min.js")" type="text/javascript"></script>
   </head>
   <body>  
-    @if(request.queryString.get("embeddable") == null) {
+     @if(play.mvc.Http.Context.current.get == null || play.mvc.Http.Context.current.get.request.queryString.get("embeddable") == null) {
       <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="navbar-inner">
           <div class="monitrix-row">

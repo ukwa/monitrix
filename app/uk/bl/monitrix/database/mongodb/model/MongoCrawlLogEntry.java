@@ -1,6 +1,7 @@
 package uk.bl.monitrix.database.mongodb.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -164,6 +165,7 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	
 	public void setAnnotations(String annotations) {
 		dbo.put(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS, annotations);
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, Arrays.asList(annotations.split(",")));
 	}
 	
 	public void setLogLine(String line) {

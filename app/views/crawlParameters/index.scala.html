@@ -1,7 +1,13 @@
+@(log: uk.bl.monitrix.model.CrawlLog)
+
 @import tags.navbar
 
 @main("Monitrix - Crawl Parameters") {
   @navbar("/crawl-parameters")
 } {
-    
+   <ul>
+      @log.getEntriesWithAnnotation("Q:serverMaxSuccessKb").map { entry =>
+        <li>@entry.toString</li>
+      }
+    </ul>
 }

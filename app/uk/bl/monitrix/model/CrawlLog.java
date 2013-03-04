@@ -79,6 +79,20 @@ public abstract class CrawlLog {
 	 * @param hostname the host name
 	 * @return the log entries for the host
 	 */
-	public abstract Iterator<CrawlLogEntry> getEntriesForHost(String hostname); 
+	public abstract Iterator<CrawlLogEntry> getEntriesForHost(String hostname);
+	
+	/**
+	 * Counts the log entries that carry the specified annotation.
+	 * @param annotation the annotation
+	 * @return the number of entries with that annotation
+	 */
+	public abstract long countEntriesWithAnnotation(String annotation);
+	
+	/**
+	 * Returns the log entries that carry the specified annotation
+	 * @param annotation the annotation
+	 * @return the log entries with that annotation
+	 */
+	public abstract Iterator<CrawlLogEntry> getEntriesWithAnnotation(String annotation);
 	
 }

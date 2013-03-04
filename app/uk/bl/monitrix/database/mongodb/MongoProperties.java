@@ -47,6 +47,7 @@ public class MongoProperties {
 	public static final String FIELD_CRAWL_LOG_CRAWLER_ID = "crawler_id";
 	public static final String FIELD_CRAWL_LOG_HTTP_CODE = "http_code";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS = "annotations";
+	public static final String FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED = "annotations_tokenized";
 	
 	/** Database field keys (Crawl Stats collection) **/
 	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "timestamp";

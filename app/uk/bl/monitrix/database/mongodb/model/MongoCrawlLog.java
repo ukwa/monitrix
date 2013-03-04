@@ -8,6 +8,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.model.CrawlLog;
@@ -105,6 +106,35 @@ public class MongoCrawlLog extends CrawlLog {
 			@Override
 			public CrawlLogEntry next() {
 				return new MongoCrawlLogEntry(cursor.next());	
+			}
+
+			@Override
+			public void remove() {
+				cursor.remove();
+			}
+		};
+	}
+
+	@Override
+	public long countEntriesWithAnnotation(String annotation) {
+		DBObject q = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, annotation); 
+		return collection.count(q);
+	}
+
+	@Override
+	public Iterator<CrawlLogEntry> getEntriesWithAnnotation(String annotation) {
+		DBObject q = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, annotation);
+		final DBCursor cursor = collection.find(q);
+		
+		return new Iterator<CrawlLogEntry>() {
+			@Override
+			public boolean hasNext() {
+				return cursor.hasNext();
+			}
+
+			@Override
+			public CrawlLogEntry next() {
+				return new MongoCrawlLogEntry(cursor.next());
 			}
 
 			@Override

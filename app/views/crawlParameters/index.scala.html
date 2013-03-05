@@ -5,9 +5,8 @@
 @main("Monitrix - Crawl Parameters") {
   @navbar("/crawl-parameters")
 } {
-   <ul>
-      @log.getEntriesWithAnnotation("Q:serverMaxSuccessKb").map { entry =>
-        <li>@entry.toString</li>
-      }
-    </ul>
+   <h3>@log.countEntriesWithAnnotation("Q:serverMaxSuccessKb") Capped Sites</h3>
+   @log.getEntriesWithAnnotation("Q:serverMaxSuccessKb").map { entry =>
+     @entry.getURL<br/>
+   }
 }

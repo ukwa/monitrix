@@ -34,17 +34,14 @@
           <div class="chart" id="gauge-download-rate" data-percent="0"><span>0</span></div>
           MB/min
         </div>
-        <p style="clear:both;margin-bottom:20px;"/>    
-     </div>      
-      
-      <div class="span7 offset1">
-        <h5>Hosts by Top Level Domain</h5>
-        <table class="table table-condensed">
-          @for(tld <- knownHosts.getTopLevelDomains) {
-            <tr><td>.@tld</td><td>@knownHosts.countForTopLevelDomain(tld)</td></tr>
-          }
-        </table>
         
+        <p style="clear:both;margin-bottom:20px;"/>    
+        
+        <h5>Hosts by Top Level Domain</h5>
+        <div id="hosts-barchart"></div>
+      </div>
+         
+      <div class="span7 offset1">
         <h5>Recent Alerts (out of @alerts.countAll alerts total) <a class="pull-right" style="font-weight:normal" href="@routes.Alerts.index">Details »</a></h5>
         <table class="table table-condensed">
           @for(alert <- alerts.getMostRecent(10)) {
@@ -62,12 +59,28 @@
   <link rel="stylesheet"type="text/css" href="@routes.Assets.at("stylesheets/jquery.easy-pie-chart.css")">
   <script type="text/javascript" src="@routes.Assets.at("javascripts/monitrix-clock.js")"></script>
   <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.easy-pie-chart.js")"></script>
+  <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
+  <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>
   <script type="text/javascript">
     @if(log.isIdle) {
       new Monitrix.ProgressClock(@{System.currentTimeMillis - log.getTimeOfLastCrawlActivity}, $('#wall-clock'));
     } else {
       new Monitrix.ProgressClock(@{System.currentTimeMillis - log.getCrawlStartTime}, $('#wall-clock'));
     }
+    
+    Morris.Bar({
+      element: 'hosts-barchart',
+      data: [
+              @{knownHosts.getTopLevelDomains.map { tld =>
+                "{ tld: '." + tld + "', count: " + knownHosts.countForTopLevelDomain(tld) + "}" 
+              }.mkString(", ") }
+    	    ],
+      xkey: 'tld',
+      ykeys: ['count'],
+      labels: [ '@knownHosts.getTopLevelDomains.mkString("', '")' ],
+      hideHover: 'auto',
+      barColors: [ '#850303' ]
+    });
     
     function getAverage(logEntries) {
       var endTime = logEntries[0].timestamp;

@@ -61,6 +61,10 @@ public class HeritrixAPI {
 		}
 	}
 	
+	public String getEndpointURL() {
+		return url.toString();
+	}
+	
 	public HeritrixSummary getSummary() throws IllegalStateException, IOException {
 		try {
 			HttpGet get = new HttpGet(url.toURI());

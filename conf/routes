@@ -30,6 +30,9 @@ GET     /viruses.pdf                       controllers.Viruses.pdf()
 
 # Heritrix remote control
 GET     /heritrix                          controllers.Heritrix.index()
+POST    /heritrix/add-crawler              controllers.Heritrix.addCrawler()
+GET     /api/heritrix/crawlers             controllers.Heritrix.getCrawlersJSON()
+GET     /api/heritrix/crawlers/:url        controllers.Heritrix.getCrawlerSummaryJSON(url)
 
 # About
 GET     /about                             controllers.About.index()

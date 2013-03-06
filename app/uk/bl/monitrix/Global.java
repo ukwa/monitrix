@@ -1,6 +1,8 @@
 package uk.bl.monitrix;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import play.Application;
 import play.GlobalSettings;
@@ -15,6 +17,7 @@ import play.mvc.Results;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.mongodb.MongoDBConnector;
 import uk.bl.monitrix.database.mongodb.ingest.MongoDBIngestConnector;
+import uk.bl.monitrix.heritrix.api.HeritrixAPI;
 import uk.bl.monitrix.heritrix.ingest.IngestWatcher;
 
 /**
@@ -27,6 +30,9 @@ public class Global extends GlobalSettings {
 	
 	private static IngestWatcher ingestWatcher = null;
 	
+	// TODO persist registered API endpoints in DB!
+	private static List<HeritrixAPI> crawlers = new ArrayList<HeritrixAPI>();
+
 	private void connectBackend() {
 		try {
 			ingestWatcher = new IngestWatcher(new MongoDBIngestConnector(), Akka.system());
@@ -38,21 +44,38 @@ public class Global extends GlobalSettings {
 			Logger.error("FATAL - could not connect to MongoDB");
 		}		
 	}
-	
+
+	/**
+	 * Returns the database read connector or <code>null</code> if the DB connection failed
+	 * for whatever reason. (Check the logs.) 
+	 * @return the database read connector or <code>null</code>
+	 */
 	public static DBConnector getBackend() {
 		return db;
 	}
 	
+	/**
+	 * Returns the ingest watcher, which is in charge of conducting periodic log-to-database syncs.
+	 * @return the ingest watcher
+	 */
 	public static IngestWatcher getIngestWatcher() {
 		return ingestWatcher;
+	}
+	
+	/**
+	 * Returns the configured Heritrix crawler APIs, in the form of a map {:endpointURL API}. 
+	 * @return the crawler APIs
+	 */
+	public static List<HeritrixAPI> getCrawlerAPIs() {
+		return crawlers;
 	}
 	
 	@Override
 	public void onStop(Application app) {
 		ingestWatcher.stopWatching();
 		if (db != null) {
-			Logger.info("Database disconnected");
 			db.close();
+			Logger.info("Database disconnected");
 		}
 	}
 	

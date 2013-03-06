@@ -1,7 +1,36 @@
+@(crawlers: List[uk.bl.monitrix.heritrix.api.HeritrixAPI])
+
 @import tags.navbar
 
 @main("Monitrix - Crawl Parameters") {
   @navbar("/heritrix")
 } {
-    
+  @if(flash.get("error") != null) {
+    <div class="alert alert-block alert-error">
+      <h4 class="alert-heading">Error.</h4> @flash.get("error")
+    </div>  
+  }
+  
+  <h3>Heritrix Instances</h3>
+  <table>
+    <thead>
+      <tr>
+        <td>Heritrix Location</td>
+      </tr>
+    </thead>
+    <tbody>
+      @for(crawler <- crawlers) {
+        <tr>
+          <td>@crawler.getEndpointURL</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  
+  <form class="form-inline" action="@routes.Heritrix.addCrawler()" method="POST">
+    <button type="submit" class="btn btn-small"><i class="icon-globe"></i> Add Heritrix API Endpoint</button>
+    <input type="text" name="heritrix_url" style="font-size:12px;height:16px;" placeholder="Enter Endpoint URL..." autocomplete="off">
+    <input type="text" name="heritrix_username" style="font-size:12px;height:16px;" placeholder="Enter HTTP Auth Username..." autocomplete="off">
+    <input type="text" name="heritrix_password" style="font-size:12px;height:16px;" placeholder="Enter HTTP Auth Password..." autocomplete="off">
+  </form>
 }

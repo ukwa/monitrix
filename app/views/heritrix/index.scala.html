@@ -5,6 +5,66 @@
 @main("Monitrix - Crawl Parameters") {
   @navbar("/heritrix")
 } {
+  <script>
+    function getCrawlerSummary(url, divId) {
+      $.getJSON('/api/heritrix/crawlers/' + encodeURIComponent(url), function(data) {
+    	console.log(data);
+    	var html = 
+    		'<table>' +
+    		'  <tr>' +
+    		'    <td class="monitrix-hostinfo-label">Heritrix Version</td>' +
+    		'    <td>' + data.heritrix_version + '</td>' +
+    		'  </tr>' +
+    		'  <tr>' +
+    		'    <td class="monitrix-hostinfo-label">Jobs Dir</td>' +
+    		'    <td>' + data.jobs_dir + '</td>' +
+    		'  </tr>' +
+    		'  <tr>' +
+    		'    <td class="monitrix-hostinfo-label">Heap Report</td>' +
+    		'    <td>' + data.heap_report.used_bytes + ' Used Bytes</td>' +
+    		'  </tr>' +
+    		'  <tr>' +
+    		'    <td></td>' +
+    		'    <td>' + data.heap_report.total_bytes + ' Total Bytes</td>' +
+    		'  </tr>' +
+    		'  <tr>' +
+    		'    <td></td>' +
+    		'    <td>' + data.heap_report.max_bytes + ' Max Bytes</td>' +
+    		'  </tr>' +
+    		'</table>' +
+    		'<h5>' + data.jobs.length + ' Jobs</h5>';
+
+    		for (var i=0; i<data.jobs.length; i++) {
+    		  var j = data.jobs[i];
+    		  html += 
+    			'<table>' +
+    			  '<tr>' +
+    			    '<td class="monitrix-hostinfo-label">Short Name</td>' +
+    			    '<td>' + j.short_name + '</td>' +
+    			  '<tr>' +
+    			  '<tr>' +
+  			        '<td class="monitrix-hostinfo-label">URL</td>' +
+  			        '<td>' + j.url + '</td>' +
+  			      '<tr>' +
+    			  '<tr>' +
+  			        '<td class="monitrix-hostinfo-label">Is Profile</td>' +
+  			        '<td>' + j.is_profile + '</td>' +
+  			      '<tr>' + 
+    			  '<tr>' +
+  			        '<td class="monitrix-hostinfo-label">Launch Count</td>' +
+  			        '<td>' + j.launch_count + '</td>' +
+  			      '<tr>' +
+			      '<tr>' +
+			        '<td class="monitrix-hostinfo-label">Crawl Controller Status</td>' +
+			        '<td>' + j.crawl_controller_state + '</td>' +
+			      '<tr>' +
+			    '</table>';
+    		}
+    	$('#' + divId).html(html);  
+      });
+    }
+  </script>
+  
   @if(flash.get("error") != null) {
     <div class="alert alert-block alert-error">
       <h4 class="alert-heading">Error.</h4> @flash.get("error")
@@ -12,22 +72,16 @@
   }
   
   <h3>Heritrix Instances</h3>
-  <table>
-    <thead>
-      <tr>
-        <td>Heritrix Location</td>
-      </tr>
-    </thead>
-    <tbody>
-      @for(crawler <- crawlers) {
-        <tr>
-          <td>@crawler.getEndpointURL</td>
-        </tr>
-      }
-    </tbody>
-  </table>
   
-  <form class="form-inline" action="@routes.Heritrix.addCrawler()" method="POST">
+  @for(crawler <- crawlers.zipWithIndex) {
+    <h4><a href="@crawler._1.getEndpointURL">@crawler._1.getEndpointURL</a></h4>
+    <div id="crawler_@crawler._2">
+      <img src="@routes.Assets.at("img/ajax-spinner.gif")">
+    </div>
+    <script>getCrawlerSummary('@crawler._1.getEndpointURL', 'crawler_@crawler._2')</script>
+  }
+ 
+  <form class="form-inline" action="@routes.Heritrix.addCrawler()" method="POST" style="margin-top:30px;">
     <button type="submit" class="btn btn-small"><i class="icon-globe"></i> Add Heritrix API Endpoint</button>
     <input type="text" name="heritrix_url" style="font-size:12px;height:16px;" placeholder="Enter Endpoint URL..." autocomplete="off">
     <input type="text" name="heritrix_username" style="font-size:12px;height:16px;" placeholder="Enter HTTP Auth Username..." autocomplete="off">

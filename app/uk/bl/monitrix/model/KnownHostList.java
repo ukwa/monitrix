@@ -32,7 +32,7 @@ public interface KnownHostList {
 	 * @param offset the result page offset
 	 * @return the search result
 	 */
-	public HostSearchResult searchHosts(String query, int limit, int offset);
+	public SearchResult searchHosts(String query, int limit, int offset);
 	
 	/**
 	 * Retruns the names of the hosts which have been crawled since the
@@ -54,77 +54,5 @@ public interface KnownHostList {
 	 * @return the list of top-level domains
 	 */
 	public List<String> getTopLevelDomains();
-	
-	/**
-	 * An host search result.
-	 */
-	public class HostSearchResult {
-		
-		private String query;
-		
-		private long totalNumberOfHosts;
-		
-		private List<String> resultPage;
-		
-		private int limit;
-		
-		private long offset;
-		
-		private long took;
-		
-		public HostSearchResult(String query, long totalResults, List<String> resultPage, int limit, int offset, long took) {
-			this.query = query;
-			this.totalNumberOfHosts = totalResults;
-			this.resultPage = resultPage;
-			this.limit = limit;
-			this.offset = offset;
-			this.took = took;
-		}
-		
-		public String query() {
-			return query;
-		}
-		
-		/**
-		 * The total number of hosts for this search
-		 * @return the total number of hosts
-		 */
-		public long totalResults() {
-			return totalNumberOfHosts;
-		}
-		
-		/**
-		 * The list of host names in this search result page
-		 * @return the host names
-		 */
-		public List<String> resultPage() {
-			return resultPage;
-		}
-		
-		/**
-		 * The current page limit
-		 * @return the page limit
-		 */
-		public int limit() {
-			return limit;
-		}
-		
-		/**
-		 * The current page offset
-		 * @return the page offset
-		 */
-		public long offset() {
-			return offset;
-		}
-		
-		/**
-		 * The time it took to process the search query
-		 * @return the query duration
-		 */
-		public long took() {
-			return took;
-		}
-		
-	}
 	
 }

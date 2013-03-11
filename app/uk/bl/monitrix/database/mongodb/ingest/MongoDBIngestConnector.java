@@ -100,6 +100,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 				MongoCrawlLogEntry dbo = new MongoCrawlLogEntry(new BasicDBObject());
 				dbo.setLogId(logId);
 				dbo.setTimestamp(timestamp);
+				dbo.setURL(next.getURL());
 				dbo.setHost(next.getHost());
 				dbo.setSubdomain(next.getSubdomain());
 				dbo.setCrawlerID(next.getWorkerThread());

@@ -22,30 +22,10 @@ import uk.bl.monitrix.analytics.TimeseriesValue;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
-import uk.bl.monitrix.model.KnownHostList.HostSearchResult;
 
 public class Hosts extends AbstractController {
-	
-	// String constants
-	private static final String QUERY = "query";
-	private static final String LIMIT = "limit";
-	private static final String OFFSET = "offset";
-	
-	private static DBConnector db = Global.getBackend();
-	
-	public static Result searchHosts() {
-		String query = getQueryParam(QUERY);
-		int limit = getQueryParamAsInt(LIMIT, 20);
-		int offset = getQueryParamAsInt(OFFSET, 0);
 		
-		if (query == null) {
-			// TODO error handling
-			return notFound();
-		} else {
-			HostSearchResult searchResult = db.getKnownHostList().searchHosts(query, limit, offset);
-			return ok(views.html.hosts.searchResult.render(searchResult, db.getCrawlLog()));
-		}
-	}
+	private static DBConnector db = Global.getBackend();
 	
 	public static Result getHostInfo(String hostname) {
 		KnownHost knownHost = db.getKnownHostList().getKnownHost(hostname);

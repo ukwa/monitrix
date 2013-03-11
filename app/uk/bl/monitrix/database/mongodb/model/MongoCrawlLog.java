@@ -13,6 +13,8 @@ import com.mongodb.DBObject;
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlLogEntry;
+import uk.bl.monitrix.model.SearchResult;
+import uk.bl.monitrix.model.SearchResultItem;
 
 /**
  * A MongoDB-backed implementation of {@link CrawlLog}.
@@ -26,9 +28,10 @@ public class MongoCrawlLog extends CrawlLog {
 	public MongoCrawlLog(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_CRAWL_LOG);
 		
-		// The Heritrix Log collection is indexed by crawl log path, timestamp, hostname and annotations (will be skipped automatically if index exists)
+		// The Heritrix Log collection is indexed by crawl log id, timestamp, url, hostname and annotations
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_ID, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_URL, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, 1));
 	}
@@ -82,6 +85,23 @@ public class MongoCrawlLog extends CrawlLog {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_ID, logId));
 	}
 
+	@Override
+	public SearchResult searchURLs(String query, int limit, int offset) {
+		long startTime = System.currentTimeMillis();
+		DBObject q = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_URL, query);
+
+		long total = collection.count(q);
+		
+		List<SearchResultItem> urls = new ArrayList<SearchResultItem>();
+		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
+		while (cursor.hasNext()) {
+			CrawlLogEntry entry = new MongoCrawlLogEntry(cursor.next());
+			urls.add(new SearchResultItem(entry.getURL(), entry.toString()));
+		}
+	
+		return new SearchResult(query, total, urls, limit, offset, System.currentTimeMillis() - startTime);
+	}
+	
 	@Override
 	public long countEntriesForHost(String hostname) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname));

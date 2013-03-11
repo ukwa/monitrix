@@ -15,6 +15,8 @@ import com.mongodb.DBObject;
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.model.KnownHost;
 import uk.bl.monitrix.model.KnownHostList;
+import uk.bl.monitrix.model.SearchResult;
+import uk.bl.monitrix.model.SearchResultItem;
 
 /**
  * A MongoDB-backed implementation of {@link KnownHostList}.
@@ -73,7 +75,7 @@ public class MongoKnownHostList implements KnownHostList {
 	}
 
 	@Override
-	public HostSearchResult searchHosts(String query, int limit, int offset) {
+	public SearchResult searchHosts(String query, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
 		
 		// Parse query
@@ -85,12 +87,12 @@ public class MongoKnownHostList implements KnownHostList {
 		long total = collection.count(q);
 		
 		// Get result page
-		List<String> hostnames = new ArrayList<String>();
+		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
 		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
 		while (cursor.hasNext())
-			hostnames.add(new MongoKnownHost(cursor.next()).getHostname());
+			hostnames.add(new SearchResultItem(new MongoKnownHost(cursor.next()).getHostname(), ""));
 		
-		return new HostSearchResult(query, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
+		return new SearchResult(query, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
 
 	@Override

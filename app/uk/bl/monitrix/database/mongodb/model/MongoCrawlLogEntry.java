@@ -70,7 +70,7 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	public void setTimestamp(long timestamp) {
 		dbo.put(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, timestamp);
 	}
-
+	
 	@Override
 	public int getHTTPCode() {
 		return (Integer) dbo.get(MongoProperties.FIELD_CRAWL_LOG_HTTP_CODE);
@@ -93,10 +93,11 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 
 	@Override
 	public String getURL() {
-		if (fields == null)
-			parseEntry();
-		
-		return fields.get(3);
+		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_URL);
+	}
+	
+	public void setURL(String url) {
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_URL, url);
 	}
 
 	@Override

@@ -68,6 +68,17 @@ public abstract class CrawlLog {
 	public abstract long countEntriesForLog(String logId);
 	
 	/**
+	 * Searches the crawl log with the specified (e.g. keyword) query.
+	 * Refer to documentation of specific implementations for the types of 
+	 * queries supported! (Note: on MongoDB only *exacty matches* are supported!
+	 * @param query the search query
+	 * @param limit the max number of results to return
+	 * @param offset the result page offset
+	 * @return the search result
+	 */
+	public abstract SearchResult searchURLs(String query, int limit, int offset);
+	
+	/**
 	 * Counts the log entries for a specific host.
 	 * @param hostname the host name
 	 * @return the number of log entries for the host

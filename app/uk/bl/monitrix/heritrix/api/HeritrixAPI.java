@@ -1,6 +1,7 @@
 package uk.bl.monitrix.heritrix.api;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -82,6 +83,10 @@ public class HeritrixAPI {
 			// Should never happen
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public void postScript(InputStream script) {
+
 	}
 
 }

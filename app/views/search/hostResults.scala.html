@@ -1,4 +1,4 @@
-@(result: uk.bl.monitrix.model.KnownHostList.HostSearchResult, log: uk.bl.monitrix.model.CrawlLog)
+@(result: uk.bl.monitrix.model.SearchResult, urlCount: Long)
 
 @import tags.navbar
 
@@ -10,13 +10,17 @@
       <!-- Sidebar -->
       <div class="span2" style="position:relative; left:-15px; padding-top:15px; padding-right:0px;">
         <p>
-          @result.totalResults Results for <strong><em>@result.query</em></strong><br/>
+          <em>@result.query</em><br/>
           <small><span style="color:#888">Took @result.took ms</span></small>
         </p>     
       </div>
       
       <!-- Result list -->
       <div class="span10">
+        <div class="monitrix-tabs">
+          <span class="monitrix-tab monitrix-tab-active">@result.totalResults Hosts</span>
+          <span class="monitrix-tab">@urlCount URLs</span>
+        </div>
         <div class="pagination">
           <ul>
             @if(result.offset > 0) {
@@ -33,8 +37,8 @@
           </ul>
         </div>
         
-        @for(host <- result.resultPage) {
-          <p><a href="@routes.Hosts.getHostInfo(host)">@host</a> <span class="label label-info">@log.countEntriesForHost(host)</span></p>
+        @for(item <- result.resultPage) {
+          <p><a href="@routes.Hosts.getHostInfo(item.title)">@item.title</a></p>
         }
       </div>
     </div>

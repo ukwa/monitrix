@@ -158,4 +158,30 @@ html, body {
   font-weight:bold;
 }
 
+.monitrix-tabs {
+  margin-top:20px;
+  border-bottom:1px solid #ccc;
+}
+
+.monitrix-tab {
+  color:#626262;
+  border-width:1px 1px 0px 1px;
+  border-style:solid;
+  border-color:#ccc;
+  padding:5px 10px;
+  display:inline-block;
+    
+  -moz-border-radius-topleft:3px;
+  -moz-border-radius-topright:3px;  
+  border-top-left-radius:3px;
+  border-top-right-radius:3px;
+}
+
+.monitrix-tab-active {
+  background-color:#eee;
+}
+
+.monitrix-tab:hover {
+  background-color:#eee;  
+}
 

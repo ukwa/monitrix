@@ -42,6 +42,9 @@ GET     /hosts/:hostname                   controllers.Hosts.getHostInfo(hostnam
 GET     /hosts                             controllers.Search.searchHosts()
 GET     /api/hosts/:hostname/urls-crawled  controllers.Hosts.getURLHistoryForHost(hostname: String)
 
+# URLs
+GET     /urls                              controllers.Search.searchURLs()
+
 # Admin
 GET     /admin                             controllers.Admin.index()
 POST    /admin/add-log                     controllers.Admin.addLog()

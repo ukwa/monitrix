@@ -6,17 +6,24 @@
   @navbar("")
 }{
   <div class="container-fluid" style="padding-bottom:40px;">
+    <div class="offset2 row">
+      <h4 style="margin-left:5px;">@result.query</h4>
+    </div>
+    
     <div class="row-fluid">
       <!-- Sidebar -->
       <div class="span2" style="position:relative; left:-15px; padding-top:15px; padding-right:0px;">
         <p>
-          @result.totalResults Results for <strong><em>@result.query</em></strong><br/>
           <small><span style="color:#888">Took @result.took ms</span></small>
         </p>     
       </div>
       
       <!-- Result list -->
       <div class="span10">
+        <div class="monitrix-tabs">
+          <a href="@routes.Search.searchHosts()?query=@result.query" class="monitrix-tab monitrix-tab-active">@hostCount Hosts</a>
+          <a href="#" class="monitrix-tab">@result.totalResults URLs</a>
+        </div>
         <div class="pagination">
           <ul>
             @if(result.offset > 0) {
@@ -34,7 +41,10 @@
         </div>
         
         @for(item <- result.resultPage) {
-          <p><a href="@routes.Hosts.getHostInfo(item.title)">@item.title</a></p>
+          <p>
+            <a href="@routes.Hosts.getHostInfo(item.title)">@item.title</a><br/>
+            <span style="font-family:Courier">@item.description</span>
+          </p>
         }
       </div>
     </div>

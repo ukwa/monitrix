@@ -28,6 +28,10 @@ public class Search extends AbstractController {
 		} else {
 			long urlPreview = crawlLog.searchURLs(query, 1, 0).totalResults();
 			SearchResult hosts = db.getKnownHostList().searchHosts(query, limit, offset);
+			
+			if (hosts.totalResults() == 0 && urlPreview > 0)
+				return redirect("/urls?query=" + query + "&limit=" + limit + "&offset=" + offset);
+			
 			return ok(views.html.search.hostResults.render(hosts, urlPreview));
 		}
 	}
@@ -43,7 +47,7 @@ public class Search extends AbstractController {
 		} else {
 			long hostPreview = db.getKnownHostList().searchHosts(query, 1, 0).totalResults();
 			SearchResult urls = crawlLog.searchURLs(query, limit, offset);
-			return ok(views.html.search.hostResults.render(urls, hostPreview));
+			return ok(views.html.search.urlResults.render(urls, hostPreview));
 		}
 	}
 	

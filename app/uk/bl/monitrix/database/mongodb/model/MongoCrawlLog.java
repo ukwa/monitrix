@@ -84,6 +84,18 @@ public class MongoCrawlLog extends CrawlLog {
 	public long countEntriesForLog(String logId) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_LOG_ID, logId));
 	}
+	
+	@Override
+	public List<CrawlLogEntry> getEntriesForURL(String url) {
+		DBObject q = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_URL, url);
+		
+		List<CrawlLogEntry> entries = new ArrayList<CrawlLogEntry>();
+		DBCursor cursor = collection.find(q);
+		while (cursor.hasNext())
+			entries.add(new MongoCrawlLogEntry(cursor.next()));
+		
+		return entries;
+	}
 
 	@Override
 	public SearchResult searchURLs(String query, int limit, int offset) {

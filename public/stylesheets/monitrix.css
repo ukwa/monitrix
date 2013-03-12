@@ -156,6 +156,7 @@ html, body {
 .monitrix-hostinfo-label {
   white-space:nowrap;
   font-weight:bold;
+  padding:2px 15px 2px 0px;
 }
 
 .monitrix-tabs {

@@ -68,9 +68,18 @@ public abstract class CrawlLog {
 	public abstract long countEntriesForLog(String logId);
 	
 	/**
+	 * Returns all log entries that exist for the specified URL.
+	 * @param url the url
+	 * @return the log entries
+	 */
+	public abstract List<CrawlLogEntry> getEntriesForURL(String url);
+	
+	/**
 	 * Searches the crawl log with the specified (e.g. keyword) query.
 	 * Refer to documentation of specific implementations for the types of 
-	 * queries supported! (Note: on MongoDB only *exacty matches* are supported!
+	 * queries supported! (Note: on MongoDB only *exacty matches* are supported! This
+	 * means that - effectively - the results for .searchURLs and .getEntriesForURL
+	 * return identical data!)
 	 * @param query the search query
 	 * @param limit the max number of results to return
 	 * @param offset the result page offset

@@ -42,7 +42,7 @@
         
         @for(item <- result.resultPage) {
           <p>
-            <a href="@routes.Hosts.getHostInfo(item.title)">@item.title</a><br/>
+            <a href="@routes.URLs.getURLInfo(java.net.URLEncoder.encode(item.title))">@item.title</a><br/>
             <span style="font-family:Courier">@item.description</span>
           </p>
         }

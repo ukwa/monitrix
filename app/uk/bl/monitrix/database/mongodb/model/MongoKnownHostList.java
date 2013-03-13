@@ -94,6 +94,25 @@ public class MongoKnownHostList implements KnownHostList {
 		
 		return new SearchResult(query, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
+	
+	// TODO remove code duplication
+	@Override
+	public SearchResult searchByTopLevelDomain(String tld, int limit, int offset) {
+		long startTime = System.currentTimeMillis();
+		
+		DBObject q = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, tld);
+		
+		// Count total no. of hosts
+		long total = collection.count(q);
+		
+		// Get result page
+		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
+		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
+		while (cursor.hasNext())
+			hostnames.add(new SearchResultItem(new MongoKnownHost(cursor.next()).getHostname(), ""));
+		
+		return new SearchResult(tld, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
+	}
 
 	@Override
 	public List<KnownHost> getCrawledHosts(long since) {
@@ -109,14 +128,14 @@ public class MongoKnownHostList implements KnownHostList {
 	}
 
 	@Override
-	public long countForTopLevelDomain(String tld) {
-		return collection.count(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, tld));
-	}
-
-	@Override
 	@SuppressWarnings("unchecked")
 	public List<String> getTopLevelDomains() {
 		return (List<String>) collection.distinct(MongoProperties.FIELD_KNOWN_HOSTS_TLD);
+	}
+	
+	@Override
+	public long countForTopLevelDomain(String tld) {
+		return collection.count(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, tld));
 	}
 
 }

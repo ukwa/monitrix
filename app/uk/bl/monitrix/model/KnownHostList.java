@@ -35,6 +35,15 @@ public interface KnownHostList {
 	public SearchResult searchHosts(String query, int limit, int offset);
 	
 	/**
+	 * Returns the hosts registered under a specific top-level domain, with pagination. 
+	 * @param tld the top-level domain
+	 * @param limit the pagination limit
+	 * @param offset the pagination offset
+	 * @return the list of hosts
+	 */
+	public SearchResult searchByTopLevelDomain(String tld, int limit, int offset);
+	
+	/**
 	 * Retruns the names of the hosts which have been crawled since the
 	 * specified timestamp.
 	 * @param since the timestamp
@@ -43,16 +52,16 @@ public interface KnownHostList {
 	public List<KnownHost> getCrawledHosts(long since);
 	
 	/**
+	 * Returns the top-level domains encountered during the crawl.
+	 * @return the list of top-level domains
+	 */
+	public List<String> getTopLevelDomains();
+	
+	/**
 	 * Counts the number of hosts registered under a specific top-level domain.
 	 * @param tld the top level domain
 	 * @return
 	 */
 	public long countForTopLevelDomain(String tld);
-	
-	/**
-	 * Returns the top-level domains encountered during the crawl.
-	 * @return the list of top-level domains
-	 */
-	public List<String> getTopLevelDomains();
 	
 }

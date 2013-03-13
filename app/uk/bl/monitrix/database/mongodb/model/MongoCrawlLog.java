@@ -98,7 +98,7 @@ public class MongoCrawlLog extends CrawlLog {
 	}
 
 	@Override
-	public SearchResult searchURLs(String query, int limit, int offset) {
+	public SearchResult searchByURL(String query, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
 		DBObject q = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_URL, query);
 
@@ -112,6 +112,24 @@ public class MongoCrawlLog extends CrawlLog {
 		}
 	
 		return new SearchResult(query, total, urls, limit, offset, System.currentTimeMillis() - startTime);
+	}
+	
+	// TODO eliminate code duplication
+	@Override
+	public SearchResult searchByAnnotation(String annotation, int limit, int offset) {
+		long startTime = System.currentTimeMillis();
+		DBObject q = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, annotation);
+		
+		long total = collection.count(q);
+		
+		List<SearchResultItem> urls = new ArrayList<SearchResultItem>();
+		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
+		while (cursor.hasNext()) {
+			CrawlLogEntry entry = new MongoCrawlLogEntry(cursor.next());
+			urls.add(new SearchResultItem(entry.getURL(), entry.toString()));
+		}
+		
+		return new SearchResult(annotation, total, urls, limit, offset, System.currentTimeMillis() - startTime);
 	}
 	
 	@Override
@@ -149,32 +167,10 @@ public class MongoCrawlLog extends CrawlLog {
 	}
 
 	@Override
-	public long countEntriesWithAnnotation(String annotation) {
-		DBObject q = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, annotation); 
-		return collection.count(q);
-	}
-
-	@Override
-	public Iterator<CrawlLogEntry> getEntriesWithAnnotation(String annotation) {
+	@SuppressWarnings("unchecked")
+	public List<String> extractHostsForAnnotation(String annotation) {
 		DBObject q = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, annotation);
-		final DBCursor cursor = collection.find(q);
-		
-		return new Iterator<CrawlLogEntry>() {
-			@Override
-			public boolean hasNext() {
-				return cursor.hasNext();
-			}
-
-			@Override
-			public CrawlLogEntry next() {
-				return new MongoCrawlLogEntry(cursor.next());
-			}
-
-			@Override
-			public void remove() {
-				cursor.remove();
-			}
-		};
+		return (List<String>) collection.distinct(MongoProperties.FIELD_CRAWL_LOG_HOST, q);
 	}
 
 }

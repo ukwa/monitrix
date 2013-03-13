@@ -1,0 +1,46 @@
+@import tags.navbar
+
+@main("Monitrix - Host Information") {
+  @navbar("")
+}{
+  <div class="container">
+    <h3>Advanced Search</h3>
+    <form class="form-horizontal" action="@routes.Search.search()" method="GET">
+      <div class="control-group">
+        <label class="control-label" for="query">Query</label>
+        <div class="controls">
+      	  <input type="text" name="query" id="query" autocomplete="off">
+      	</div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">Search By</label>
+        <div class="controls">
+          <label class="radio">
+            <input type="radio" name="type" id="typeTLD" value="tld" checked>
+            Top-Level Domain
+          </label>
+          
+          <label class="radio">
+            <input type="radio" name="type" id="typeURL" value="url">
+            URL
+          </label>
+          
+          <label class="radio">
+            <input type="radio" name="type" id="typeHost" value="hostname">
+            Hostname
+          </label>
+          
+          <label class="radio">
+            <input type="radio" name="type" id="typeAnnotation" value="annotation">
+            Crawl Annotation
+          </label>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <button type="submit" class="btn btn-small">Search!</button>
+        </div>
+      </div>
+    </form>
+  </div>
+}

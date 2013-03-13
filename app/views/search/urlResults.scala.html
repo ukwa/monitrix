@@ -1,4 +1,4 @@
-@(result: uk.bl.monitrix.model.SearchResult, hostCount: Long)
+@(result: uk.bl.monitrix.model.SearchResult, hostCount: Long, queryType: String)
 
 @import tags.navbar
 
@@ -7,7 +7,13 @@
 }{
   <div class="container-fluid" style="padding-bottom:40px;">
     <div class="offset2 row">
-      <h4 style="margin-left:5px;">@result.query</h4>
+      <h4 style="margin-left:5px;">
+      @if(queryType != null) {
+        @queryType=@result.query
+      } else {
+        @result.query
+      }
+      </h4>
     </div>
     
     <div class="row-fluid">
@@ -21,19 +27,22 @@
       <!-- Result list -->
       <div class="span10">
         <div class="monitrix-tabs">
-          <a href="@routes.Search.searchHosts()?query=@result.query" class="monitrix-tab">@hostCount Hosts</a>
+          @if(hostCount != null) {
+            <a href="@routes.Search.search()?query=@result.query&type=hostname" class="monitrix-tab">@hostCount Hosts</a>
+          }
           <a href="#" class="monitrix-tab monitrix-tab-active">@result.totalResults URLs</a>
+          <span style="float:right;padding-right:10px;"><a href="@routes.Search.search()">Advanced Search</a></span>  
         </div>
         <div class="pagination">
           <ul>
             @if(result.offset > 0) {
-              <li><a href="/hosts?query=@result.query&limit=@result.limit&offset=@{Math.max(0, result.offset - result.limit)}">&laquo;</a></li>
+              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{Math.max(0, result.offset - result.limit)}">&laquo;</a></li>
             } else {
               <li class="disabled"><a href="#">&laquo;</a></li>
             }
             <li class="disabled"><a href="#">Showing Results @{result.offset + 1} - @{Math.min(result.offset + result.limit, result.totalResults)}</a></li>
             @if(result.offset + result.limit < result.totalResults) {
-              <li><a href="/hosts?query=@result.query&limit=@result.limit&offset=@{result.offset + result.limit}">&raquo;</a></li>
+              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{result.offset + result.limit}">&raquo;</a></li>
             } else {
               <li class="disabled"><a href="#">&raquo;</a></li>
             }
@@ -42,7 +51,7 @@
         
         @for(item <- result.resultPage) {
           <p>
-            <a href="@routes.URLs.getURLInfo(java.net.URLEncoder.encode(item.title))">@item.title</a><br/>
+            <a href="@routes.URLs.getURLInfo(java.net.URLEncoder.encode(item.title, "UTF-8"))">@item.title</a><br/>
             <span style="font-family:Courier">@item.description</span>
           </p>
         }

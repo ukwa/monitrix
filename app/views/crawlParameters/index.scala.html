@@ -1,12 +1,12 @@
-@(log: uk.bl.monitrix.model.CrawlLog)
+@(cappedHosts: List[String])
 
 @import tags.navbar
 
 @main("Monitrix - Crawl Parameters") {
   @navbar("/crawl-parameters")
 } {
-   <h3>@log.countEntriesWithAnnotation("Q:serverMaxSuccessKb") Capped Sites</h3>
-   @log.getEntriesWithAnnotation("Q:serverMaxSuccessKb").toSeq.groupBy(_.getHost).map { case(host, entries) =>
+   <h3>@cappedHosts.size Capped Sites</h3>
+   @for(host <- cappedHosts) {
      <a href="@routes.Hosts.getHostInfo(host)">@host</a><br/>
    }
 }

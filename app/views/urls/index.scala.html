@@ -9,7 +9,7 @@
     <h3 style="margin-bottom:10px; padding-bottom:0px;">@entry.getURL</h3>
     @if(play.Play.application.configuration.getString("wayback.url")) {
       <p style="margin-bottom:30px;">
-        <a class="btn btn-small" target="_blank" href="@play.Play.application.configuration.getString("wayback.url")query?type=urlquery&url=@java.net.URLEncoder.encode(entry.getURL)">Open In Wayback</a>
+        <a class="btn btn-small" target="_blank" href="@play.Play.application.configuration.getString("wayback.url")query?type=urlquery&url=@java.net.URLEncoder.encode(entry.getURL, "UTF-8")">Open In Wayback</a>
       </p>
     }
    
@@ -33,7 +33,7 @@
       
       <tr>
         <td class="monitrix-hostinfo-label">Download Size</td>
-        <td>@entry.getDownloadSize Byteslage</td>
+        <td>@entry.getDownloadSize Bytes</td>
       </tr>
 
       <tr>
@@ -53,7 +53,7 @@
       
       <tr>
         <td class="monitrix-hostinfo-label">Referrer</td>
-        <td><a href="@routes.URLs.getURLInfo(java.net.URLEncoder.encode(entry.getReferrer))">@entry.getReferrer</a></td>
+        <td><a href="@routes.URLs.getURLInfo(java.net.URLEncoder.encode(entry.getReferrer, "UTF-8"))">@entry.getReferrer</a></td>
       </tr>
       
       <tr>

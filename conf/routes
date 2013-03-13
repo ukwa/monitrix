@@ -39,12 +39,13 @@ GET     /about                             controllers.About.index()
 
 # Hosts
 GET     /hosts/:hostname                   controllers.Hosts.getHostInfo(hostname: String)
-GET     /hosts                             controllers.Search.searchHosts()
 GET     /api/hosts/:hostname/urls-crawled  controllers.Hosts.getURLHistoryForHost(hostname: String)
 
 # URLs
 GET     /urls/:url                         controllers.URLs.getURLInfo(url: String)
-GET     /urls                              controllers.Search.searchURLs()
+
+# Search
+GET     /search                            controllers.Search.search()
 
 # Admin
 GET     /admin                             controllers.Admin.index()

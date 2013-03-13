@@ -85,7 +85,16 @@ public abstract class CrawlLog {
 	 * @param offset the result page offset
 	 * @return the search result
 	 */
-	public abstract SearchResult searchURLs(String query, int limit, int offset);
+	public abstract SearchResult searchByURL(String query, int limit, int offset);
+	
+	/**
+	 * Returns the log entries that carry the specified annotation
+	 * @param annotation the annotation
+	 * @param limit the max number of results to return
+	 * @param offset the result page offset
+	 * @return the log entries with that annotation
+	 */
+	public abstract SearchResult searchByAnnotation(String annotation, int limit, int offset);
 	
 	/**
 	 * Counts the log entries for a specific host.
@@ -102,17 +111,11 @@ public abstract class CrawlLog {
 	public abstract Iterator<CrawlLogEntry> getEntriesForHost(String hostname);
 	
 	/**
-	 * Counts the log entries that carry the specified annotation.
+	 * A helper function which extracts from the log the list of distinct host names
+	 * which have any URLs with the specified annotation.
 	 * @param annotation the annotation
-	 * @return the number of entries with that annotation
+	 * @return the list of hosts
 	 */
-	public abstract long countEntriesWithAnnotation(String annotation);
-	
-	/**
-	 * Returns the log entries that carry the specified annotation
-	 * @param annotation the annotation
-	 * @return the log entries with that annotation
-	 */
-	public abstract Iterator<CrawlLogEntry> getEntriesWithAnnotation(String annotation);
+	public abstract List<String> extractHostsForAnnotation(String annotation);
 	
 }

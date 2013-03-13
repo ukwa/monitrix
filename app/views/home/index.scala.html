@@ -41,7 +41,21 @@
         <div id="hosts-barchart"></div>
       </div>
          
-      <div class="span7 offset1">
+      <div class="span7 offset1" style="margin-top:5px;">
+        <div class="monitrix-current-stats pull-left">
+          <strong>Total URLs</strong>
+          @defining(uk.bl.monitrix.Global.getBackend.getCrawlLog) { log =>
+            @defining(log.searchByAnnotation("warcRevisit:digest", 1, 0).totalResults) { revisited =>
+              @defining(log.countEntries) { total =>
+                <div class="chart" id="gauge-visited" data-percent="@{100 * (total - revisited) / total}"><span>@log.countEntries</span></div>
+              }
+            }
+          }
+          URLs
+        </div>
+
+        <p style="clear:both;margin-bottom:20px;"/>    
+        
         <h5>Recent Alerts (out of @alerts.countAll alerts total) <a class="pull-right" style="font-weight:normal" href="@routes.Alerts.index">Details »</a></h5>
         <table class="table table-condensed">
           @for(alert <- alerts.getMostRecent(10)) {

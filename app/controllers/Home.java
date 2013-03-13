@@ -43,5 +43,5 @@ public class Home extends Controller {
 			return ok();
 		return ok(Json.toJson(new CrawlStatsUnitMapper(mostRecent.get(1))));
 	}
-  
+	  
 }

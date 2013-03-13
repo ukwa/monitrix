@@ -62,6 +62,8 @@
   <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>
   <script type="text/javascript">
+    var lastHoveredTLD;
+    
     @if(log.isIdle) {
       new Monitrix.ProgressClock(@{System.currentTimeMillis - log.getTimeOfLastCrawlActivity}, $('#wall-clock'));
     } else {
@@ -72,14 +74,22 @@
       element: 'hosts-barchart',
       data: [
               @{knownHosts.getTopLevelDomains.map { tld =>
-                "{ tld: '." + tld + "', count: " + knownHosts.countForTopLevelDomain(tld) + "}" 
+                "{ tld: '" + tld + "', count: " + knownHosts.countForTopLevelDomain(tld) + "}" 
               }.mkString(", ") }
     	    ],
       xkey: 'tld',
       ykeys: ['count'],
       labels: [ '@knownHosts.getTopLevelDomains.mkString("', '")' ],
       hideHover: 'auto',
-      barColors: [ '#850303' ]
+      barColors: [ '#850303' ], 
+      hoverCallback: function(index, options) {
+        var row = options.data[index];
+        lastHoveredTLD = row.tld;
+      }
+    });
+    
+    $('#hosts-barchart').mouseup(function() {
+      window.location.href='/search?type=tld&query=' + lastHoveredTLD;
     });
     
     function getAverage(logEntries) {

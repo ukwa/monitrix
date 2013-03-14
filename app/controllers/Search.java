@@ -14,11 +14,14 @@ public class Search extends AbstractController {
 	private static final String TYPE = "type";
 	private static final String LIMIT = "limit";
 	private static final String OFFSET = "offset";
+	private static final String MIN = "min";
+	private static final String MAX = "max";
 	
 	private static final String TYPE_TLD = "tld";
 	private static final String TYPE_URL = "url";
 	private static final String TYPE_HOST = "hostname";
 	private static final String TYPE_ANNOTATION = "annotation";
+	private static final String TYPE_FETCH_DURATION = "fetch_duration";
 	
 	private static DBConnector db = Global.getBackend();
 	
@@ -33,7 +36,7 @@ public class Search extends AbstractController {
 		int limit = getQueryParamAsInt(LIMIT, 20);
 		int offset = getQueryParamAsInt(OFFSET, 0);
 		
-		if (query == null)
+		if (query == null && !type.equalsIgnoreCase(TYPE_FETCH_DURATION))
 			return ok(views.html.search.advanced.render());
 		
 		if (type == null) {
@@ -60,6 +63,14 @@ public class Search extends AbstractController {
 		} else if (type.equalsIgnoreCase(TYPE_ANNOTATION)) {
 			SearchResult urls = crawlLog.searchByAnnotation(query, limit, offset);
 			return ok(views.html.search.urlResults.render(urls, null, TYPE_ANNOTATION));
+		} else if (type.equalsIgnoreCase(TYPE_FETCH_DURATION)) {
+			int min = getQueryParamAsInt(MIN, -1);
+			int max = getQueryParamAsInt(MAX, -1);
+			
+			if (min > -1 && max > -1 && max > min) {
+				SearchResult hosts = knownHostList.searchByAverageFetchDuration(min, max, limit, offset);
+				return ok(views.html.search.hostResults.render(hosts, null, null));
+			}
 		}
 		
 		// Only happens if someone messes with the query string manually

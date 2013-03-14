@@ -36,10 +36,10 @@ public class Search extends AbstractController {
 		int limit = getQueryParamAsInt(LIMIT, 20);
 		int offset = getQueryParamAsInt(OFFSET, 0);
 		
-		if (query == null && !type.equalsIgnoreCase(TYPE_FETCH_DURATION))
+		if (query == null)
 			return ok(views.html.search.advanced.render());
 		
-		if (type == null) {
+		if (type == null && query != null) {
 			// Default to combined host + URL search
 			SearchResult hosts = knownHostList.searchHosts(query, limit, offset);	
 			long urlPreview = crawlLog.searchByURL(query, 1, 0).totalResults();

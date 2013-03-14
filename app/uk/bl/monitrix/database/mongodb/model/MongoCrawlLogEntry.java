@@ -215,10 +215,19 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 		dbo.put(MongoProperties.FIELD_CRAWL_LOG_RETRIES, retries);
 	}
 	
+	@Override
+	public double getCompressability() {
+		return (Double) dbo.get(MongoProperties.FIELD_CRAWL_LOG_COMPRESSABILITY);
+	}
+
+	public void setCompressability(double compressability) {
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_COMPRESSABILITY, compressability);
+	}
+	
 	public void setLogLine(String line) {
 		dbo.put(MongoProperties.FIELD_CRAWL_LOG_LINE, line);
 	}
-	
+		
 	@Override
 	public String toString() {
 		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_LINE);

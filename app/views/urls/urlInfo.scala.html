@@ -1,0 +1,84 @@
+@(logEntries: List[uk.bl.monitrix.model.CrawlLogEntry])
+
+@import tags.{heritrixStatus, navbar}
+
+@main("Monitrix - URL") {
+  @navbar("")
+}{
+  @for(entry <- logEntries) {
+    <h3 style="margin-bottom:10px; padding-bottom:0px;">@entry.getURL</h3>
+    @if(play.Play.application.configuration.getString("wayback.url")) {
+      <p style="margin-bottom:30px;">
+        <a class="btn btn-small" target="_blank" href="@play.Play.application.configuration.getString("wayback.url")query?type=urlquery&url=@java.net.URLEncoder.encode(entry.getURL, "UTF-8")">Open In Wayback</a>
+      </p>
+    }
+   
+    <table>
+      <tr>
+        @defining(uk.bl.monitrix.Global.getBackend.getIngestSchedule.getLog(entry.getLogId)) { log =>
+          <td class="monitrix-hostinfo-label">Crawler ID</td>
+          <td>@log.getCrawlerId</td>
+        }
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Crawled At</td>
+        <td>@entry.getLogTimestamp (@uk.bl.monitrix.NumberFormat.since(entry.getLogTimestamp.getTime) ago)</td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Response Code</td>
+        <td>@heritrixStatus(entry.getHTTPCode.toString)</td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Download Size</td>
+        <td>@entry.getDownloadSize Bytes</td>
+      </tr>
+
+      <tr>
+        <td class="monitrix-hostinfo-label">Host</td>
+        <td><a href="@routes.Hosts.getHostInfo(entry.getHost)">@entry.getHost</a></td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Subdomain</td>
+        <td>@entry.getSubdomain</td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Breadcrumb Trail</td>
+        <td>@entry.getBreadcrumbCodes</td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Referrer</td>
+        <td><a href="@routes.URLs.getURLInfo(java.net.URLEncoder.encode(entry.getReferrer, "UTF-8"))">@entry.getReferrer</a></td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Content Type</td>
+        <td>@entry.getContentType</td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Worker Thread</td>
+        <td>@entry.getWorkerThread</td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">SHA1 Hash</td>
+        <td>@entry.getSHA1Hash</td>
+      </tr>
+      
+      <tr>
+        <td class="monitrix-hostinfo-label">Annotations</td>
+        <td>@entry.getAnnotations</td>
+      </tr>
+    </table>
+    
+    <p>
+      <pre style="margin:60px 0px;"><code>@entry.toString</code></pre>
+    </p>
+  }
+}

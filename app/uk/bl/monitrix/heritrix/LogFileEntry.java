@@ -1,5 +1,7 @@
 package uk.bl.monitrix.heritrix;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -8,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 import play.Logger;
 
@@ -43,6 +46,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	private String bufferedSubdomain = null;
 	
+	private Double bufferedCompressability = null;
+	
 	private List<Alert> alerts = new ArrayList<Alert>();
 	
 	public LogFileEntry(String logPath, String line) {
@@ -74,30 +79,13 @@ public class LogFileEntry extends CrawlLogEntry {
 	private List<Alert> validate() {
 		List<Alert> alerts = new ArrayList<Alert>();
 		
-		String url = this.getURL();
-		/*
-		try {
-			ByteArrayOutputStream b64os = new ByteArrayOutputStream();
-			GZIPOutputStream gzip = new GZIPOutputStream(b64os);
-			gzip.write(url.getBytes());
-			gzip.flush();
-			
-			// The smaller this ratio is, the more 'compressible' the string,
-			// i.e. the more repetitive the URL
-			double ratio = ((double) b64os.toByteArray().length) / ((double) url.length());
-			
-			// TODO find the right threshold + make configurable
-			if (ratio < 0.02)
-				alerts.add(new DefaultAlert(this.getTimestamp().getTime(), this.getHost(), AlertType.COMPRESSABILITY, url));
-			
-			gzip.close();
-			b64os.close();
-		} catch (IOException e) {
-			Logger.error("Could not analyse URL for compressability: " + url);
-		}
-		*/
+		double compressability = getCompressability();
+
+		// TODO find the right threshold + make configurable
+		if (compressability < 0.02)
+			alerts.add(new DefaultAlert(this.getLogTimestamp().getTime(), this.getHost(), AlertType.COMPRESSABILITY, getURL()));
 		
-		String[] pathSegments = url.split("/");
+		String[] pathSegments = getURL().split("/");
 		if ((pathSegments.length - 1) > TOO_MANY_PATH_SEGMENTS_THRESHOLD)
 			alerts.add(new DefaultAlert(this.getLogTimestamp().getTime(), this.getHost(), AlertType.TOO_MANY_PATH_SEGMENTS, MSG_TOO_MANY_PATH_SEGMENTS + this.getURL()));
 
@@ -234,6 +222,30 @@ public class LogFileEntry extends CrawlLogEntry {
 			}
 		}
 		return 0;
+	}
+	
+	@Override
+	public double getCompressability() {
+		if (bufferedCompressability == null) {
+			String url = getURL();
+			try {			
+				ByteArrayOutputStream b64os = new ByteArrayOutputStream();
+				GZIPOutputStream gzip = new GZIPOutputStream(b64os);
+				gzip.write(url.getBytes());
+				gzip.flush();
+				
+				// The smaller this ratio is, the more 'compressible' the string,
+				// i.e. the more repetitive the URL
+				bufferedCompressability = ((double) b64os.toByteArray().length) / ((double) url.length());
+				
+				gzip.close();
+				b64os.close();
+			} catch (IOException e) {
+				Logger.error("Could not analyse URL for compressability: " + url);
+			}
+		}
+		
+		return bufferedCompressability;
 	}
 	
 	@Override

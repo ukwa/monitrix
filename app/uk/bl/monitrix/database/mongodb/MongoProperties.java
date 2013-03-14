@@ -49,6 +49,7 @@ public class MongoProperties {
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS = "annotations";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED = "annotations_tokenized";
 	public static final String FIELD_CRAWL_LOG_RETRIES = "retries";
+	public static final String FIELD_CRAWL_LOG_COMPRESSABILITY = "compressability";
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	
 	/** Database field keys (Crawl Stats collection) **/

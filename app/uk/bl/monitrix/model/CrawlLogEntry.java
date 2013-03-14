@@ -117,4 +117,10 @@ public abstract class CrawlLogEntry {
 	 */
 	public abstract int getRetries();
 	
+	/**
+	 * Returns the 'compressability' of the URL
+	 * @return the compressability
+	 */
+	public abstract double getCompressability();
+	
 }

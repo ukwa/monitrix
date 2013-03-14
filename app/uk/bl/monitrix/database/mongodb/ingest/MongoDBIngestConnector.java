@@ -107,6 +107,8 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 				dbo.setHTTPCode(next.getHTTPCode());
 				dbo.setAnnotations(next.getAnnotations());
 				dbo.setLogLine(next.toString());
+				dbo.setRetries(next.getRetries());
+				dbo.setCompressability(next.getCompressability());
 				logEntryBatch.add(dbo);	
 								
 				// Update pre-aggregated stats

@@ -15,9 +15,6 @@ GET     /api/timeline/urls-crawled         controllers.Timeline.getURLs()
 GET     /api/timeline/new-hosts-crawled    controllers.Timeline.getNewHostsCrawled()
 GET     /api/timeline/completed-hosts      controllers.Timeline.getCompletedHosts()
 
-# Seed Stats
-GET     /seed-stats                        controllers.Seeds.index()
-
 # Alerts
 GET     /alerts                            controllers.Alerts.index()
 
@@ -41,6 +38,7 @@ GET     /api/hosts/:hostname/urls-crawled  controllers.Hosts.getURLHistoryForHos
 
 # URLs
 GET     /urls/:url                         controllers.URLs.getURLInfo(url: String)
+GET     /urls                              controllers.URLs.index()
 
 # Search
 GET     /search                            controllers.Search.search()

@@ -98,6 +98,7 @@ public class MongoCrawlLog extends CrawlLog {
 		return entries;
 	}
 
+	// TODO eliminate code duplication
 	@Override
 	public SearchResult searchByURL(String query, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
@@ -115,7 +116,6 @@ public class MongoCrawlLog extends CrawlLog {
 		return new SearchResult(query, total, urls, limit, offset, System.currentTimeMillis() - startTime);
 	}
 	
-	// TODO eliminate code duplication
 	@Override
 	public SearchResult searchByAnnotation(String annotation, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
@@ -131,6 +131,25 @@ public class MongoCrawlLog extends CrawlLog {
 		}
 		
 		return new SearchResult(annotation, total, urls, limit, offset, System.currentTimeMillis() - startTime);
+	}
+	
+	@Override
+	public SearchResult searchByCompressability(double from, double to, int limit, int offset) {
+		long startTime = System.currentTimeMillis();
+		
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_COMPRESSABILITY, 
+				new BasicDBObject("$gt", from).append("$lte", to));
+		
+		long total = collection.count(query);
+		
+		List<SearchResultItem> urls = new ArrayList<SearchResultItem>();
+		DBCursor cursor = collection.find(query).skip(offset).limit(limit);
+		while (cursor.hasNext()) {
+			CrawlLogEntry entry = new MongoCrawlLogEntry(cursor.next());
+			urls.add(new SearchResultItem(entry.getURL(), entry.toString()));
+		}
+		
+		return new SearchResult(null, total, urls, limit, offset, System.currentTimeMillis() - startTime);
 	}
 	
 	@Override

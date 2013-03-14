@@ -12,9 +12,13 @@ public class URLs extends Controller {
 	
 	private static CrawlLog crawlLog  = Global.getBackend().getCrawlLog();
 	
+	public static Result index() {
+		return ok(views.html.urls.index.render(crawlLog));
+	}
+	
 	public static Result getURLInfo(String url) {
 		List<CrawlLogEntry> entries = crawlLog.getEntriesForURL(url);
-		return ok(views.html.urls.index.render(entries));
+		return ok(views.html.urls.urlInfo.render(entries));
 	}
 	
 	// TODO JSON output for this!

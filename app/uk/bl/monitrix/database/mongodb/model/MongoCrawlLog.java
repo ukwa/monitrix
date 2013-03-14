@@ -35,6 +35,7 @@ public class MongoCrawlLog extends CrawlLog {
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_RETRIES, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_COMPRESSABILITY, 1));
 	}
 
 	@Override
@@ -138,7 +139,7 @@ public class MongoCrawlLog extends CrawlLog {
 		long startTime = System.currentTimeMillis();
 		
 		DBObject query = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_COMPRESSABILITY, 
-				new BasicDBObject("$gt", from).append("$lte", to));
+				new BasicDBObject("$gte", from).append("$lt", to));
 		
 		long total = collection.count(query);
 		

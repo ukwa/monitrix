@@ -11,7 +11,7 @@
   <table class="table monitrix-hostinfo">
     <tr>
       <td class="monitrix-hostinfo-label">Compressability</td>
-      <td><div style="height:220px;" id="compressability-histogram"></div></td>
+      <td style="width:90%"><div style="height:220px;" id="compressability-histogram"></div></td>
     </tr>
   </table>
   
@@ -24,7 +24,7 @@
       element: 'compressability-histogram',
       data: [
             @{Seq.range(0, 100).map(_ * 0.01).map { c =>
-              "{ compressability: " + c + ", count: " + hosts.searchByAverageFetchDuration(startValue, startValue + increment, 1, 0).totalResults + "}" 
+              "{ compressability: " + c + ", count: " + log.searchByCompressability(c, c + 0.01, 1, 0).totalResults + "}" 
             }.mkString(", ") }
         ],
       xkey: 'compressability',
@@ -32,6 +32,17 @@
       labels: [ '# of Hosts' ],
       hideHover: 'false',
       barColors: [ '#850303' ],
+      hoverCallback: function(index, options) {
+          var row = options.data[index];
+          lastHoveredBracket = row.delay;
+          
+          var html =        	  
+        	    '<div class="morris-hover-row-label">Compressed/Uncompressed ' + row.compressability + '</div>' + 
+        	    '<div class="morris-hover-point" style="color: #850303">' +
+                  row.count + ' URLs' +
+                '</div>';
+          return html;
+        }
     });
   </script>
 }

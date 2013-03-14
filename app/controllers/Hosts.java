@@ -31,7 +31,7 @@ public class Hosts extends AbstractController {
 	
 	public static Result index() {
 		List<String> cappedHosts = db.getCrawlLog().extractHostsForAnnotation(CAPPED_CRAWL_ANNOTATION);
-		return ok(views.html.hosts.index.render(cappedHosts));
+		return ok(views.html.hosts.index.render(db.getKnownHostList(), cappedHosts));
 	}
 	
 	public static Result getHostInfo(String hostname) {

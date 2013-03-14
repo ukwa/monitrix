@@ -124,30 +124,24 @@ public class MongoKnownHost extends KnownHost {
 	
 	@Override
 	public double getAverageFetchDuration() {
-		DBObject fetchDBO = (DBObject) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION);
-		if (fetchDBO == null)
+		Double duration = (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION);
+		if (duration == null)
 			return 0;
 		else
-			return (Double) fetchDBO.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS);
+			return duration;
 	}
 
 	public void updateAverageFetchDuration(double fetch) {
 		if (fetch > 0) {
-			DBObject fetchDBO = (DBObject) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION);
-			if (fetchDBO == null) {
-				// Init
-				fetchDBO = new BasicDBObject();
-				fetchDBO.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_FETCH_COUNT, 0l);
-				fetchDBO.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS, 0.0);
-				dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, fetchDBO);
-			}
+			Long count = (Long) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_COUNT);
+			if (count == null)
+				count = 0l;
 			
-			long count = (Long) fetchDBO.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_FETCH_COUNT);
-			double currentAvg = (Double) fetchDBO.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS);
+			double currentAvg = getAverageFetchDuration();
 			double newAvg = (currentAvg * count + fetch) / (count + 1);
 			
-			fetchDBO.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_FETCH_COUNT, count + 1);
-			fetchDBO.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS, newAvg);
+			dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, newAvg);
+			dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_COUNT, count + 1);
 		}
 	}
 	

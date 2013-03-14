@@ -1,12 +1,56 @@
-@(cappedHosts: List[String])
+@(hosts: uk.bl.monitrix.model.KnownHostList, cappedHosts: List[String])
 
 @import tags.navbar
 
 @main("Monitrix - Hosts") {
   @navbar("/hosts")
 } {
-   <h3>@cappedHosts.size Capped Sites</h3>
-   @for(host <- cappedHosts) {
-     <a href="@routes.Hosts.getHostInfo(host)">@host</a><br/>
-   }
+  <h2>@hosts.count Known Hosts</h2>
+  <h3>@hosts.countSuccessful Successfully Crawled</h3>
+  
+  <table class="table monitrix-hostinfo">
+    <tr>
+      <td class="monitrix-hostinfo-label">Hosts by Top-Level Domain</td>
+      <td></td>
+    </tr>
+    
+    <tr>
+      <td class="monitrix-hostinfo-label">Average Delay</td>
+      <td><div style="height:220px;" id="average-delay-histogram"></div></td>
+    </tr>
+    
+    <tr>
+      <td class="monitrix-hostinfo-label">Capped Hosts (@cappedHosts.size)</td>
+      <td class="monitrix-three-column-text" style="width:90%">
+        @for(host <- cappedHosts) {
+          <a href="@routes.Hosts.getHostInfo(host)">@host</a><br/>
+        }
+      </td>
+    </tr>
+  </table>  
+
+  <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/morris.css")">
+  <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
+  <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>  
+  <script>
+    var maxDuration = @hosts.getMaxFetchDuration;
+    var increment = @{hosts.getMaxFetchDuration / 100}
+    var lastMax = 100
+    
+    @defining(hosts.getMaxFetchDuration / 100) { increment  =>
+      Morris.Bar({
+        element: 'average-delay-histogram',
+        data: [
+              @{Seq.range(0, 101).map(_ * increment).map { startValue =>
+                "{ delay: '" + startValue / 100 + "s', count: " + hosts.searchByAverageFetchDuration(startValue, startValue + increment, 1, 0).totalResults + "}" 
+              }.mkString(", ") }
+    	    ],
+        xkey: 'delay',
+        ykeys: ['count'],
+        labels: [ '# of Hosts' ],
+        hideHover: 'auto',
+        barColors: [ '#850303' ]
+      });
+    }
+  </script>
 }

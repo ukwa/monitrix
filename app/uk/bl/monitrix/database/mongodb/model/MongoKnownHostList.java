@@ -44,7 +44,28 @@ public class MongoKnownHostList implements KnownHostList {
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, 1));
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, 1));
+	}
+	
+	@Override
+	public long count() {
+		return collection.count();
+	}
+	
+	@Override
+	public long countSuccessful() {
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_COUNT, new BasicDBObject("$exists", true));
+		return collection.count(query);
+	}
+	
+	@Override
+	public long getMaxFetchDuration() {
+		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, -1)).limit(1);
+		if (cursor.hasNext()) {
+			MongoKnownHost h = new MongoKnownHost(cursor.next());
+			return (long) h.getAverageFetchDuration();
+		}
+		return 0; 
 	}
 
 	@Override
@@ -75,6 +96,7 @@ public class MongoKnownHostList implements KnownHostList {
 		return wrapped;
 	}
 
+	// TODO remove code duplication
 	@Override
 	public SearchResult searchHosts(String query, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
@@ -96,7 +118,6 @@ public class MongoKnownHostList implements KnownHostList {
 		return new SearchResult(query, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
 	
-	// TODO remove code duplication
 	@Override
 	public SearchResult searchByTopLevelDomain(String tld, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
@@ -114,6 +135,24 @@ public class MongoKnownHostList implements KnownHostList {
 		
 		return new SearchResult(tld, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
+	
+	@Override
+	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset) {
+		long startTime = System.currentTimeMillis();
+		
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, 
+				new BasicDBObject("$gt", min).append("$lte", max));
+		
+		long total = collection.count(query);
+		
+		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
+		DBCursor cursor = collection.find(query).skip(offset).limit(limit);
+		while (cursor.hasNext())
+			hostnames.add(new SearchResultItem(new MongoKnownHost(cursor.next()).getHostname(), ""));
+		
+		return new SearchResult(null, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
+	}
+
 
 	@Override
 	public List<KnownHost> getCrawledHosts(long since) {
@@ -138,5 +177,5 @@ public class MongoKnownHostList implements KnownHostList {
 	public long countForTopLevelDomain(String tld) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, tld));
 	}
-
+	
 }

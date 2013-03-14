@@ -100,7 +100,7 @@ public abstract class KnownHost {
 	
 	@Override
 	public String toString() {
-		return getHostname() + " (last access: " + getLastAccess() + ", first access: " + getFirstAccess() + ")";
+		return getHostname() + " (last access: " + getLastAccess() + ", first access: " + getFirstAccess() + ", average delay: " + getAverageFetchDuration() + ")";
 	}
 	
 }

@@ -10,6 +10,24 @@ import java.util.List;
 public interface KnownHostList {
 	
 	/**
+	 * Returns the total number of known hosts.
+	 * @return the number of hosts
+	 */
+	public long count();
+	
+	/**
+	 * Returns the number of host that had at least one URL successfully resolved.
+	 * @return the number of successfully crawled hosts.
+	 */
+	public long countSuccessful();
+	
+	/**
+	 * Returns the maximum average delay that was encountered over all hosts.
+	 * @return the maximum average delay
+	 */
+	public long getMaxFetchDuration();
+	
+	/**
 	 * Checks if the specified hostname is already in the known hosts list.
 	 * @param hostname the hostname
 	 * @return <code>true</code> if the host is already in the list
@@ -42,6 +60,16 @@ public interface KnownHostList {
 	 * @return the list of hosts
 	 */
 	public SearchResult searchByTopLevelDomain(String tld, int limit, int offset);
+
+	/**
+	 * Returns the hosts within a specific average delay bracket.
+	 * @param min the minimum average delay
+	 * @param max the maximum average delay
+	 * @param limit the pagination limit
+	 * @param offset the pagination offset
+	 * @return the list of hosts
+	 */
+	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset);
 	
 	/**
 	 * Retruns the names of the hosts which have been crawled since the

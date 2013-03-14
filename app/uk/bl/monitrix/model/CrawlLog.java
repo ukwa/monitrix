@@ -10,6 +10,14 @@ import java.util.List;
 public abstract class CrawlLog {
 	
 	/**
+	 * Utility method: returns true if the log is empty.
+	 * @return <code>true</code> if the log is empty
+	 */
+	public boolean isEmpty() {
+		return countEntries() == 0;
+	}
+	
+	/**
 	 * Returns the UNIX timestamp of the crawl start time, i.e.
 	 * the timestamp of the first entry written to the log.
 	 * @return crawl start time

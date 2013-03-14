@@ -31,6 +31,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	private static DateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	
+	private static DateFormat RFC2550_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+	
 	private String logPath;
 	
 	private String line;
@@ -97,7 +99,7 @@ public class LogFileEntry extends CrawlLogEntry {
 		
 		String[] pathSegments = url.split("/");
 		if ((pathSegments.length - 1) > TOO_MANY_PATH_SEGMENTS_THRESHOLD)
-			alerts.add(new DefaultAlert(this.getTimestamp().getTime(), this.getHost(), AlertType.TOO_MANY_PATH_SEGMENTS, MSG_TOO_MANY_PATH_SEGMENTS + this.getURL()));
+			alerts.add(new DefaultAlert(this.getLogTimestamp().getTime(), this.getHost(), AlertType.TOO_MANY_PATH_SEGMENTS, MSG_TOO_MANY_PATH_SEGMENTS + this.getURL()));
 
 		return alerts;
 	}
@@ -120,7 +122,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	}
 	
 	@Override
-	public Date getTimestamp() {
+	public Date getLogTimestamp() {
 		try {
 			return ISO_FORMAT.parse(fields.get(0));
 		} catch (ParseException e) {
@@ -182,6 +184,32 @@ public class LogFileEntry extends CrawlLogEntry {
 	public String getWorkerThread() {
 		return fields.get(7);
 	}
+	
+	@Override
+	public Date getFetchTimestamp() {
+		try {
+			String timestamp = fields.get(8);
+			if (timestamp.indexOf('+') > -1)
+				timestamp = timestamp.substring(0, timestamp.indexOf('+'));
+			
+			System.out.println("fetch timestamp: " + timestamp);
+			return RFC2550_FORMAT.parse(timestamp);
+		} catch (ParseException e) {
+			// Should never happen!
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public int getFetchDuration() {
+		String duration = fields.get(8);
+		if (duration.indexOf('+') > -1) {
+			duration = duration.substring(duration.indexOf('+') + 1);
+			return Integer.parseInt(duration);
+		}
+		
+		return 0;
+	}
 
 	@Override
 	public String getSHA1Hash() {
@@ -222,7 +250,7 @@ public class LogFileEntry extends CrawlLogEntry {
 			return new HostParseResult(domainName, subdomain, null);
 		} catch (MalformedURLException e) {
 			// Logger.warn(e.getMessage());
-			return new HostParseResult(url, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(url, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (IllegalArgumentException e) {
 			// Will be thrown by InternetDomainName.from in case the host name looks weird
 			// Logger.warn(e.getMessage());
@@ -247,11 +275,11 @@ public class LogFileEntry extends CrawlLogEntry {
 				host = hostBuilder.toString().substring(1);
 			}
 
-			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (IllegalStateException e) {
 			// Will be thrown by InternetDomainName.from in case the host name looks weird
 			Logger.warn(e.getMessage());
-			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (Throwable e) {
 			Logger.warn("Offending host: " + host);
 			Logger.warn("Extracted subdomain: " + subdomain);

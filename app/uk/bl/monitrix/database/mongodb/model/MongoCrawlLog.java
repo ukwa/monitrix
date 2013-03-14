@@ -42,7 +42,7 @@ public class MongoCrawlLog extends CrawlLog {
 		long crawlStartTime = 0;
 		DBCursor cursor = collection.find().limit(1).sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, 1));
 		while (cursor.hasNext())
-			crawlStartTime = new MongoCrawlLogEntry(cursor.next()).getTimestamp().getTime();					
+			crawlStartTime = new MongoCrawlLogEntry(cursor.next()).getLogTimestamp().getTime();					
 		
 		return crawlStartTime;
 	}
@@ -53,7 +53,7 @@ public class MongoCrawlLog extends CrawlLog {
 		long lastCrawlActivity = 0;
 		DBCursor cursor = collection.find().limit(1).sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP, -1));
 		while (cursor.hasNext())
-			lastCrawlActivity = new MongoCrawlLogEntry(cursor.next()).getTimestamp().getTime();					
+			lastCrawlActivity = new MongoCrawlLogEntry(cursor.next()).getLogTimestamp().getTime();					
 		
 		return lastCrawlActivity;
 	}

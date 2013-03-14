@@ -38,7 +38,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 	 */
 	public void update(CrawlLogEntry entry) {
 		// Step 1 - compute the timeslot
-		long timeslot = toTimeslot(entry.getTimestamp().getTime());
+		long timeslot = toTimeslot(entry.getLogTimestamp().getTime());
 				
 		// Step 2 - update data for this timeslot
 		MongoCrawlStatsUnit currentUnit = (MongoCrawlStatsUnit) getStatsForTimestamp(timeslot);
@@ -69,9 +69,9 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 			}
 			
 			// Update last access time
-			knownHosts.setLastAccess(hostname, entry.getTimestamp().getTime());
+			knownHosts.setLastAccess(hostname, entry.getLogTimestamp().getTime());
 		} else {
-			long timestamp = entry.getTimestamp().getTime();
+			long timestamp = entry.getLogTimestamp().getTime();
 			knownHosts.addToList(hostname, timestamp);
 			currentUnit.setNumberOfNewHostsCrawled(currentUnit.getNumberOfNewHostsCrawled() + 1);
 			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);

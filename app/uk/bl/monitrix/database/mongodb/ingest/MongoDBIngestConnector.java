@@ -92,7 +92,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 				LogFileEntry next = iterator.next();
 				counter++;
 				
-				long timestamp = next.getTimestamp().getTime();
+				long timestamp = next.getLogTimestamp().getTime();
 				if (timestamp < timeOfFirstLogEntryInBatch)
 					timeOfFirstLogEntryInBatch = timestamp;
 
@@ -118,7 +118,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 				// Log-entry-level alerts
 				for (Alert a : next.getAlerts()) {
 					MongoAlert alert = new MongoAlert(new BasicDBObject());
-					alert.setTimestamp(next.getTimestamp().getTime());
+					alert.setTimestamp(next.getLogTimestamp().getTime());
 					alert.setOffendingHost(a.getOffendingHost());
 					alert.setAlertType(a.getAlertType());
 					alert.setAlertDescription(a.getAlertDescription());

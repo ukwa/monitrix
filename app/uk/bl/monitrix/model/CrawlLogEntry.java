@@ -19,7 +19,7 @@ public abstract class CrawlLogEntry {
 	 * Column #1 - ISO timestamp.
 	 * @return the crawl time
 	 */
-	public abstract Date getTimestamp();
+	public abstract Date getLogTimestamp();
 	
 	/**
 	 * Column #2 - the HTTP status or Heritrix error code ('fetch status code').
@@ -86,6 +86,18 @@ public abstract class CrawlLogEntry {
 	 * @return the worker thread ID
 	 */
 	public abstract String getWorkerThread();
+	
+	/**
+	 * The fetch timestamp, derived from column #8.
+	 * @return the fetch timestamp
+	 */
+	public abstract Date getFetchTimestamp();
+	
+	/**
+	 * The fetch timestamp, derived from column #8;
+	 * @return
+	 */
+	public abstract int getFetchDuration();
 	
 	/**
 	 * Column #10 - file SHA1 hash.

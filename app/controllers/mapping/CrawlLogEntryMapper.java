@@ -19,7 +19,7 @@ public class CrawlLogEntryMapper {
 	
 	public CrawlLogEntryMapper(CrawlLogEntry entry) {
 		this.url = entry.getURL();
-		this.timestamp = entry.getTimestamp().getTime();
+		this.timestamp = entry.getLogTimestamp().getTime();
 		this.download_size = entry.getDownloadSize();
 	}
 	

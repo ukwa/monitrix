@@ -1,5 +1,8 @@
 package uk.bl.monitrix.database.mongodb.model;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -19,6 +22,8 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	private DBObject dbo;
 	
 	private List<String> fields = null;
+	
+	private static DateFormat RFC2550_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	
 	public MongoCrawlLogEntry(DBObject dbo) {
 		this.dbo = dbo;
@@ -63,7 +68,7 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	}
 
 	@Override
-	public Date getTimestamp() {
+	public Date getLogTimestamp() {
 		return new Date((Long) dbo.get(MongoProperties.FIELD_CRAWL_LOG_TIMESTAMP));
 	}
 
@@ -145,6 +150,38 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	@Override
 	public String getWorkerThread() {
 		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_CRAWLER_ID);
+	}
+	
+	@Override
+	public Date getFetchTimestamp() {
+		if (fields == null)
+			parseEntry();
+		
+		try {
+			String timestamp = fields.get(8);
+			if (timestamp.indexOf('+') > -1)
+				timestamp = timestamp.substring(0, timestamp.indexOf('+'));
+			
+			System.out.println("fetch timestamp: " + timestamp);
+			return RFC2550_FORMAT.parse(timestamp);
+		} catch (ParseException e) {
+			// Should never happen!
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public int getFetchDuration() {
+		if (fields == null)
+			parseEntry();
+		
+		String duration = fields.get(8);
+		if (duration.indexOf('+') > -1) {
+			duration = duration.substring(duration.indexOf('+') + 1);
+			return Integer.parseInt(duration);
+		}
+		
+		return 0;
 	}
 	
 	public void setCrawlerID(String crawlerId) {

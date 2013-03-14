@@ -47,7 +47,7 @@
           @defining(uk.bl.monitrix.Global.getBackend.getCrawlLog) { log =>
             @defining(log.searchByAnnotation("warcRevisit:digest", 1, 0).totalResults) { revisited =>
               @defining(log.countEntries) { total =>
-                <div class="chart" id="gauge-visited" data-percent="@{100 * (total - revisited) / total}"><span>@log.countEntries</span></div>
+                <div class="chart" id="gauge-visited" data-percent="@{if (total > 0) { 100 * (total - revisited) / total} }"><span>@log.countEntries</span></div>
               }
             }
           }

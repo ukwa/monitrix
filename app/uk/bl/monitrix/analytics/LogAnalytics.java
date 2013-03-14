@@ -58,7 +58,7 @@ public class LogAnalytics {
 		while (log.hasNext()) {
 			CrawlLogEntry next = log.next();
 			
-			long timestamp = next.getTimestamp().getTime();
+			long timestamp = next.getLogTimestamp().getTime();
 			if (timestamp > endTime)
 				endTime = timestamp;
 			
@@ -85,7 +85,7 @@ public class LogAnalytics {
 		while (log.hasNext()) {
 			CrawlLogEntry next = log.next();
 			
-			long timestamp = next.getTimestamp().getTime();
+			long timestamp = next.getLogTimestamp().getTime();
 			if (timestamp > endTime)
 				endTime = timestamp;
 			
@@ -233,7 +233,7 @@ public class LogAnalytics {
 		long logStartTime = Long.MAX_VALUE;
 		long logEndTime = 0;
 		for (CrawlLogEntry entry : log) {
-			long timestamp = entry.getTimestamp().getTime();
+			long timestamp = entry.getLogTimestamp().getTime();
 			
 			if (timestamp > logEndTime)
 				logEndTime = timestamp;
@@ -249,7 +249,7 @@ public class LogAnalytics {
 		Map<Long, TimeseriesValue> graph = new HashMap<Long, TimeseriesValue>(maxDatapoints);
 		
 		for (CrawlLogEntry entry : log) {
-			long timeslot = entry.getTimestamp().getTime() / resolution;
+			long timeslot = entry.getLogTimestamp().getTime() / resolution;
 			
 			TimeseriesValue urlCount = graph.get(timeslot);
 			if (urlCount == null)

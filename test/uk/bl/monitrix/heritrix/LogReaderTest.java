@@ -20,7 +20,7 @@ public class LogReaderTest {
 		int counter = 0;
 		while (entries.hasNext()) {
 			LogFileEntry entry = entries.next();
-			Assert.assertTrue(entry.getTimestamp().getTime() > 0);
+			Assert.assertTrue(entry.getLogTimestamp().getTime() > 0);
 			Assert.assertNotNull(entry.getHTTPCode()); // Just make sure the method gets called
 			Assert.assertTrue(entry.getDownloadSize() > -1);
 			Assert.assertFalse(entry.getURL().isEmpty());

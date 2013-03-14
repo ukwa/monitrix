@@ -24,11 +24,14 @@ import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
 
 public class Hosts extends AbstractController {
+	
+	private static final String CAPPED_CRAWL_ANNOTATION = "Q:serverMaxSuccessKb";
 		
 	private static DBConnector db = Global.getBackend();
 	
 	public static Result index() {
-		return ok();
+		List<String> cappedHosts = db.getCrawlLog().extractHostsForAnnotation(CAPPED_CRAWL_ANNOTATION);
+		return ok(views.html.hosts.index.render(cappedHosts));
 	}
 	
 	public static Result getHostInfo(String hostname) {

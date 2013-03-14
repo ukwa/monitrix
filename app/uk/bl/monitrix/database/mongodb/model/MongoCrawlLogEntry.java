@@ -206,6 +206,15 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 		dbo.put(MongoProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, Arrays.asList(annotations.split(",")));
 	}
 	
+	@Override
+	public int getRetries() {
+		return (Integer) dbo.get(MongoProperties.FIELD_CRAWL_LOG_RETRIES);
+	}
+
+	public void setRetries(int retries) {
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_RETRIES, retries);
+	}
+	
 	public void setLogLine(String line) {
 		dbo.put(MongoProperties.FIELD_CRAWL_LOG_LINE, line);
 	}

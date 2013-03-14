@@ -48,6 +48,7 @@ public class MongoProperties {
 	public static final String FIELD_CRAWL_LOG_HTTP_CODE = "http_code";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS = "annotations";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED = "annotations_tokenized";
+	public static final String FIELD_CRAWL_LOG_RETRIES = "retries";
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	
 	/** Database field keys (Crawl Stats collection) **/
@@ -66,6 +67,10 @@ public class MongoProperties {
 	public static final String FIELD_KNOWN_HOSTS_FIRST_ACCESS = "first_access";
 	public static final String FIELD_KNOWN_HOSTS_LAST_ACCESS = "last_access";
 	public static final String FIELD_KNOWN_HOSTS_CRAWLERS = "crawlers";
+	public static final String FIELD_KNOWN_HOSTS_CRAWLED_URLS = "crawled_urls";
+	public static final String FIELD_KNOWN_HOST_AVG_FETCH_DURATION = "avg_fetch_duration";
+	public static final String FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS = "avg_fetch_duration_millis";
+	public static final String FIELD_KNOWN_HOST_AVG_FETCH_DURATION_FETCH_COUNT = "avg_fetch_duration_fetch_count";
 	public static final String FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES = "fetch_status_codes";
 	public static final String FIELD_KNOWN_HOSTS_CONTENT_TYPES = "content_types";
 	public static final String FIELD_KNOWN_HOSTS_VIRUS_STATS = "virus_stats";

@@ -222,6 +222,21 @@ public class LogFileEntry extends CrawlLogEntry {
 	}
 	
 	@Override
+	public int getRetries() {
+		for (String a : fields.get(11).split(",")) {
+			if (a.endsWith("t")) {
+				String retries = a.substring(0, a.length() - 1);
+				try {
+					return Integer.parseInt(retries);
+				} catch (Throwable t) {
+					// Do nothing
+				}
+			}
+		}
+		return 0;
+	}
+	
+	@Override
 	public String toString() {
 		return line;
 	}

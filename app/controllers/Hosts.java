@@ -27,6 +27,10 @@ public class Hosts extends AbstractController {
 		
 	private static DBConnector db = Global.getBackend();
 	
+	public static Result index() {
+		return ok();
+	}
+	
 	public static Result getHostInfo(String hostname) {
 		KnownHost knownHost = db.getKnownHostList().getKnownHost(hostname);
 		

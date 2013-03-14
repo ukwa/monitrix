@@ -47,6 +47,18 @@ public abstract class KnownHost {
 	public abstract List<String> getCrawlerIDs();
 	
 	/**
+	 * The number of URLs crawled at this host.
+	 * @return
+	 */
+	public abstract long getCrawledURLs();
+	
+	/**
+	 * The average fetch duration observed at this host (in milliseconds).
+	 * @return the average fetch duration
+	 */
+	public abstract double getAverageFetchDuration();
+	
+	/**
 	 * The distribution of Heritrix fetch status codes for the URLs crawled at
 	 * this host. The return value is a map that has the encountered fetch status
 	 * codes (200, 404, -1, ...) as keys, and the number of URLs that have ended

@@ -111,4 +111,10 @@ public abstract class CrawlLogEntry {
 	 */
 	public abstract String getAnnotations();
 	
+	/**
+	 * Returns the number of HTTP retries (based on info in column #12)
+	 * @return the number of retries
+	 */
+	public abstract int getRetries();
+	
 }

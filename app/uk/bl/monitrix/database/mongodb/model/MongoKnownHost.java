@@ -110,6 +110,48 @@ public class MongoKnownHost extends KnownHost {
 	}
 
 	@Override
+	public long getCrawledURLs() {
+		Long crawledURLs = (Long) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS);
+		if (crawledURLs == null)
+			return 0;
+		else
+			return crawledURLs;
+	}
+		
+	public void setCrawledURLs(long urls) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS, urls);
+	}
+	
+	@Override
+	public double getAverageFetchDuration() {
+		DBObject fetchDBO = (DBObject) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION);
+		if (fetchDBO == null)
+			return 0;
+		else
+			return (Double) fetchDBO.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS);
+	}
+
+	public void updateAverageFetchDuration(double fetch) {
+		if (fetch > 0) {
+			DBObject fetchDBO = (DBObject) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION);
+			if (fetchDBO == null) {
+				// Init
+				fetchDBO = new BasicDBObject();
+				fetchDBO.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_FETCH_COUNT, 0l);
+				fetchDBO.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS, 0.0);
+				dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, fetchDBO);
+			}
+			
+			long count = (Long) fetchDBO.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_FETCH_COUNT);
+			double currentAvg = (Double) fetchDBO.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS);
+			double newAvg = (currentAvg * count + fetch) / (count + 1);
+			
+			fetchDBO.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_FETCH_COUNT, count + 1);
+			fetchDBO.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_MILLIS, newAvg);
+		}
+	}
+	
+	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getFetchStatusDistribution() {
 		DBObject fetchStatusCodes = (DBObject) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES);

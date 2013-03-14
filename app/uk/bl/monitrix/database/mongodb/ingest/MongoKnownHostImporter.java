@@ -104,6 +104,16 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 			Logger.warn("Attempt to write fetch status info to unknown host: " + hostname);
 		}
 	}
+	
+	public void incrementCrawledURLCounter(String hostname) {
+		MongoKnownHost host = (MongoKnownHost) getKnownHost(hostname);
+		if (host != null) {
+			long crawledURLs = host.getCrawledURLs();
+			host.setCrawledURLs(crawledURLs + 1);
+		} else {
+			Logger.warn("Attempt to increment crawled URL counter for unknown host: " + hostname);
+		}			
+	}
 
 	public void incrementContentTypeCounter(String hostname, String contentType) {
 		// According to MongoDB rules: "fields stored in the db can't have . in them"
@@ -138,6 +148,15 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 		} else {
 			Logger.warn("Attempt to write virus stats info to unknown host: " + hostname);
 		}			
+	}
+	
+	public void updateAverageResponseTime(String hostname, int fetchDuration) {
+		MongoKnownHost host = (MongoKnownHost) getKnownHost(hostname);
+		if (host != null) {
+			host.updateAverageFetchDuration(fetchDuration);
+		} else {
+			Logger.warn("Attempt to update average response time for known host: " + hostname);
+		}
 	}
 	
 	/**

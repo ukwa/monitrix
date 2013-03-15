@@ -82,7 +82,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 		knownHosts.addSubdomain(hostname, entry.getSubdomain());
 		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
 		knownHosts.incrementCrawledURLCounter(hostname);
-		knownHosts.updateAverageResponseTime(hostname, entry.getFetchDuration());
+		knownHosts.updateAverageResponseTimeAndRetryRate(hostname, entry.getFetchDuration(), entry.getRetries());
 		
 		// Warning: there seems to be a bug in Heritrix which sometimes leaves a 'content type template' (?)
 		// in the log line: content type = '$ctype'. This causes MongoDB to crash, because it can't use 

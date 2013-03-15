@@ -123,6 +123,19 @@ public class MongoKnownHost extends KnownHost {
 	}
 	
 	@Override
+	public long getSuccessfullyFetchedURLs() {
+		Long fetchedURLs = (Long) dbo.get(MongoProperties.FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS);
+		if (fetchedURLs == null)
+			return 0;
+		else
+			return fetchedURLs;
+	}
+	
+	public void setSuccessfullyFetchedURLs(long urls) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS, urls);
+	}
+		
+	@Override
 	public double getAverageFetchDuration() {
 		Double duration = (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION);
 		if (duration == null)
@@ -131,18 +144,21 @@ public class MongoKnownHost extends KnownHost {
 			return duration;
 	}
 
-	public void updateAverageFetchDuration(double fetch) {
-		if (fetch > 0) {
-			Long count = (Long) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_COUNT);
-			if (count == null)
-				count = 0l;
-			
-			double currentAvg = getAverageFetchDuration();
-			double newAvg = (currentAvg * count + fetch) / (count + 1);
-			
-			dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, newAvg);
-			dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_COUNT, count + 1);
-		}
+	public void setAverageFetchDuration(double avg) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, avg);			
+	}
+	
+	@Override
+	public double getAverageRetryRate() {
+		Double retryRate = (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_RETRY_RATE);
+		if (retryRate == null)
+			return 0;
+		else
+			return retryRate;
+	}
+	
+	public void setAverageRetryRate(double rate) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_RETRY_RATE, rate);
 	}
 	
 	@Override

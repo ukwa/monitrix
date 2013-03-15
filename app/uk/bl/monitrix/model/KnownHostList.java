@@ -57,7 +57,7 @@ public interface KnownHostList {
 	 * @param tld the top-level domain
 	 * @param limit the pagination limit
 	 * @param offset the pagination offset
-	 * @return the list of hosts
+	 * @return the search result
 	 */
 	public SearchResult searchByTopLevelDomain(String tld, int limit, int offset);
 
@@ -67,9 +67,19 @@ public interface KnownHostList {
 	 * @param max the maximum average delay
 	 * @param limit the pagination limit
 	 * @param offset the pagination offset
-	 * @return the list of hosts
+	 * @return the search result
 	 */
 	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset);
+	
+	/**
+	 * Returns the hosts within a specified average retry rate bracket.
+	 * @param min the minimum number of retries
+	 * @param max the maximum number of retries
+	 * @param limit the pagination limit
+	 * @param offset the pagination offset
+	 * @return the search result
+	 */
+	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset);
 	
 	/**
 	 * Retruns the names of the hosts which have been crawled since the

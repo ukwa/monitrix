@@ -20,6 +20,11 @@
     </tr>
     
     <tr>
+      <td class="monitrix-hostinfo-label">Average Retries</td>
+      <td><div style="height:220px; width:100%;" id="average-retries-histogram"></div></td>
+    </tr>
+    
+    <tr>
       <td class="monitrix-hostinfo-label">Capped Hosts (@cappedHosts.size)</td>
       <td class="monitrix-three-column-text" style="width:90%">
         @for(host <- cappedHosts) {
@@ -33,15 +38,17 @@
   <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>  
   <script>
-    var lastHoveredBracket;
-    var increment = @{hosts.getMaxFetchDuration / 100};
+    var lastHoveredDelay;
+    var delayInc = @{hosts.getMaxFetchDuration / 100};
     
-    @defining(hosts.getMaxFetchDuration / 100) { increment  =>
+    var lastHoveredRetries;
+    
+    @defining(hosts.getMaxFetchDuration / 100) { delayInc  =>
       Morris.Bar({
         element: 'average-delay-histogram',
         data: [
-              @{Seq.range(0, 101).map(_ * increment).map { startValue =>
-                "{ delay: " + startValue + ", count: " + hosts.searchByAverageFetchDuration(startValue, startValue + increment, 1, 0).totalResults + "}" 
+              @{Seq.range(0, 101).map(_ * delayInc).map { startValue =>
+                "{ delay: " + startValue + ", count: " + hosts.searchByAverageFetchDuration(startValue, startValue + delayInc, 1, 0).totalResults + "}" 
               }.mkString(", ") }
     	    ],
         xkey: 'delay',
@@ -51,10 +58,10 @@
         barColors: [ '#850303' ],
         hoverCallback: function(index, options) {
           var row = options.data[index];
-          lastHoveredBracket = row.delay;
+          lastHoveredDelay = row.delay;
           
           var html =        	  
-        	    '<div class="morris-hover-row-label">Delay ' + (row.delay / 100) + 's - ' + (row.delay + increment)/ 100 + 's</div>' + 
+        	    '<div class="morris-hover-row-label">Delay ' + (row.delay / 100) + 's - ' + (row.delay + delayInc)/ 100 + 's</div>' + 
         	    '<div class="morris-hover-point" style="color: #850303">' +
                   row.count + ' Hosts' +
                 '</div>';
@@ -64,7 +71,37 @@
     }
     
     $('#average-delay-histogram').mouseup(function() {
-      window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredBracket + '&max=' + (lastHoveredBracket + increment);
+      window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc);
+    });
+    
+    Morris.Bar({
+      element: 'average-retries-histogram',
+      data: [
+            @{Seq.range(0, 21).map { r =>
+                val count = hosts.searchByAverageRetries(r, r + 1, 1, 0).totalResults
+                "{ retries: " + r + ", scale: " + Math.max(Math.log(count.toDouble), 0) + ", count: " + count + "}"
+            }.mkString(", ") }
+  	    ],
+      xkey: 'retries',
+      ykeys: ['scale'],
+      labels: [ '# of Hosts' ],
+      hideHover: 'false',
+      barColors: [ '#850303' ],
+      hoverCallback: function(index, options) {
+          var row = options.data[index];
+          lastHoveredRetries = row.retries;
+          
+          var html =        	  
+        	    '<div class="morris-hover-row-label">' + row.retries + '  - ' + (row.retries + 1) + ' Retries</div>' + 
+        	    '<div class="morris-hover-point" style="color: #850303">' +
+                  row.count + ' Hosts' +
+                '</div>';
+          return html;
+        }
+    });
+    
+    $('#average-retries-histogram').mouseup(function() {
+      window.location.href='/search?type=avg_retries&min=' + lastHoveredRetries + '&max=' + (lastHoveredRetries + 1);
     });
   </script>
 }

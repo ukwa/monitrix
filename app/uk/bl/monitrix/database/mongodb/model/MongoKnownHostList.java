@@ -54,7 +54,7 @@ public class MongoKnownHostList implements KnownHostList {
 	
 	@Override
 	public long countSuccessful() {
-		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION_COUNT, new BasicDBObject("$exists", true));
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS, new BasicDBObject("$exists", true));
 		return collection.count(query);
 	}
 	
@@ -152,7 +152,23 @@ public class MongoKnownHostList implements KnownHostList {
 		
 		return new SearchResult(null, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
-
+	
+	@Override
+	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset) {
+		long startTime = System.currentTimeMillis();
+		
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_RETRY_RATE, 
+				new BasicDBObject("$gte", min).append("$lt", max));
+		
+		long total = collection.count(query);
+		
+		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
+		DBCursor cursor = collection.find(query).skip(offset).limit(limit);
+		while (cursor.hasNext())
+			hostnames.add(new SearchResultItem(new MongoKnownHost(cursor.next()).getHostname(), ""));
+		
+		return new SearchResult(null, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
+	}
 
 	@Override
 	public List<KnownHost> getCrawledHosts(long since) {

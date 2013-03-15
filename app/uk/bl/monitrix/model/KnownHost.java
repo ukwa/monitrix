@@ -53,10 +53,23 @@ public abstract class KnownHost {
 	public abstract long getCrawledURLs();
 	
 	/**
+	 * The number of URLs that were successfully fetched (and not only attempted)
+	 * @return the no. of successfully fetched URLs
+	 */
+	public abstract long getSuccessfullyFetchedURLs();
+	
+	/**
 	 * The average fetch duration observed at this host (in milliseconds).
 	 * @return the average fetch duration
 	 */
 	public abstract double getAverageFetchDuration();
+	
+	
+	/**
+	 * The average number of retries over all (eventually) successful fetches.
+	 * @return the average retry rate
+	 */
+	public abstract double getAverageRetryRate();
 	
 	/**
 	 * The distribution of Heritrix fetch status codes for the URLs crawled at

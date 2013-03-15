@@ -21,8 +21,9 @@ public class Search extends AbstractController {
 	private static final String TYPE_URL = "url";
 	private static final String TYPE_HOST = "hostname";
 	private static final String TYPE_ANNOTATION = "annotation";
-	private static final String TYPE_FETCH_DURATION = "fetch_duration";
+	private static final String TYPE_AVG_FETCH_DURATION = "fetch_duration";
 	private static final String TYPE_COMPRESSABILITY = "compressability";
+	private static final String TYPE_AVG_RETRIES = "avg_retries";
 	
 	private static DBConnector db = Global.getBackend();
 	
@@ -36,6 +37,9 @@ public class Search extends AbstractController {
 		
 		int limit = getQueryParamAsInt(LIMIT, 20);
 		int offset = getQueryParamAsInt(OFFSET, 0);
+		
+		if (type == null && query == null)
+			return ok(views.html.search.advanced.render());
 		
 		if (type == null && query != null) {
 			// Default to combined host + URL search
@@ -65,13 +69,13 @@ public class Search extends AbstractController {
 			SearchResult urls = crawlLog.searchByAnnotation(query, limit, offset);
 			return ok(views.html.search.urlResults.render(urls, null, TYPE_ANNOTATION, null));
 			
-		} else if (type.equalsIgnoreCase(TYPE_FETCH_DURATION)) {
+		} else if (type.equalsIgnoreCase(TYPE_AVG_FETCH_DURATION)) {
 			int min = getQueryParamAsInt(MIN, -1);
 			int max = getQueryParamAsInt(MAX, -1);
 			
 			if (min > -1 && max > min) {
 				SearchResult hosts = knownHostList.searchByAverageFetchDuration(min, max, limit, offset);
-				return ok(views.html.search.hostResults.render(hosts, null, TYPE_FETCH_DURATION, "&min=" + min + "&max=" + max));
+				return ok(views.html.search.hostResults.render(hosts, null, TYPE_AVG_FETCH_DURATION, "&min=" + min + "&max=" + max));
 			}
 		} else if (type.equalsIgnoreCase(TYPE_COMPRESSABILITY)) {
 			double min = getQueryParamAsDouble(MIN, -1);
@@ -80,6 +84,14 @@ public class Search extends AbstractController {
 			if (min > -1 && max > min) {
 				SearchResult urls = crawlLog.searchByCompressability(min, max, limit, offset);
 				return ok(views.html.search.urlResults.render(urls, null, TYPE_COMPRESSABILITY, "&min=" + min + "&max=" + max));
+			}
+		} else if (type.equalsIgnoreCase(TYPE_AVG_RETRIES)) {
+			int min = getQueryParamAsInt(MIN, -1);
+			int max = getQueryParamAsInt(MAX, -1);
+			
+			if (min > -1 && max > min) {
+				SearchResult hosts = knownHostList.searchByAverageRetries(min, max, limit, offset);
+				return ok(views.html.search.hostResults.render(hosts, null, TYPE_AVG_RETRIES, "&min=" + min + "&max=" + max));				
 			}
 		}
 		

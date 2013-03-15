@@ -15,6 +15,9 @@ import uk.bl.monitrix.model.Alert.AlertType;
 
 /**
  * An extended version of {@link MongoKnownHostList} that adds insert/update capability.
+ * 
+ * TODO this whole class really needs some cleanup!
+ * 
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 class MongoKnownHostImporter extends MongoKnownHostList {
@@ -150,12 +153,24 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 		}			
 	}
 	
-	public void updateAverageResponseTime(String hostname, int fetchDuration) {
-		MongoKnownHost host = (MongoKnownHost) getKnownHost(hostname);
-		if (host != null) {
-			host.updateAverageFetchDuration(fetchDuration);
-		} else {
-			Logger.warn("Attempt to update average response time for known host: " + hostname);
+	public void updateAverageResponseTimeAndRetryRate(String hostname, int fetchDuration, int retries) {
+		if (fetchDuration > 0) {
+			MongoKnownHost host = (MongoKnownHost) getKnownHost(hostname);
+			if (host != null) {
+				long successCount = host.getSuccessfullyFetchedURLs();
+				
+				double currentAvgResponseTime = host.getAverageFetchDuration();
+				double newAvgResponseTime = (currentAvgResponseTime * successCount + fetchDuration) / (successCount + 1);
+				
+				double currentAvgRetryRate = host.getAverageRetryRate();
+				double newAvgRetryRate = (currentAvgRetryRate * successCount + retries) / (successCount + 1);
+				
+				host.setSuccessfullyFetchedURLs(successCount + 1);
+				host.setAverageFetchDuration(newAvgResponseTime);
+				host.setAverageRetryRate(newAvgRetryRate);
+			} else {
+				Logger.warn("Attempt to update average response time for known host: " + hostname);
+			}
 		}
 	}
 	

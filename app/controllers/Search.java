@@ -41,7 +41,9 @@ public class Search extends AbstractController {
 		if (type == null && query == null)
 			return ok(views.html.search.advanced.render());
 		
-		if (type == null && query != null) {
+		if ((type == null && query != null) ||
+			(type.isEmpty() && query != null))	{
+			
 			// Default to combined host + URL search
 			SearchResult hosts = knownHostList.searchHosts(query, limit, offset);	
 			long urlPreview = crawlLog.searchByURL(query, 1, 0).totalResults();

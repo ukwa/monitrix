@@ -19,12 +19,14 @@
   <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>  
   <script>
+    var lastHoveredCompressability;
+    
     // Compressability is a value between 0 (theoretical - i.e. 'compressed to 0) and 1 (not compressable)
     Morris.Bar({
       element: 'compressability-histogram',
       data: [
-            @{Seq.range(0, 100).map(_ * 0.01).map { c =>
-              "{ compressability: " + c + ", count: " + log.searchByCompressability(c, c + 0.01, 1, 0).totalResults + "}" 
+            @{Seq.range(0, 50).map(_ * 0.02).map { c =>
+              "{ compressability: " + c + ", count: " + log.searchByCompressability(c, c + 0.02, 0, 0).totalResults + "}" 
             }.mkString(", ") }
         ],
       xkey: 'compressability',
@@ -34,7 +36,7 @@
       barColors: [ '#850303' ],
       hoverCallback: function(index, options) {
           var row = options.data[index];
-          lastHoveredBracket = row.delay;
+          lastHoveredCompressability = row.compressability;
           
           var html =        	  
         	    '<div class="morris-hover-row-label">Compressed/Uncompressed ' + row.compressability + '</div>' + 
@@ -43,6 +45,10 @@
                 '</div>';
           return html;
         }
+    });
+    
+    $('#compressability-histogram').mouseup(function() {
+      window.location.href='/search?type=compressability&min=' + lastHoveredCompressability + '&max=' + (lastHoveredCompressability + 0.02);
     });
   </script>
 }

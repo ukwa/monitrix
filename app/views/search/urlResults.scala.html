@@ -1,4 +1,4 @@
-@(result: uk.bl.monitrix.model.SearchResult, hostCount: Long, queryType: String)
+@(result: uk.bl.monitrix.model.SearchResult, hostCount: Long, queryType: String, extraParams: String)
 
 @import tags.navbar
 
@@ -9,7 +9,7 @@
     <div class="offset2 row">
       <h4 style="margin-left:5px;">
       @if(queryType != null) {
-        @queryType=@result.query
+        <em>@queryType</em> @result.query
       } else {
         @result.query
       }
@@ -36,13 +36,13 @@
         <div class="pagination">
           <ul>
             @if(result.offset > 0) {
-              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{Math.max(0, result.offset - result.limit)}">&laquo;</a></li>
+              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{Math.max(0, result.offset - result.limit)}@extraParams">&laquo;</a></li>
             } else {
               <li class="disabled"><a href="#">&laquo;</a></li>
             }
             <li class="disabled"><a href="#">Showing Results @{result.offset + 1} - @{Math.min(result.offset + result.limit, result.totalResults)}</a></li>
             @if(result.offset + result.limit < result.totalResults) {
-              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{result.offset + result.limit}">&raquo;</a></li>
+              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{result.offset + result.limit}@extraParams">&raquo;</a></li>
             } else {
               <li class="disabled"><a href="#">&raquo;</a></li>
             }

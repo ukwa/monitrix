@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import play.Logger;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -136,6 +138,7 @@ public class MongoCrawlLog extends CrawlLog {
 	
 	@Override
 	public SearchResult searchByCompressability(double from, double to, int limit, int offset) {
+		Logger.debug("Searching by compressability");
 		long startTime = System.currentTimeMillis();
 		
 		DBObject query = new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_COMPRESSABILITY, 
@@ -144,12 +147,16 @@ public class MongoCrawlLog extends CrawlLog {
 		long total = collection.count(query);
 		
 		List<SearchResultItem> urls = new ArrayList<SearchResultItem>();
-		DBCursor cursor = collection.find(query).skip(offset).limit(limit);
-		while (cursor.hasNext()) {
-			CrawlLogEntry entry = new MongoCrawlLogEntry(cursor.next());
-			urls.add(new SearchResultItem(entry.getURL(), entry.toString()));
+		
+		if (limit > 0) {
+			DBCursor cursor = collection.find(query).skip(offset).limit(limit);
+			while (cursor.hasNext()) {
+				CrawlLogEntry entry = new MongoCrawlLogEntry(cursor.next());
+				urls.add(new SearchResultItem(entry.getURL(), entry.toString()));
+			}
 		}
 		
+		Logger.debug("Done - took " + (System.currentTimeMillis() - startTime));
 		return new SearchResult(null, total, urls, limit, offset, System.currentTimeMillis() - startTime);
 	}
 	

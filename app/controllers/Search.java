@@ -22,6 +22,7 @@ public class Search extends AbstractController {
 	private static final String TYPE_HOST = "hostname";
 	private static final String TYPE_ANNOTATION = "annotation";
 	private static final String TYPE_FETCH_DURATION = "fetch_duration";
+	private static final String TYPE_COMPRESSABILITY = "compressability";
 	
 	private static DBConnector db = Global.getBackend();
 	
@@ -36,9 +37,6 @@ public class Search extends AbstractController {
 		int limit = getQueryParamAsInt(LIMIT, 20);
 		int offset = getQueryParamAsInt(OFFSET, 0);
 		
-		if (query == null)
-			return ok(views.html.search.advanced.render());
-		
 		if (type == null && query != null) {
 			// Default to combined host + URL search
 			SearchResult hosts = knownHostList.searchHosts(query, limit, offset);	
@@ -46,30 +44,42 @@ public class Search extends AbstractController {
 		
 			if (hosts.totalResults() == 0 && urlPreview > 0) {
 				SearchResult urls = crawlLog.searchByURL(query, limit, offset);
-				return ok(views.html.search.urlResults.render(urls, hosts.totalResults(), null));
+				return ok(views.html.search.urlResults.render(urls, hosts.totalResults(), null, null));
 			} else {
-				return ok(views.html.search.hostResults.render(hosts, urlPreview, null));
+				return ok(views.html.search.hostResults.render(hosts, urlPreview, null, null));
 			}
 		}
 		
-		if (type.equalsIgnoreCase(TYPE_TLD)) {
-			return ok(views.html.search.hostResults.render(knownHostList.searchByTopLevelDomain(query, limit, offset), null, TYPE_TLD));
-		} else if (type.equalsIgnoreCase(TYPE_URL)) {
+		if (type.equalsIgnoreCase(TYPE_TLD) && query != null) {
+			return ok(views.html.search.hostResults.render(knownHostList.searchByTopLevelDomain(query, limit, offset), null, TYPE_TLD, null));
+			
+		} else if (type.equalsIgnoreCase(TYPE_URL) && query != null) {
 			SearchResult urls = crawlLog.searchByURL(query, limit, offset);
-			return ok(views.html.search.urlResults.render(urls, null, TYPE_URL));
-		} else if (type.equalsIgnoreCase(TYPE_HOST)) {
+			return ok(views.html.search.urlResults.render(urls, null, TYPE_URL, null));
+			
+		} else if (type.equalsIgnoreCase(TYPE_HOST) && query != null) {
 			SearchResult hosts = knownHostList.searchHosts(query, limit, offset);	
-			return ok(views.html.search.hostResults.render(hosts, null, TYPE_HOST));
-		} else if (type.equalsIgnoreCase(TYPE_ANNOTATION)) {
+			return ok(views.html.search.hostResults.render(hosts, null, TYPE_HOST, null));
+			
+		} else if (type.equalsIgnoreCase(TYPE_ANNOTATION) && query != null) {
 			SearchResult urls = crawlLog.searchByAnnotation(query, limit, offset);
-			return ok(views.html.search.urlResults.render(urls, null, TYPE_ANNOTATION));
+			return ok(views.html.search.urlResults.render(urls, null, TYPE_ANNOTATION, null));
+			
 		} else if (type.equalsIgnoreCase(TYPE_FETCH_DURATION)) {
 			int min = getQueryParamAsInt(MIN, -1);
 			int max = getQueryParamAsInt(MAX, -1);
 			
-			if (min > -1 && max > -1 && max > min) {
+			if (min > -1 && max > min) {
 				SearchResult hosts = knownHostList.searchByAverageFetchDuration(min, max, limit, offset);
-				return ok(views.html.search.hostResults.render(hosts, null, null));
+				return ok(views.html.search.hostResults.render(hosts, null, TYPE_FETCH_DURATION, "&min=" + min + "&max=" + max));
+			}
+		} else if (type.equalsIgnoreCase(TYPE_COMPRESSABILITY)) {
+			double min = getQueryParamAsDouble(MIN, -1);
+			double max = getQueryParamAsDouble(MAX, -1);
+			
+			if (min > -1 && max > min) {
+				SearchResult urls = crawlLog.searchByCompressability(min, max, limit, offset);
+				return ok(views.html.search.urlResults.render(urls, null, TYPE_COMPRESSABILITY, "&min=" + min + "&max=" + max));
 			}
 		}
 		

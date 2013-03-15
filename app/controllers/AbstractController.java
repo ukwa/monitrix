@@ -32,6 +32,21 @@ public class AbstractController extends Controller {
 		}
 	}
 	
+	protected static double getQueryParamAsDouble(String name, double defaultValue) {
+		String[] param = request().queryString().get(name);
+		if (param == null)
+			return defaultValue;
+		
+		if (param.length < 1)
+			return defaultValue;
+		
+		try {
+			return Double.parseDouble(param[0]);
+		} catch (Throwable t) {
+			return defaultValue;
+		}
+	}
+	
 	protected static String getFormParam(String name) {
 		Map<String, String[]> formParams = request().body().asFormUrlEncoded();
 		if (formParams == null)

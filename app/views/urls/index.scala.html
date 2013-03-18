@@ -6,7 +6,7 @@
   @navbar("/urls")
 }{
   <h2>Total URLs: @log.countEntries</h2>
-  <h3>Revisited: @log.searchByAnnotation("warcRevisit:digest", 1, 0).totalResults</h3>
+  <h3>Revisited: <a href="/search?type=annotation&query=warcRevisit:digest">@log.searchByAnnotation("warcRevisit:digest", 1, 0).totalResults</a></h3>
   
   <table class="table monitrix-hostinfo">
     <tr>

@@ -107,7 +107,9 @@ html, body {
 .graph-thumb-container {
   position:relative;
   margin:20px 0px 40px 0px;
+  padding-top:20px;
   min-height:180px;
+  clear:both;
 }
 
 .graph-thumb {
@@ -151,6 +153,7 @@ html, body {
   left:0px;
   width:40px;
   height:180px;
+  padding-top:20px;
 }
 
 .monitrix-hostinfo-label {

@@ -13,23 +13,43 @@ import java.util.Iterator;
  */
 public class IncrementalLogfileReader {
 	
-	private String logPath;
+	private static long TEN_MINUTES = 60 * 10000;
+	
+	private File logFile;
 	
 	private BufferedReader reader;
 	
 	private long linesRead = 0;
+	
+	private long lastModifiedValueAtLastRead = 0;
+	
+	private long lastSize = 0;
 
 	public IncrementalLogfileReader(String filename) throws FileNotFoundException {
 		File log = new File(filename);
 		if (!log.exists())
 			throw new FileNotFoundException(filename + " not found");
+
+		this.logFile = new File(log.getAbsolutePath());
+		this.lastSize = logFile.length();
 		
-		this.logPath = log.getAbsolutePath();
 		this.reader = new BufferedReader(new FileReader(log));
 	}
 	
 	public String getPath() {
-		return logPath;
+		return logFile.getAbsolutePath();
+	}
+	
+	public boolean isRenamed() throws IOException {
+		// If the log has become smaller - RENAMED!
+		if (logFile.length() < lastSize)
+			return true;
+
+		// If the log was modified, but the reader didn't read anything in the past 10 minutes - RENAMED!
+		if (lastModifiedValueAtLastRead < logFile.lastModified() - TEN_MINUTES)
+			return true;
+
+		return false;
 	}
 
 	/**
@@ -71,9 +91,10 @@ public class IncrementalLogfileReader {
 		@Override
 		public LogFileEntry next() {
 			try {
-				LogFileEntry next = new LogFileEntry(logPath, nextLine);
+				LogFileEntry next = new LogFileEntry(logFile.getAbsolutePath(), nextLine);
 				nextLine = reader.readLine();
 				linesRead++;
+				lastModifiedValueAtLastRead = logFile.lastModified();
 				return next;
 			} catch (IOException e) {
 				// Should never happen as we've already checked that the file exists

@@ -185,6 +185,13 @@ public class IngestActor extends UntypedActor {
 						// TODO performance improvement
 						if (schedule.isMonitoringEnabled(log.getLogInfo().getId())) {
 							Logger.debug("Synchronizing log: " + log.getLogInfo().getPath());
+							
+							// Check if file was renamed in the mean time
+							if(log.getReader().isRenamed()) {
+								Logger.info("Detected log rename");
+								log.setReader(new IncrementalLogfileReader(log.getLogInfo().getPath()));
+							}
+							
 							synchronizeWithLog(log);
 						}
 					}
@@ -203,33 +210,41 @@ public class IngestActor extends UntypedActor {
 		}, system.dispatcher());
 	}
 	
-	private void catchUpWithLog(WatchedLog log) throws IOException {
-		IncrementalLogfileReader reader = log.getReader();
-		long linesToSkip = db.getIngestSchedule().getLogForPath(reader.getPath()).getIngestedLines();
-		
-		Logger.info("Skipping " + linesToSkip + " (of estimated " + log.getEstimatedLineCount() + " log lines)");
-		
-		IngestStatus status = statusList.get(log.getLogInfo().getId());			
-		status.phase = IngestStatus.Phase.CATCHING_UP;
+	private void catchUpWithLog(WatchedLog log) {
+		try {
+			IncrementalLogfileReader reader = log.getReader();
+			long linesToSkip = db.getIngestSchedule().getLogForPath(reader.getPath()).getIngestedLines();
 			
-		Iterator<LogFileEntry> iterator = reader.newIterator();
-		for (long i=0; i<linesToSkip; i++) {
-			if (iterator.hasNext())
-				iterator.next();
-		}
-	
-		Logger.info("Catching up with log file contents");
-		db.insert(log.getLogInfo().getId(), iterator);
+			Logger.info("Skipping " + linesToSkip + " (of estimated " + log.getEstimatedLineCount() + " log lines)");
+			
+			IngestStatus status = statusList.get(log.getLogInfo().getId());			
+			status.phase = IngestStatus.Phase.CATCHING_UP;
+				
+			Iterator<LogFileEntry> iterator = reader.newIterator();
+			for (long i=0; i<linesToSkip; i++) {
+				if (iterator.hasNext())
+					iterator.next();
+			}
 		
-		status.phase = IngestStatus.Phase.IDLE;
-		status.progress = 0;
+			Logger.info("Catching up with log file contents");
+			db.insert(log.getLogInfo().getId(), iterator);
+			
+			status.phase = IngestStatus.Phase.IDLE;
+			status.progress = 0;
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 	}
 	
 	private void synchronizeWithLog(WatchedLog log) {
-		IngestStatus status = statusList.get(log.getLogInfo().getId());
-		status.phase = IngestStatus.Phase.SYNCHRONIZING;		
-		db.insert(log.getLogInfo().getId(), log.getReader().newIterator());		
-		status.phase = IngestStatus.Phase.IDLE;
+		try {
+			IngestStatus status = statusList.get(log.getLogInfo().getId());
+			status.phase = IngestStatus.Phase.SYNCHRONIZING;		
+			db.insert(log.getLogInfo().getId(), log.getReader().newIterator());		
+			status.phase = IngestStatus.Phase.IDLE;
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 	}
 
 }

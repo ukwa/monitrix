@@ -25,6 +25,10 @@ public class WatchedLog {
 		return reader;
 	}
 	
+	public void setReader(IncrementalLogfileReader newReader) {
+		this.reader = newReader;
+	}
+	
 	public long getEstimatedLineCount() {
 		return estimatedLineCount;
 	}

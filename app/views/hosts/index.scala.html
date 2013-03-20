@@ -11,17 +11,17 @@
   <table class="table monitrix-hostinfo">
     <tr>
       <td class="monitrix-hostinfo-label">Hosts by Top-Level Domain</td>
-      <td></td>
-    </tr>
-    
-    <tr>
-      <td class="monitrix-hostinfo-label">Average Delay</td>
-      <td><div style="height:220px;" id="average-delay-histogram"></div></td>
+      <td><div style="height:180px; width: 290px;" id="hosts-barchart"></div></td>
     </tr>
     
     <tr>
       <td class="monitrix-hostinfo-label">Average Retries</td>
       <td><div style="height:220px; width:100%;" id="average-retries-histogram"></div></td>
+    </tr> 
+   
+    <tr>
+      <td class="monitrix-hostinfo-label">Average Delay</td>
+      <td><div style="height:220px;" id="average-delay-histogram"></div></td>
     </tr>
     
     <tr>
@@ -42,6 +42,31 @@
     var delayInc = @{hosts.getMaxFetchDuration / 100};
     
     var lastHoveredRetries;
+    
+    Morris.Bar({
+        element: 'hosts-barchart',
+        data: [
+                @{hosts.getTopLevelDomains.reverse.map { tld =>
+                  "{ tld: '" + tld + "', count: " + hosts.countForTopLevelDomain(tld) + "}" 
+                }.mkString(", ") }
+      	    ],
+        xkey: 'tld',
+        ykeys: ['count'],
+        labels: [ '@hosts.getTopLevelDomains.reverse.mkString("', '")' ],
+        hideHover: 'false',
+        barColors: [ '#850303' ], 
+        hoverCallback: function(index, options) {
+          var row = options.data[index];
+          lastHoveredTLD = row.tld;
+          
+          var html =        	  
+      	    '<div class="morris-hover-row-label">.' + row.tld + '</div>' + 
+      	    '<div class="morris-hover-point" style="color: #850303">' +
+                row.count + ' Hosts' +
+              '</div>';
+          return html;
+        }
+    });
     
     @defining(hosts.getMaxFetchDuration / 100) { delayInc  =>
       Morris.Bar({

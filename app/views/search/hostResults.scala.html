@@ -50,9 +50,19 @@
           </ul>
         </div>
         
-        @for(item <- result.resultPage) {
-          <p><a href="@routes.Hosts.getHostInfo(item.title)">@item.title</a></p>
-        }
+        <table>
+          <thead>
+            <tr><td>Hostname</td><td># of URLs crawled</td></tr>
+          </thead>
+          <tbody>
+            @for(item <- result.resultPage) {
+              <tr>
+                <td style="padding:3px 0px;"><a href="@routes.Hosts.getHostInfo(item.title)">@item.title</a></td>
+                <td style="padding:3px 0px 3px 30px;text-align:center;">@item.description</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

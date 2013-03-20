@@ -45,6 +45,7 @@ public class MongoKnownHostList implements KnownHostList {
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS, -1));
 	}
 	
 	@Override
@@ -112,8 +113,13 @@ public class MongoKnownHostList implements KnownHostList {
 		// Get result page
 		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
 		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
-		while (cursor.hasNext())
-			hostnames.add(new SearchResultItem(new MongoKnownHost(cursor.next()).getHostname(), ""));
+		
+		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
+		// TODO we need to find a better way to handle 'search result metadata' 
+		while (cursor.hasNext()) {
+			KnownHost host = new MongoKnownHost(cursor.next());
+			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
+		}
 		
 		return new SearchResult(query, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
@@ -130,8 +136,13 @@ public class MongoKnownHostList implements KnownHostList {
 		// Get result page
 		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
 		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
-		while (cursor.hasNext())
-			hostnames.add(new SearchResultItem(new MongoKnownHost(cursor.next()).getHostname(), ""));
+		
+		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
+		// TODO we need to find a better way to handle 'search result metadata' 
+		while (cursor.hasNext()) {
+			KnownHost host = new MongoKnownHost(cursor.next());
+			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
+		}
 		
 		return new SearchResult(tld, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
@@ -146,9 +157,14 @@ public class MongoKnownHostList implements KnownHostList {
 		long total = collection.count(query);
 		
 		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
+		
 		DBCursor cursor = collection.find(query).skip(offset).limit(limit);
-		while (cursor.hasNext())
-			hostnames.add(new SearchResultItem(new MongoKnownHost(cursor.next()).getHostname(), ""));
+		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
+		// TODO we need to find a better way to handle 'search result metadata' 
+		while (cursor.hasNext()) {
+			KnownHost host = new MongoKnownHost(cursor.next());
+			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
+		}
 		
 		return new SearchResult(null, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}
@@ -164,8 +180,13 @@ public class MongoKnownHostList implements KnownHostList {
 		
 		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
 		DBCursor cursor = collection.find(query).skip(offset).limit(limit);
-		while (cursor.hasNext())
-			hostnames.add(new SearchResultItem(new MongoKnownHost(cursor.next()).getHostname(), ""));
+		
+		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
+		// TODO we need to find a better way to handle 'search result metadata' 
+		while (cursor.hasNext()) {
+			KnownHost host = new MongoKnownHost(cursor.next());
+			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
+		}
 		
 		return new SearchResult(null, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 	}

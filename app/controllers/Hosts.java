@@ -1,6 +1,8 @@
 package controllers;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +24,7 @@ import uk.bl.monitrix.analytics.TimeseriesValue;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
+import uk.bl.monitrix.model.KnownHostList;
 
 public class Hosts extends AbstractController {
 	
@@ -29,9 +32,36 @@ public class Hosts extends AbstractController {
 		
 	private static DBConnector db = Global.getBackend();
 	
+	private static KnownHostList hosts = db.getKnownHostList();
+	
 	public static Result index() {
 		List<String> cappedHosts = db.getCrawlLog().extractHostsForAnnotation(CAPPED_CRAWL_ANNOTATION);
 		return ok(views.html.hosts.index.render(db.getKnownHostList(), cappedHosts));
+	}
+	
+	public static Result getAvergageDelayHistogram() {
+		int intervals = getQueryParamAsInt("intervals", 100);
+		int increment = (int) (hosts.getMaxFetchDuration() / intervals);
+		
+		List<Point2D> histogram = new ArrayList<Point2D>();
+		for (int i=0; i<intervals; i++) {
+			int from = i * increment;
+			int to = from + increment;
+			histogram.add(new Point2D.Double(from, hosts.searchByAverageFetchDuration(from, to, 1, 0).totalResults()));
+		}
+		
+		return ok(Json.toJson(histogram));
+	}
+	
+	public static Result getAvergageRetriesHistogram() {
+		int intervals = getQueryParamAsInt("maxRetries", 20);
+		
+		List<Point2D> histogram = new ArrayList<Point2D>();
+		for (int r=0; r<intervals; r++) {
+			histogram.add(new Point2D.Double(r, hosts.searchByAverageRetries(r, r + 1, 1, 0).totalResults()));
+		}
+		
+		return ok(Json.toJson(histogram));
 	}
 	
 	public static Result getHostInfo(String hostname) {

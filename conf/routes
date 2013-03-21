@@ -34,6 +34,8 @@ GET     /about                             controllers.About.index()
 # Hosts
 GET     /hosts/:hostname                   controllers.Hosts.getHostInfo(hostname: String)
 GET     /hosts                             controllers.Hosts.index()
+GET     /api/hosts/average-delay           controllers.Hosts.getAvergageDelayHistogram()
+GET     /api/hosts/average-retries         controllers.Hosts.getAvergageRetriesHistogram()
 GET     /api/hosts/:hostname/urls-crawled  controllers.Hosts.getURLHistoryForHost(hostname: String)
 
 # URLs

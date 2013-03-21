@@ -130,7 +130,7 @@
     
     $('#average-delay-histogram').mouseup(function() {
       var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-      window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc) + embeddable;
+      window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay * 100 + '&max=' + (lastHoveredDelay + delayInc) * 100 + embeddable;
     });
     
     Morris.Bar({

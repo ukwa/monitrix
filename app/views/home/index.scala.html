@@ -34,11 +34,6 @@
           <div class="chart" id="gauge-download-rate" data-percent="0"><span>0</span></div>
           MB/min
         </div>
-        
-        <p style="clear:both;margin-bottom:20px;"/>    
-        
-        <h5>Hosts by Top Level Domain</h5>
-        <div id="hosts-barchart"></div>
       </div>
          
       <div class="span7 offset1" style="margin-top:5px;">
@@ -83,28 +78,6 @@
     } else {
       new Monitrix.ProgressClock(@{System.currentTimeMillis - log.getCrawlStartTime}, $('#wall-clock'));
     }
-    
-    Morris.Bar({
-      element: 'hosts-barchart',
-      data: [
-              @{knownHosts.getTopLevelDomains.map { tld =>
-                "{ tld: '" + tld + "', count: " + knownHosts.countForTopLevelDomain(tld) + "}" 
-              }.mkString(", ") }
-    	    ],
-      xkey: 'tld',
-      ykeys: ['count'],
-      labels: [ '@knownHosts.getTopLevelDomains.mkString("', '")' ],
-      hideHover: 'false',
-      barColors: [ '#850303' ], 
-      hoverCallback: function(index, options) {
-        var row = options.data[index];
-        lastHoveredTLD = row.tld;
-      }
-    });
-    
-    $('#hosts-barchart').mouseup(function() {
-      window.location.href='/search?type=tld&query=' + lastHoveredTLD;
-    });
     
     function getAverage(logEntries) {
       var endTime = logEntries[0].timestamp;

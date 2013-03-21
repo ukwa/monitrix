@@ -24,77 +24,119 @@
       </div>
       
       <!-- Content -->
-      <div class="span9">
+      <div class="span9" style="max-width:850px;">
         <div class="row-fluid">
           <div class="span6">
             <p class="pull-left">Data Volume</p>
-            <div class="btn-group pull-right" style="margin-right:35px;"data-toggle="buttons-radio">
+            <div class="btn-group pull-right" style="margin-right:35px;" data-toggle="buttons-radio">
               <button type="button" class="btn btn-mini btn-selected" onclick="redraw('graph-volume', true);">Cumulative</button>
               <button type="button" class="btn btn-mini" onclick="redraw('graph-volume', false);">Timeseries</button>
             </div>           
             
-            
-            <div class="graph-thumb-container">
-              <div class="graph-thumb-y-axis" id="graph-volume-axis"></div>
-              <div class="graph-thumb graph-tumb-loading" id="graph-volume"></div>
-              <p class="pull-right monitrix-graph-thumb-fullscreen">
-                <a href="javascript:$(createLightBox('/api/timeline/datavolume')).lightbox_me({destroyOnClose: true});">
-                  <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
-                </a>
-              </p>
+            <div class="monitrix-barchart-container-small">      
+              <div style="display:inline-block;">
+                <span class="monitrix-barchart-y-label-small">Data Volume [Bytes]</span>
+              </div>
+              
+              <div class="monitrix-barchart-container-right-small">  
+                <div class="monitrix-barchart-axis-area-small" id="graph-volume-axis"></div>
+                <div class="monitrix-barchart-chart-area-small" id="graph-volume"></div>
+              </div>
+              
+              <div class="monitrix-barchart-x-label-small">
+                Time
+                <p style="float:right;">
+                  <a title="View Fullscreen" href="javascript:$(createLightBox('/api/timeline/datavolume')).lightbox_me({destroyOnClose: true});">
+                    <i class="icon-fullscreen"></i>
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
             
           <div class="span6">
             <p class="pull-left">Number of URLs Crawled</p>
-            <div class="btn-group pull-right" style="margin-right:35px;"data-toggle="buttons-radio">
+            <div class="btn-group pull-right" style="margin-right:35px;" data-toggle="buttons-radio">
               <button type="button" class="btn btn-mini btn-selected" onclick="redraw('graph-urls', true);">Cumulative</button>
               <button type="button" class="btn btn-mini" onclick="redraw('graph-urls', false);">Timeseries</button>
             </div>
-            <div style="clear:both; margin-top:10px;" class="graph-thumb-container">
-              <div class="graph-thumb-y-axis" id="graph-urls-axis"></div>
-              <div class="graph-thumb graph-tumb-loading" id="graph-urls"></div>
-              <p class="pull-right monitrix-graph-thumb-fullscreen">
-                <a href="javascript:$(createLightBox('/api/timeline/urls-crawled')).lightbox_me({destroyOnClose: true});">
-                  <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
-                </a>
-              </p>
-            </div>
-          </div>  
+            
+            <div class="monitrix-barchart-container-small">      
+              <div style="display:inline-block;">
+                <span class="monitrix-barchart-y-label-small">No. of URLs</span>
+              </div>
+              
+              <div class="monitrix-barchart-container-right-small">  
+                <div class="monitrix-barchart-axis-area-small" id="graph-urls-axis"></div>
+                <div class="monitrix-barchart-chart-area-small" id="graph-urls"></div>
+              </div>   
+                        
+              <div class="monitrix-barchart-x-label-small">
+                Time    
+                <p style="float:right;">
+                  <a title="View Fullscreen" href="javascript:$(createLightBox('/api/timeline/urls-crawled')).lightbox_me({destroyOnClose: true});">
+                    <i class="icon-fullscreen"></i>
+                  </a>
+                </p>
+              </div>
+            </div>  
+          </div>
         </div>
         
         <div class="row-fluid" style="margin-top:40px">
           <div class="span6">
             <p class="pull-left">Number of New Hosts Crawled</p>
-            <div class="btn-group pull-right" style="margin-right:35px;"data-toggle="buttons-radio">
+            <div class="btn-group pull-right" style="margin-right:35px;" data-toggle="buttons-radio">
               <button type="button" class="btn btn-mini btn-selected" onclick="redraw('graph-new-hosts', true);">Cumulative</button>
               <button type="button" class="btn btn-mini" onclick="redraw('graph-new-hosts', false);">Timeseries</button>
             </div>
-            <div style="clear:both; margin-top:10px;" class="graph-thumb-container">
-              <div class="graph-thumb-y-axis" id="graph-hosts-axis"></div>
-              <div class="graph-thumb graph-tumb-loading" id="graph-new-hosts"></div>
-              <p class="pull-right monitrix-graph-thumb-fullscreen">
-                <a href="javascript:$(createLightBox('/api/timeline/new-hosts-crawled')).lightbox_me({destroyOnClose: true});">
-                  <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
-                </a>
-              </p>
+            
+            <div class="monitrix-barchart-container-small">      
+              <div style="display:inline-block;">
+                <span class="monitrix-barchart-y-label-small">No. of Hosts</span>
+              </div>
+              
+              <div class="monitrix-barchart-container-right-small">  
+                <div class="monitrix-barchart-axis-area-small" id="graph-new-hosts-axis"></div>
+                <div class="monitrix-barchart-chart-area-small" id="graph-new-hosts"></div>
+              </div>   
+            
+              <div class="monitrix-barchart-x-label-small">
+                Time
+                <p style="float:right">
+                  <a title="View Fullscreen" href="javascript:$(createLightBox('/api/timeline/new-hosts-crawled')).lightbox_me({destroyOnClose: true});">
+                    <i class="icon-fullscreen"></i>
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
             
           <div class="span6">
             <p class="pull-left">Completed Hosts</p>
-            <div class="btn-group pull-right" style="margin-right:35px;"data-toggle="buttons-radio">
+            <div class="btn-group pull-right" style="margin-right:35px;" data-toggle="buttons-radio">
               <button type="button" class="btn btn-mini btn-selected" onclick="redraw('graph-completed-hosts', true);">Cumulative</button>
               <button type="button" class="btn btn-mini" onclick="redraw('graph-completed-hosts', false);">Timeseries</button>
             </div>
-            <div style="clear:both; margin-top:10px;" class="graph-thumb-container">
-              <div class="graph-thumb-y-axis" id="graph-completed-hosts-axis"></div>
-              <div class="graph-thumb graph-tumb-loading" id="graph-completed-hosts"></div>
-              <p class="pull-right monitrix-graph-thumb-fullscreen">
-                <a href="javascript:$(createLightBox('/api/timeline/completed-hosts')).lightbox_me({destroyOnClose: true});">
-                  <small>View Fullscreen</small> <i class="icon-fullscreen"></i>
-                </a>
-              </p>
+            
+            <div class="monitrix-barchart-container-small">      
+              <div style="display:inline-block;">
+                <span class="monitrix-barchart-y-label-small">No. of Hosts</span>
+              </div>
+              
+              <div class="monitrix-barchart-container-right-small">  
+                <div class="monitrix-barchart-axis-area-small" id="graph-completed-hosts-axis"></div>
+                <div class="monitrix-barchart-chart-area-small" id="graph-completed-hosts"></div>
+              </div>   
+              
+              <div class="monitrix-barchart-x-label-small">
+                Time
+                <p style="float:right;">
+                  <a title="View Fullscreen" href="javascript:$(createLightBox('/api/timeline/completed-hosts')).lightbox_me({destroyOnClose: true});">
+                    <i class="icon-fullscreen"></i>
+                  </a>
+                </p>
+              </div>
             </div>
           </div>            
         </div>
@@ -116,21 +158,21 @@
       
       switch(graph) {
         case 'graph-volume':
-          loadGraph('/api/timeline/datavolume?maxpoints=100', 'graph-volume', 'Volume', '#c05020', cumulative, false, function(total) {
+          loadGraph('/api/timeline/datavolume?maxpoints=100', 'graph-volume', 'Volume', '#c05020', cumulative, true, function(total) {
               total = total / (1024 * 1024 * 1024);
               $('#total-data-volume').html(total.toPrecision(4) + ' GB');	
           });
           break;
         case 'graph-urls':
-            loadGraph('/api/timeline/urls-crawled?maxpoints=100', 'graph-urls', 'URLs', '#c05020', cumulative, false, function(total) {
+            loadGraph('/api/timeline/urls-crawled?maxpoints=100', 'graph-urls', 'URLs', '#c05020', cumulative, true, function(total) {
                 $('#total-urls-crawled').html(total);
             }); 
             break;
         case 'graph-new-hosts':
-        	loadGraph('/api/timeline/new-hosts-crawled?maxpoints=100', 'graph-new-hosts', 'New Hosts', '#c05020', cumulative, false);
+        	loadGraph('/api/timeline/new-hosts-crawled?maxpoints=100', 'graph-new-hosts', 'New Hosts', '#c05020', cumulative, true);
             break;
         case 'graph-completed-hosts':
-        	loadGraph('/api/timeline/completed-hosts?maxpoints=100', 'graph-completed-hosts', 'Completed Hosts', '#c05020', cumulative, false);
+        	loadGraph('/api/timeline/completed-hosts?maxpoints=100', 'graph-completed-hosts', 'Completed Hosts', '#c05020', cumulative, true);
             break;
       }
     }
@@ -152,6 +194,8 @@
     function loadGraph(url, divId, name, color, cumulative, opt_show_hover_detail, opt_total_callback) {
       $.getJSON(url, function(data) {
         if (data) {
+          console.log(data);
+          
           if (opt_total_callback) {
               var total = 0;
               $.each(data, function(idx, value) {
@@ -174,11 +218,28 @@
             }]
           });
           
-          new Rickshaw.Graph.Axis.Time({ graph: graph });
+          new Rickshaw.Graph.Axis.X({
+        	  graph:graph,
+        	  pixelsPerTick: 70,
+        	  tickFormat: function(x) {
+        		  var date = new Date(x);
+        		  return date.getHours() + ":" + date.getMinutes(); 
+        	  },
+          });
           
           new Rickshaw.Graph.Axis.Y({
               graph: graph,
-              tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+              tickFormat: function(y) {
+            	  if (y >= 1000000000)
+            		  return (y / 1000000000) + "G";
+            	  if (y >= 1000000)
+            		  return (y / 1000000) + "M";
+            	  
+            	  if (y >= 1000)
+            		  return (y / 1000) + "k";
+            	  
+            	  return y;           	  
+              },
               orientation:'left',
               element: document.getElementById(divId + '-axis')
           });
@@ -186,7 +247,20 @@
           if (opt_show_hover_detail) {
             new Rickshaw.Graph.HoverDetail({
               graph: graph,
-              // yFormatter: function(y) { return (y / (1024 * 1024 * 1024)).toPrecision(2) + ' GB'; }
+              yFormatter: function(y) { 
+            	  if (y > 1000000000)
+            		  return (y / 1000000000).toFixed(2) + "G";
+            	  if (y > 1000000)
+            		  return (y / 1000000).toFixed(2) + "M";
+            	  
+            	  if (y > 1000)
+            		  return (y / 1000).toFixed(2) + "k";
+            	  
+            	  return y;    
+              },
+              xFormatter: function(x) {
+            	  return new Date(x).toString();
+              }
             });
           }
               
@@ -211,17 +285,17 @@
         return div;
       }
     
-    loadGraph('/api/timeline/datavolume?maxpoints=100', 'graph-volume', 'Volume', '#c05020', true, false, function(total) {
+    loadGraph('/api/timeline/datavolume?maxpoints=100', 'graph-volume', 'Volume', '#c05020', true, true, function(total) {
       total = total / (1024 * 1024 * 1024);
       $('#total-data-volume').html(total.toPrecision(4) + ' GB');	
     });
     
-    loadGraph('/api/timeline/urls-crawled?maxpoints=100', 'graph-urls', 'URLs', '#c05020', true, false, function(total) {
+    loadGraph('/api/timeline/urls-crawled?maxpoints=100', 'graph-urls', 'URLs', '#c05020', true, true, function(total) {
       $('#total-urls-crawled').html(total);
     });  
     
-    loadGraph('/api/timeline/new-hosts-crawled?maxpoints=100', 'graph-new-hosts', 'New Hosts', '#c05020', true, false);
+    loadGraph('/api/timeline/new-hosts-crawled?maxpoints=100', 'graph-new-hosts', 'New Hosts', '#c05020', true, true);
     
-    loadGraph('/api/timeline/completed-hosts?maxpoints=100', 'graph-completed-hosts', 'Completed Hosts', '#c05020', true, false);
+    loadGraph('/api/timeline/completed-hosts?maxpoints=100', 'graph-completed-hosts', 'Completed Hosts', '#c05020', true, true);
   </script>
 }

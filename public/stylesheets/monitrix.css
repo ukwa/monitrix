@@ -200,9 +200,22 @@ html, body {
  position:relative;
 }
 
+.monitrix-barchart-container-small {
+  clear:both;
+  position:relative;
+  width:370px;
+}
+
 .monitrix-barchart-container-right {
   display:inline-block;
   height:250px;
+}
+
+.monitrix-barchart-container-right-small {
+  display:inline-block;
+  width:340px;
+  position:relative;
+  margin-left:40px;
 }
 
 .monitrix-barchart-y-label-container {
@@ -211,6 +224,16 @@ html, body {
   top:0px;
   left:0px;
   width:80px;
+  height:230px;
+  margin-top:20px;
+}
+
+.monitrix-barchart-y-label-container-small {
+  display:inline-block;
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:40px;
   height:230px;
   margin-top:20px;
 }
@@ -228,6 +251,19 @@ html, body {
   -o-transform: rotate(-90deg);
 }
 
+.monitrix-barchart-y-label-small {
+  display:block;
+  position:absolute;
+  width:180px;
+  text-align:center;
+  top:120px;
+  left:-85px;
+  -webkit-transform:rotate(-90deg);
+  -moz-transform:rotate(-90deg);
+  -ms-transform:rotate(-90deg);
+  -o-transform: rotate(-90deg);
+}
+
 .monitrix-barchart-x-label {
   height:30px;
   position:relative;
@@ -237,16 +273,40 @@ html, body {
   text-align:center;
 }
 
+.monitrix-barchart-x-label-small {
+  width:310px;
+  position:relative;
+  left:40px;
+  margin-top:10px;
+  text-align:center;
+}
+
 .monitrix-barchart-chart-area {
   height:220px;
   width:700px;
   margin-left:80px;
 }
 
+.monitrix-barchart-chart-area-small {
+  width:290px;
+  height:200px;
+  margin-left:20px;
+  margin-top:20px;
+  display:inline-block;
+}
+
 .monitrix-barchart-axis-area {
   position:absolute;
   top:30px;
   left:40px;
+}
+
+.monitrix-barchart-axis-area-small {
+  width:40px;
+  position:absolute;
+  left:-20px;
+  top:20px;
+  display:inline-block;
 }
 
 .rickshaw-graph {

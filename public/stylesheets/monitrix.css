@@ -196,6 +196,32 @@ html, body {
   color:#000; 
 }
 
+.not-loaded {
+  position:relative;
+  background-color:#fcfcfc;
+  border-style:solid;
+  border-width:1px;
+  border-color:#ccc #eaeaea #e8e8e8 #ccc;
+}
+
+.loading {
+  background-image:url('../img/ajax-spinner.gif');
+  background-repeat:no-repeat;
+  background-position:50% 50%;
+}
+
+.load-button {
+  position:absolute;
+  top:50%;
+  width:100%;
+  margin-top:-10px;
+  text-align:center;
+}
+
+.not-loaded .monitrix-barchart-container {
+  opacity:0;
+}
+
 .monitrix-barchart-container {
  position:relative;
 }

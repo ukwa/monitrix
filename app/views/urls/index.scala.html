@@ -12,13 +12,19 @@
     <tr>
       <td class="monitrix-hostinfo-label">Compressability</td>
       <td style="width:90%">
-        <div class="monitrix-barchart-container">
-          <div class="monitrix-barchart-y-label-container">
-            <span class="monitrix-barchart-y-label">Number of URLs</span>
+        <div class="not-loaded">
+          <div class="monitrix-barchart-container">
+            <div class="monitrix-barchart-y-label-container">
+              <span class="monitrix-barchart-y-label">Number of URLs</span>
+            </div>
+            <div class="monitrix-barchart-container-right">
+              <div class="monitrix-barchart-chart-area" id="compressability-histogram"></div>
+              <div class="monitrix-barchart-x-label">Compressability - (compressed length / uncompressed length)</div>
+            </div>
           </div>
-          <div class="monitrix-barchart-container-right">
-            <div class="monitrix-barchart-chart-area" id="compressability-histogram"></div>
-            <div class="monitrix-barchart-x-label">Compressability - (compressed length / uncompressed length)</div>
+          
+          <div class="load-button">
+            <span class="btn" onclick="loadHistogram();">Generate Histogram</span>
           </div>
         </div>
       </td>
@@ -32,35 +38,38 @@
   <script>
     var lastHoveredCompressability;
     
-    // Compressability is a value between 0 (theoretical - i.e. 'compressed to 0) and 1 (not compressable)
-    Morris.Bar({
-      element: 'compressability-histogram',
-      data: [
-            @{Seq.range(0, 50).map(_ * 0.02).map { c =>
-              "{ compressability: " + c + ", count: " + log.searchByCompressability(c, c + 0.02, 0, 0).totalResults + "}" 
-            }.mkString(", ") }
-        ],
-      xkey: 'compressability',
-      ykeys: ['count'],
-      labels: [ '# of Hosts' ],
-      hideHover: 'false',
-      barColors: [ '#850303' ],
-      hoverCallback: function(index, options) {
-          var row = options.data[index];
-          lastHoveredCompressability = row.compressability;
-          
-          var html =        	  
-        	    '<div class="morris-hover-row-label">Compressed/Uncompressed ' + row.compressability + '</div>' + 
-        	    '<div class="morris-hover-point" style="color: #850303">' +
-                  row.count + ' URLs' +
-                '</div>';
-          return html;
-        }
-    });
-    
-    $('#compressability-histogram').mouseup(function() {
-      var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-      window.location.href='/search?type=compressability&min=' + lastHoveredCompressability + '&max=' + (lastHoveredCompressability + 0.02) + embeddable;
-    });
+    function loadHistogram() {
+        $('.load-button').remove();
+        $('.not-loaded').addClass('loading');
+        
+        $.getJSON('/api/urls/compressability', function(data) {
+          $('.not-loaded').removeClass('not-loaded').removeClass('loading');
+          Morris.Bar({
+            element: 'compressability-histogram',
+			data: data,
+            xkey: 'x',
+            ykeys: ['y'],
+            labels: [ '# of Hosts' ],
+            hideHover: 'false',
+            barColors: [ '#850303' ],
+            hoverCallback: function(index, options) {
+              var row = options.data[index];
+              lastHoveredCompressability = row.x;
+              
+              var html =        	  
+            	    '<div class="morris-hover-row-label">Compressed/Uncompressed ' + row.x + '</div>' + 
+            	    '<div class="morris-hover-point" style="color: #850303">' +
+                      row.y + ' URLs' +
+                    '</div>';
+              return html;
+            }
+          });
+        
+          $('#compressability-histogram').mouseup(function() {
+            var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+            window.location.href='/search?type=compressability&min=' + lastHoveredCompressability + '&max=' + (lastHoveredCompressability + 0.02) + embeddable;
+          });	
+        });
+    }
   </script>
 }

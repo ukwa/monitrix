@@ -39,6 +39,7 @@ GET     /api/hosts/:hostname/urls-crawled  controllers.Hosts.getURLHistoryForHos
 # URLs
 GET     /urls/:url                         controllers.URLs.getURLInfo(url: String)
 GET     /urls                              controllers.URLs.index()
+GET     /api/urls/compressability          controllers.URLs.getCompressability()
 
 # Search
 GET     /search                            controllers.Search.search()

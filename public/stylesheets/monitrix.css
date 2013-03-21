@@ -191,3 +191,49 @@ html, body {
   color:#000; 
 }
 
+.monitrix-barchart-container {
+ position:relative;
+}
+
+.monitrix-barchart-container-right {
+  display:inline-block;
+  height:250px;
+}
+
+.monitrix-barchart-y-label-container {
+  display:inline-block;
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:80px;
+  height:230px;
+  margin-top:20px;
+}
+
+.monitrix-barchart-y-label {
+  display:block;
+  height:30px;
+  width:230px;
+  position:absolute;
+  top:10px;
+  left:-50px;
+  -webkit-transform:rotate(-90deg);
+  -moz-transform:rotate(-90deg);
+  -ms-transform:rotate(-90deg);
+  -o-transform: rotate(-90deg);
+}
+
+.monitrix-barchart-x-label {
+  height:30px;
+  position:relative;
+  top:-10px;
+  width:700px;
+  margin-left:80px;
+  text-align:center;
+}
+
+.monitrix-barchart-chart-area {
+  height:220px;
+  width:700px;
+  margin-left:80px;
+}

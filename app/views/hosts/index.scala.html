@@ -11,17 +11,47 @@
   <table class="table monitrix-hostinfo">
     <tr>
       <td class="monitrix-hostinfo-label">Hosts by Top-Level Domain</td>
-      <td><div style="height:180px; width: 290px;" id="hosts-barchart"></div></td>
+      <td>
+        <div class="monitrix-barchart-container">
+          <div class="monitrix-barchart-y-label-container">
+            <span class="monitrix-barchart-y-label">Number of Hosts</span>
+          </div>
+          <div class="monitrix-barchart-container-right">
+            <div class="monitrix-barchart-chart-area" id="hosts-barchart"></div>
+            <div class="monitrix-barchart-x-label">Top-Level Domain</div>
+          </div>
+        </div>
+      </td>
     </tr>
     
     <tr>
       <td class="monitrix-hostinfo-label">Average Retries</td>
-      <td><div style="height:220px; width:100%;" id="average-retries-histogram"></div></td>
+      <td>
+        <div class="monitrix-barchart-container">
+          <div class="monitrix-axis-y-label-container">
+            <span class="monitrix-barchart-y-label">Number of Hosts</span>
+          </div>
+          <div class="monitrix-barchart-container-right">
+            <div style="height:220px; width:700px;" id="average-retries-histogram"></div>
+            <div class="monitrix-barchart-x-label">Average No. of HTTP Retries</div>
+          </div>
+        </div>
+      </td>
     </tr> 
    
     <tr>
       <td class="monitrix-hostinfo-label">Average Delay</td>
-      <td><div style="height:220px;" id="average-delay-histogram"></div></td>
+      <td>
+        <div class="monitrix-barchart-container">
+          <div class="monitrix-barchart-y-label-container">
+            <span class="monitrix-barchart-y-label">Number of Hosts</span>
+          </div>
+          <div class="monitrix-barchart-container-right">
+            <div class="monitrix-barchart-chart-area" id="average-delay-histogram"></div>
+            <div class="monitrix-barchart-x-label">Average Delay (in Seconds)</div>
+          </div>
+        </div>
+      </td>
     </tr>
     
     <tr>

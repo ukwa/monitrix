@@ -1,6 +1,6 @@
 @(virusLog: uk.bl.monitrix.model.VirusLog)
 
-@import tags.navbar
+@import tags.{ navbar, embedParam }
 
 @main("Monitrix - Virus Log") {
   @navbar("/viruses")
@@ -19,7 +19,7 @@
               <td>@occurences.foldLeft(0)(_ + _._2)</td>
               <td>
                 @virusRecord.getOccurences.map { case (hostname, occurences) =>
-                  <a href="@routes.Hosts.getHostInfo(hostname)">@hostname</a> (@occurences)<br/>
+                  <a href="@routes.Hosts.getHostInfo(hostname)@embedParam()">@hostname</a> (@occurences)<br/>
                 }
               </td>
             </tr>

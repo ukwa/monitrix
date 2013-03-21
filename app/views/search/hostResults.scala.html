@@ -1,6 +1,6 @@
 @(result: uk.bl.monitrix.model.SearchResult, urlCount: Long, queryType: String, extraParams: String)
 
-@import tags.navbar
+@import tags.{navbar, embedParam}
 
 @main("Monitrix - Host Information") {
   @navbar("")
@@ -29,21 +29,21 @@
         <div class="monitrix-tabs" style="position:relative;">
           <a href="#" class="monitrix-tab monitrix-tab-active">@result.totalResults Hosts</a>
           @if(urlCount != null) {
-            <a href="@routes.Search.search()?query=@result.query&type=url" class="monitrix-tab">@urlCount URLs</a>
+            <a href="@routes.Search.search()?query=@result.query&type=url@embedParam("&")" class="monitrix-tab">@urlCount URLs</a>
           }
-          <span style="float:right;padding-right:10px;"><a href="@routes.Search.search()">Advanced Search</a></span>          
+          <span style="float:right;padding-right:10px;"><a href="@routes.Search.search()@embedParam()">Advanced Search</a></span>          
         </div>
 
         <div class="pagination">
           <ul>
             @if(result.offset > 0) {
-              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{Math.max(0, result.offset - result.limit)}@extraParams">&laquo;</a></li>
+              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{Math.max(0, result.offset - result.limit)}@extraParams@embedParam("&")">&laquo;</a></li>
             } else {
               <li class="disabled"><a href="#">&laquo;</a></li>
             }
             <li class="disabled"><a href="#">Showing Results @{result.offset + 1} - @{Math.min(result.offset + result.limit, result.totalResults)}</a></li>
             @if(result.offset + result.limit < result.totalResults) {
-              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{result.offset + result.limit}@extraParams">&raquo;</a></li>
+              <li><a href="/search?query=@result.query&type=@queryType&limit=@result.limit&offset=@{result.offset + result.limit}@extraParams@embedParam("&")">&raquo;</a></li>
             } else {
               <li class="disabled"><a href="#">&raquo;</a></li>
             }
@@ -57,7 +57,7 @@
           <tbody>
             @for(item <- result.resultPage) {
               <tr>
-                <td style="padding:3px 0px;"><a href="@routes.Hosts.getHostInfo(item.title)">@item.title</a></td>
+                <td style="padding:3px 0px;"><a href="@routes.Hosts.getHostInfo(item.title)@embedParam()">@item.title</a></td>
                 <td style="padding:3px 0px 3px 30px;text-align:center;">@item.description</td>
               </tr>
             }

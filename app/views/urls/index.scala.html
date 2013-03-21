@@ -1,12 +1,12 @@
 @(log: uk.bl.monitrix.model.CrawlLog)
 
-@import tags.{heritrixStatus, navbar}
+@import tags.{heritrixStatus, navbar, embedParam}
 
 @main("Monitrix - URLs") {
   @navbar("/urls")
 }{
   <h2>Total URLs: @log.countEntries</h2>
-  <h3>Revisited: <a href="/search?type=annotation&query=warcRevisit:digest">@log.searchByAnnotation("warcRevisit:digest", 1, 0).totalResults</a></h3>
+  <h3>Revisited: <a href="/search?type=annotation&query=warcRevisit:digest@embedParam()">@log.searchByAnnotation("warcRevisit:digest", 1, 0).totalResults</a></h3>
   
   <table class="table monitrix-hostinfo">
     <tr>
@@ -28,6 +28,7 @@
   <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/morris.css")">
   <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>  
+  <script src="@routes.Assets.at("javascripts/querystring.js")" type="text/javascript"></script>   
   <script>
     var lastHoveredCompressability;
     
@@ -58,7 +59,8 @@
     });
     
     $('#compressability-histogram').mouseup(function() {
-      window.location.href='/search?type=compressability&min=' + lastHoveredCompressability + '&max=' + (lastHoveredCompressability + 0.02);
+      var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+      window.location.href='/search?type=compressability&min=' + lastHoveredCompressability + '&max=' + (lastHoveredCompressability + 0.02) + embeddable;
     });
   </script>
 }

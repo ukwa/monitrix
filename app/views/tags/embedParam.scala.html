@@ -1,0 +1,9 @@
+@(separator: String = "?")
+
+@{
+   if(play.mvc.Http.Context.current.get == null || play.mvc.Http.Context.current.get.request.queryString.get("embeddable") == null) {
+     ""
+   } else {
+     separator + "embeddable=true"
+   }
+}

@@ -1,6 +1,6 @@
 @(log: uk.bl.monitrix.model.CrawlLog, stats: uk.bl.monitrix.model.CrawlStats, knownHosts: uk.bl.monitrix.model.KnownHostList, alerts: uk.bl.monitrix.model.AlertLog)
 
-@import tags.{navbar, alertTag}
+@import tags.{ navbar, alertTag, embedParam }
 
 @main("Monitrix - Home") {
   @navbar("/")
@@ -51,13 +51,13 @@
 
         <p style="clear:both;margin-bottom:20px;"/>    
         
-        <h5>Recent Alerts (out of @alerts.countAll alerts total) <a class="pull-right" style="font-weight:normal" href="@routes.Alerts.index">Details »</a></h5>
+        <h5>Recent Alerts (out of @alerts.countAll alerts total) <a class="pull-right" style="font-weight:normal" href="@routes.Alerts.index@embedParam()">Details »</a></h5>
         <table class="table table-condensed">
           @for(alert <- alerts.getMostRecent(10)) {
             <tr class="monitrix-alert-table">
               <td>@alertTag(alert.getAlertType())</td>
               <td>@uk.bl.monitrix.NumberFormat.since(alert.getTimestamp, true)</td>
-              <td><a href="@routes.Hosts.getHostInfo(alert.getOffendingHost)">@alert.getOffendingHost</a></td>
+              <td><a href="@routes.Hosts.getHostInfo(alert.getOffendingHost)@embedParam()">@alert.getOffendingHost</a></td>
             </tr>
           }
         </table>

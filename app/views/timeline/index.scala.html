@@ -45,11 +45,11 @@
               
               <div class="monitrix-barchart-x-label-small">
                 Time
-                <p style="float:right;">
+                <!-- p style="float:right;">
                   <a title="View Fullscreen" href="javascript:$(createLightBox('/api/timeline/datavolume')).lightbox_me({destroyOnClose: true});">
                     <i class="icon-fullscreen"></i>
                   </a>
-                </p>
+                </p -->
               </div>
             </div>
           </div>
@@ -73,11 +73,11 @@
                         
               <div class="monitrix-barchart-x-label-small">
                 Time    
-                <p style="float:right;">
+                <!-- p style="float:right;">
                   <a title="View Fullscreen" href="javascript:$(createLightBox('/api/timeline/urls-crawled')).lightbox_me({destroyOnClose: true});">
                     <i class="icon-fullscreen"></i>
                   </a>
-                </p>
+                </p -->
               </div>
             </div>  
           </div>
@@ -103,11 +103,11 @@
             
               <div class="monitrix-barchart-x-label-small">
                 Time
-                <p style="float:right">
+                <!-- p style="float:right">
                   <a title="View Fullscreen" href="javascript:$(createLightBox('/api/timeline/new-hosts-crawled')).lightbox_me({destroyOnClose: true});">
                     <i class="icon-fullscreen"></i>
                   </a>
-                </p>
+                </p -->
               </div>
             </div>
           </div>
@@ -131,11 +131,11 @@
               
               <div class="monitrix-barchart-x-label-small">
                 Time
-                <p style="float:right;">
+                <!-- p style="float:right;">
                   <a title="View Fullscreen" href="javascript:$(createLightBox('/api/timeline/completed-hosts')).lightbox_me({destroyOnClose: true});">
                     <i class="icon-fullscreen"></i>
                   </a>
-                </p>
+                </p -->
               </div>
             </div>
           </div>            
@@ -194,8 +194,6 @@
     function loadGraph(url, divId, name, color, cumulative, opt_show_hover_detail, opt_total_callback) {
       $.getJSON(url, function(data) {
         if (data) {
-          console.log(data);
-          
           if (opt_total_callback) {
               var total = 0;
               $.each(data, function(idx, value) {

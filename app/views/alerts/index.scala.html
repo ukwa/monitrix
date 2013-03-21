@@ -1,6 +1,6 @@
 @(alertLog: uk.bl.monitrix.model.AlertLog)
 
-@import tags.{alertTag, navbar}
+@import tags.{alertTag, navbar, embedParam}
 
 @main("Monitrix - Alerts") {
   @navbar("/alerts")
@@ -20,7 +20,7 @@
         @for(host <- offendingHosts) {
           @defining(alertLog.getAlertTypesForHost(host)) { alertTypes =>
             <tr>
-              <td rowspan="@alertTypes.size"><a href="@routes.Hosts.getHostInfo(host)">@host</a></td>
+              <td rowspan="@alertTypes.size"><a href="@routes.Hosts.getHostInfo(host)@embedParam()">@host</a></td>
               <td>@alertTag(alertTypes.head)</td>
               <td>@alertLog.countAlertsForHost(host, alertTypes.head)</td>
             </tr>

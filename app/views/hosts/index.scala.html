@@ -1,6 +1,6 @@
 @(hosts: uk.bl.monitrix.model.KnownHostList, cappedHosts: List[String])
 
-@import tags.navbar
+@import tags.{ navbar, embedParam }
 
 @main("Monitrix - Hosts") {
   @navbar("/hosts")
@@ -58,7 +58,7 @@
       <td class="monitrix-hostinfo-label">Capped Hosts (@cappedHosts.size)</td>
       <td class="monitrix-three-column-text" style="width:90%">
         @for(host <- cappedHosts) {
-          <a href="@routes.Hosts.getHostInfo(host)">@host</a><br/>
+          <a href="@routes.Hosts.getHostInfo(host)@embedParam()">@host</a><br/>
         }
       </td>
     </tr>
@@ -66,7 +66,8 @@
 
   <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/morris.css")">
   <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
-  <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>  
+  <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>
+  <script src="@routes.Assets.at("javascripts/querystring.js")" type="text/javascript"></script>    
   <script>
     var lastHoveredDelay;
     var delayInc = @{hosts.getMaxFetchDuration / 100};
@@ -126,7 +127,8 @@
     }
     
     $('#average-delay-histogram').mouseup(function() {
-      window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc);
+      var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+      window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc) + embeddable;
     });
     
     Morris.Bar({
@@ -156,7 +158,8 @@
     });
     
     $('#average-retries-histogram').mouseup(function() {
-      window.location.href='/search?type=avg_retries&min=' + lastHoveredRetries + '&max=' + (lastHoveredRetries + 1);
+      var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+      window.location.href='/search?type=avg_retries&min=' + lastHoveredRetries + '&max=' + (lastHoveredRetries + 1) + embeddable;
     });
   </script>
 }

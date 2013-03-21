@@ -105,7 +105,7 @@
         data: [
               @{Seq.range(0, 101).map(_ * delayInc).map { startValue =>
                 val count = hosts.searchByAverageFetchDuration(startValue, startValue + delayInc, 1, 0).totalResults
-                "{ delay: " + startValue + ", scale: " + Math.max(Math.log10(count.toDouble), 0) +", count: " + count + "}" 
+                "{ delay: " + startValue / 100 + ", scale: " + (Math.log10(count.toDouble + 1)) + ", count: " + count + "}" 
               }.mkString(", ") }
     	    ],
         xkey: 'delay',
@@ -119,7 +119,7 @@
           lastHoveredDelay = row.delay;
           
           var html =        	  
-        	    '<div class="morris-hover-row-label">Delay ' + (row.delay / 100) + 's - ' + (row.delay + delayInc)/ 100 + 's</div>' + 
+        	    '<div class="morris-hover-row-label">Delay ' + row.delay + 's - ' + (row.delay + delayInc)/ 100 + 's</div>' + 
         	    '<div class="morris-hover-point" style="color: #850303">' +
                   row.count + ' Hosts' +
                 '</div>';

@@ -32,7 +32,7 @@
             <span class="monitrix-barchart-y-label">Number of Hosts</span>
           </div>
           <div class="monitrix-barchart-container-right">
-            <div style="height:220px; width:700px;" id="average-retries-histogram"></div>
+            <div class="monitrix-barchart-chart-area" id="average-retries-histogram"></div>
             <div class="monitrix-barchart-x-label">Average No. of HTTP Retries</div>
           </div>
         </div>
@@ -104,11 +104,13 @@
         element: 'average-delay-histogram',
         data: [
               @{Seq.range(0, 101).map(_ * delayInc).map { startValue =>
-                "{ delay: " + startValue + ", count: " + hosts.searchByAverageFetchDuration(startValue, startValue + delayInc, 1, 0).totalResults + "}" 
+                val count = hosts.searchByAverageFetchDuration(startValue, startValue + delayInc, 1, 0).totalResults
+                "{ delay: " + startValue + ", scale: " + Math.max(Math.log10(count.toDouble), 0) +", count: " + count + "}" 
               }.mkString(", ") }
     	    ],
         xkey: 'delay',
-        ykeys: ['count'],
+        ykeys: ['scale'],
+        yLabelFormat: function(y) { return Math.round(Math.pow(10, y)); },
         labels: [ '# of Hosts' ],
         hideHover: 'false',
         barColors: [ '#850303' ],
@@ -136,11 +138,12 @@
       data: [
             @{Seq.range(0, 21).map { r =>
                 val count = hosts.searchByAverageRetries(r, r + 1, 1, 0).totalResults
-                "{ retries: " + r + ", scale: " + Math.max(Math.log(count.toDouble), 0) + ", count: " + count + "}"
+                "{ retries: " + r + ", scale: " + Math.max(Math.log10(count.toDouble), 0) + ", count: " + count + "}"
             }.mkString(", ") }
   	    ],
       xkey: 'retries',
       ykeys: ['scale'],
+      yLabelFormat: function(y) { return Math.round(Math.pow(10, y)); },
       labels: [ '# of Hosts' ],
       hideHover: 'false',
       barColors: [ '#850303' ],

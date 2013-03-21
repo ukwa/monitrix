@@ -27,13 +27,19 @@
     <tr>
       <td class="monitrix-hostinfo-label">Average Retries</td>
       <td>
-        <div class="monitrix-barchart-container">
-          <div class="monitrix-axis-y-label-container">
-            <span class="monitrix-barchart-y-label">Number of Hosts</span>
+        <div class="not-loaded not-loaded-retries">
+          <div class="monitrix-barchart-container">
+            <div class="monitrix-axis-y-label-container">
+              <span class="monitrix-barchart-y-label">Number of Hosts</span>
+            </div>
+            <div class="monitrix-barchart-container-right">
+              <div class="monitrix-barchart-chart-area" id="average-retries-histogram"></div>
+              <div class="monitrix-barchart-x-label">Average No. of HTTP Retries</div>
+            </div>
           </div>
-          <div class="monitrix-barchart-container-right">
-            <div class="monitrix-barchart-chart-area" id="average-retries-histogram"></div>
-            <div class="monitrix-barchart-x-label">Average No. of HTTP Retries</div>
+          
+          <div class="load-button load-button-retries">
+            <span class="btn" onclick="loadRetries();">Generate Histogram</span>
           </div>
         </div>
       </td>
@@ -42,13 +48,19 @@
     <tr>
       <td class="monitrix-hostinfo-label">Average Delay</td>
       <td>
-        <div class="monitrix-barchart-container">
-          <div class="monitrix-barchart-y-label-container">
-            <span class="monitrix-barchart-y-label">Number of Hosts</span>
+        <div class="not-loaded">
+          <div class="monitrix-barchart-container">
+            <div class="monitrix-barchart-y-label-container">
+              <span class="monitrix-barchart-y-label">Number of Hosts</span>
+            </div>
+            <div class="monitrix-barchart-container-right">
+              <div class="monitrix-barchart-chart-area" id="average-delay-histogram"></div>
+              <div class="monitrix-barchart-x-label">Average Delay (in Seconds)</div>
+            </div>
           </div>
-          <div class="monitrix-barchart-container-right">
-            <div class="monitrix-barchart-chart-area" id="average-delay-histogram"></div>
-            <div class="monitrix-barchart-x-label">Average Delay (in Seconds)</div>
+          
+          <div class="load-button">
+            <span class="btn" onclick="loadDelay();">Generate Histogram</span>
           </div>
         </div>
       </td>
@@ -69,9 +81,7 @@
   <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("javascripts/querystring.js")" type="text/javascript"></script>    
   <script>
-    var lastHoveredDelay;
-    var delayInc = @{hosts.getMaxFetchDuration / 100};
-    
+    var lastHoveredDelay;    
     var lastHoveredRetries;
     
     Morris.Bar({
@@ -99,70 +109,74 @@
         }
     });
     
-    @defining(hosts.getMaxFetchDuration / 100) { delayInc  =>
-      Morris.Bar({
-        element: 'average-delay-histogram',
-        data: [
-              @{Seq.range(0, 101).map(_ * delayInc).map { startValue =>
-                val count = hosts.searchByAverageFetchDuration(startValue, startValue + delayInc, 1, 0).totalResults
-                "{ delay: " + startValue / 100 + ", scale: " + (Math.log10(count.toDouble + 1)) + ", count: " + count + "}" 
-              }.mkString(", ") }
-    	    ],
-        xkey: 'delay',
-        ykeys: ['scale'],
-        yLabelFormat: function(y) { return Math.round(Math.pow(10, y)); },
-        labels: [ '# of Hosts' ],
-        hideHover: 'false',
-        barColors: [ '#850303' ],
-        hoverCallback: function(index, options) {
-          var row = options.data[index];
-          lastHoveredDelay = row.delay;
+    function loadRetries() {
+        $('.load-button-retries').remove();
+        $('.not-loaded-retries').addClass('loading');
+        
+        $.getJSON('/api/hosts/average-retries', function(data) {
+          $('.not-loaded-retries').removeClass('not-loaded').removeClass('loading');
           
-          var html =        	  
-        	    '<div class="morris-hover-row-label">Delay ' + row.delay + 's - ' + (row.delay + delayInc)/ 100 + 's</div>' + 
-        	    '<div class="morris-hover-point" style="color: #850303">' +
-                  row.count + ' Hosts' +
-                '</div>';
-          return html;
-        }
-      });
+          var logData = [];
+          $.each(data, function(idx, xy) {
+        	  logData.push({x: xy.x, y: Math.log(xy.y + 1) / Math.LN10 });
+          });
+          
+          Morris.Bar({
+            element: 'average-retries-histogram',
+            data:logData,
+            xkey: 'x',
+            ykeys: ['y'],
+            yLabelFormat: function(y) { return Math.round(Math.pow(10, y)); },
+            labels: [ '# of Hosts' ],
+            hideHover: 'false',
+            barColors: [ '#850303' ],
+            hoverCallback: function(index, options) {
+              var row = data[index];
+              lastHoveredRetries = row.x;
+            
+              var html =        	  
+          	    '<div class="morris-hover-row-label">' + row.x + '  - ' + (row.x + 1) + ' Retries</div>' + 
+          	    '<div class="morris-hover-point" style="color: #850303">' +
+                    row.y + ' Hosts' +
+                  '</div>';
+              return html;
+            }
+          });
+        });
+      
+        $('#average-retries-histogram').mouseup(function() {
+          var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+          window.location.href='/search?type=avg_retries&min=' + lastHoveredRetries + '&max=' + (lastHoveredRetries + 1) + embeddable;
+        });
     }
     
-    $('#average-delay-histogram').mouseup(function() {
-      var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-      window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay * 100 + '&max=' + (lastHoveredDelay + delayInc) * 100 + embeddable;
-    });
-    
+    @defining(hosts.getMaxFetchDuration / 100) { delayInc  =>
     Morris.Bar({
-      element: 'average-retries-histogram',
-      data: [
-            @{Seq.range(0, 21).map { r =>
-                val count = hosts.searchByAverageRetries(r, r + 1, 1, 0).totalResults
-                "{ retries: " + r + ", scale: " + Math.max(Math.log10(count.toDouble), 0) + ", count: " + count + "}"
-            }.mkString(", ") }
-  	    ],
-      xkey: 'retries',
+      element: 'average-delay-histogram',
+      data: [],
+      xkey: 'delay',
       ykeys: ['scale'],
       yLabelFormat: function(y) { return Math.round(Math.pow(10, y)); },
       labels: [ '# of Hosts' ],
       hideHover: 'false',
       barColors: [ '#850303' ],
       hoverCallback: function(index, options) {
-          var row = options.data[index];
-          lastHoveredRetries = row.retries;
-          
-          var html =        	  
-        	    '<div class="morris-hover-row-label">' + row.retries + '  - ' + (row.retries + 1) + ' Retries</div>' + 
-        	    '<div class="morris-hover-point" style="color: #850303">' +
-                  row.count + ' Hosts' +
-                '</div>';
-          return html;
-        }
+        var row = options.data[index];
+        lastHoveredDelay = row.delay;
+        
+        var html =        	  
+      	    '<div class="morris-hover-row-label">Delay ' + row.delay + 's - ' + (row.delay + delayInc)/ 100 + 's</div>' + 
+      	    '<div class="morris-hover-point" style="color: #850303">' +
+                row.count + ' Hosts' +
+              '</div>';
+        return html;
+      }
     });
+  }
     
-    $('#average-retries-histogram').mouseup(function() {
+    $('#average-delay-histogram').mouseup(function() {
       var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-      window.location.href='/search?type=avg_retries&min=' + lastHoveredRetries + '&max=' + (lastHoveredRetries + 1) + embeddable;
+      window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay * 100 + '&max=' + (lastHoveredDelay + delayInc) * 100 + embeddable;
     });
   </script>
 }

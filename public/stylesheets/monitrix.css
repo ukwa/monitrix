@@ -214,7 +214,7 @@ html, body {
   height:230px;
   margin-top:20px;
 }
-
+        	  
 .monitrix-barchart-y-label {
   display:block;
   height:30px;
@@ -257,7 +257,7 @@ html, body {
 }
 
 .rickshaw-graph svg {
-  border-width:1px 1px 0px 0px;
+  border-width:1px 0px 0px 0px;
   border-style:dotted solid solid solid;
   border-color:#ccc;
 }

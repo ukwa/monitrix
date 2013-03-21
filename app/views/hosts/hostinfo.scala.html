@@ -40,6 +40,7 @@
               <div class="monitrix-barchart-container-right">  
                 <div class="monitrix-barchart-axis-area" id="graph-urls-axis"></div>             
                 <div class="monitrix-barchart-chart-area rickshaw-graph graph-tumb-loading" id="graph-urls"></div>
+                <div id="graph-urls-x-axis"></div>
                 <div class="monitrix-barchart-x-label">Time</div>
               </div>
             </div>
@@ -199,7 +200,15 @@
             }]
           });
           
-          new Rickshaw.Graph.Axis.Time({ graph: graph });
+          
+          new Rickshaw.Graph.Axis.X({
+        	  graph:graph,
+        	  pixelsPerTick: 70,
+        	  tickFormat: function(x) {
+        		  var date = new Date(x);
+        		  return date.getHours() + ":" + date.getMinutes(); 
+        	  },
+          });
           
           new Rickshaw.Graph.Axis.Y({
               graph: graph,

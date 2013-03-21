@@ -16,7 +16,7 @@ public class TimeseriesValueMapper {
 	public long y;
 	
 	public TimeseriesValueMapper(TimeseriesValue val) {
-		this.x = val.getTimestamp() / 1000;
+		this.x = val.getTimestamp();
 		this.y = val.getValue();
 	}
 	

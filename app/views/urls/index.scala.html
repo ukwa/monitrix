@@ -11,7 +11,17 @@
   <table class="table monitrix-hostinfo">
     <tr>
       <td class="monitrix-hostinfo-label">Compressability</td>
-      <td style="width:90%"><div style="height:220px;" id="compressability-histogram"></div></td>
+      <td style="width:90%">
+        <div class="monitrix-barchart-container">
+          <div class="monitrix-barchart-y-label-container">
+            <span class="monitrix-barchart-y-label">Number of URLs</span>
+          </div>
+          <div class="monitrix-barchart-container-right">
+            <div class="monitrix-barchart-chart-area" id="compressability-histogram"></div>
+            <div class="monitrix-barchart-x-label">Compressability - (compressed length / uncompressed length)</div>
+          </div>
+        </div>
+      </td>
     </tr>
   </table>
   

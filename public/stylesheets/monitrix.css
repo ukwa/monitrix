@@ -124,10 +124,15 @@ html, body {
   text-align:center;
 }
 
-.graph-thumb .load-progress {
+.load-progress {
+	position:relative;
+	left:-10px;
 	display:block;
 	padding-top:40px;
+	padding-right:300px;
 	font-weight:bold;
+	width:100%;
+	text-align:center;
 }
 
 .monitrix-graph-thumb-fullscreen {
@@ -143,7 +148,7 @@ html, body {
 .graph-tumb-loading {
   background-image:url('../img/ajax-spinner.gif');
   background-repeat:no-repeat;
-  background-position:126px 76px;
+  background-position:50% 50%;
   border-width:1px;	
 }
 
@@ -236,4 +241,23 @@ html, body {
   height:220px;
   width:700px;
   margin-left:80px;
+}
+
+.monitrix-barchart-axis-area {
+  position:absolute;
+  top:30px;
+  left:40px;
+}
+
+.rickshaw-graph {
+  padding-left:30px;
+  height:160px !important;
+  margin-top:30px;
+  margin-bottom:20px;
+}
+
+.rickshaw-graph svg {
+  border-width:1px 1px 0px 0px;
+  border-style:dotted solid solid solid;
+  border-color:#ccc;
 }

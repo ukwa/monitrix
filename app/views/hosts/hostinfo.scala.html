@@ -33,8 +33,15 @@
         <tr>
           <td class="monitrix-hostinfo-label">URL History</td>
           <td colspan="2">
-            <div class="graph-thumb-container">
-              <div class="graph-thumb graph-tumb-loading" id="graph-urls"></div>
+            <div class="monitrix-barchart-container">
+              <div class="monitrix-barchart-y-label-container">
+                <span class="monitrix-barchart-y-label">Number of URLs</span>
+              </div>
+              <div class="monitrix-barchart-container-right">  
+                <div class="monitrix-barchart-axis-area" id="graph-urls-axis"></div>             
+                <div class="monitrix-barchart-chart-area rickshaw-graph graph-tumb-loading" id="graph-urls"></div>
+                <div class="monitrix-barchart-x-label">Time</div>
+              </div>
             </div>
           </td>
           <td style="width:50%" />

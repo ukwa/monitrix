@@ -69,12 +69,15 @@ public class MongoProperties {
 	public static final String FIELD_KNOWN_HOSTS_LAST_ACCESS = "last_access";
 	public static final String FIELD_KNOWN_HOSTS_CRAWLERS = "crawlers";
 	public static final String FIELD_KNOWN_HOSTS_CRAWLED_URLS = "crawled_urls";
-	public static final String FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS = "successfully_fetched_urls";
-	public static final String FIELD_KNOWN_HOST_AVG_FETCH_DURATION = "avg_fetch_duration";
-	public static final String FIELD_KNOWN_HOST_AVG_RETRY_RATE = "avg_retry_rate";	
+	public static final String FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS = "successfully_fetched_urls";
+	public static final String FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION = "avg_fetch_duration";
+	public static final String FIELD_KNOWN_HOSTS_AVG_RETRY_RATE = "avg_retry_rate";	
 	public static final String FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES = "fetch_status_codes";
 	public static final String FIELD_KNOWN_HOSTS_CONTENT_TYPES = "content_types";
 	public static final String FIELD_KNOWN_HOSTS_VIRUS_STATS = "virus_stats";
+	public static final String FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE = "redirect_percentage";
+	public static final String FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE = "robots_block_percentage";
+	public static final String FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO = "text_to_nontext_ratio";
 	
 	/** Database field keys (Virus Log collection **/
 	public static final String FIELD_VIRUS_LOG_NAME = "virus_name";

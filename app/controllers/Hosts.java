@@ -44,7 +44,7 @@ public class Hosts extends AbstractController {
 		int increment = (int) (hosts.getMaxFetchDuration() / intervals);
 		
 		List<Point2D> histogram = new ArrayList<Point2D>();
-		for (int i=0; i<intervals; i++) {
+		for (int i=0; i<=intervals; i++) {
 			int from = i * increment;
 			int to = from + increment;
 			histogram.add(new Point2D.Double(from, hosts.searchByAverageFetchDuration(from, to, 1, 0).totalResults()));

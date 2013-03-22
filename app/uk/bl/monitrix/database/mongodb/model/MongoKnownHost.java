@@ -124,7 +124,7 @@ public class MongoKnownHost extends KnownHost {
 	
 	@Override
 	public long getSuccessfullyFetchedURLs() {
-		Long fetchedURLs = (Long) dbo.get(MongoProperties.FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS);
+		Long fetchedURLs = (Long) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS);
 		if (fetchedURLs == null)
 			return 0;
 		else
@@ -132,12 +132,12 @@ public class MongoKnownHost extends KnownHost {
 	}
 	
 	public void setSuccessfullyFetchedURLs(long urls) {
-		dbo.put(MongoProperties.FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS, urls);
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS, urls);
 	}
 		
 	@Override
 	public double getAverageFetchDuration() {
-		Double duration = (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION);
+		Double duration = (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION);
 		if (duration == null)
 			return 0;
 		else
@@ -145,12 +145,12 @@ public class MongoKnownHost extends KnownHost {
 	}
 
 	public void setAverageFetchDuration(double avg) {
-		dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, avg);			
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, avg);			
 	}
 	
 	@Override
 	public double getAverageRetryRate() {
-		Double retryRate = (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOST_AVG_RETRY_RATE);
+		Double retryRate = (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE);
 		if (retryRate == null)
 			return 0;
 		else
@@ -158,7 +158,7 @@ public class MongoKnownHost extends KnownHost {
 	}
 	
 	public void setAverageRetryRate(double rate) {
-		dbo.put(MongoProperties.FIELD_KNOWN_HOST_AVG_RETRY_RATE, rate);
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE, rate);
 	}
 	
 	@Override
@@ -201,6 +201,33 @@ public class MongoKnownHost extends KnownHost {
 	
 	public void setVirusStats(Map<String, Integer> virusStats) {
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS, new BasicDBObject(virusStats));
+	}
+	
+	@Override
+	public double getRobotsBlockPercentage() {
+		return (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE);
+	}
+	
+	public void setRobotsBlockPercentage(double percentage) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE, percentage);
+	}
+
+	@Override
+	public double getRedirectPercentage() {
+		return (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE);
+	}
+	
+	public void setRedirectPercentage(double percentage) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE, percentage);		
+	}
+
+	@Override
+	public double getTextToNoneTextRatio() {
+		return (Double) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO);
+	}
+	
+	public void setTextToNoneTextRatio(double ratio) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO, ratio);
 	}
 
 }

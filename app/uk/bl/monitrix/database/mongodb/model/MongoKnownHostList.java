@@ -39,13 +39,14 @@ public class MongoKnownHostList implements KnownHostList {
 	public MongoKnownHostList(DB db) {
 		this.collection = db.getCollection(MongoProperties.COLLECTION_KNOWN_HOSTS);
 		
-		// Known Hosts collection is indexed by hostname, tokenized host name, top-level domain, last-visit timestamp and average fetch duration
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, 1));
 		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, 1));
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, 1));
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS, -1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, 1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS, -1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE, -1));
+		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE, -1));
 	}
 	
 	@Override
@@ -55,13 +56,13 @@ public class MongoKnownHostList implements KnownHostList {
 	
 	@Override
 	public long countSuccessful() {
-		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_SUCCESSFULLY_FETCHED_URLS, new BasicDBObject("$exists", true));
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS, new BasicDBObject("$exists", true));
 		return collection.count(query);
 	}
 	
 	@Override
 	public long getMaxFetchDuration() {
-		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, -1)).limit(1);
+		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, -1)).limit(1);
 		if (cursor.hasNext()) {
 			MongoKnownHost h = new MongoKnownHost(cursor.next());
 			return (long) h.getAverageFetchDuration();
@@ -151,7 +152,7 @@ public class MongoKnownHostList implements KnownHostList {
 	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
 		
-		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_FETCH_DURATION, 
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, 
 				new BasicDBObject("$gt", min).append("$lte", max));
 		
 		long total = collection.count(query);
@@ -173,7 +174,7 @@ public class MongoKnownHostList implements KnownHostList {
 	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
 		
-		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOST_AVG_RETRY_RATE, 
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE, 
 				new BasicDBObject("$gte", min).append("$lt", max));
 		
 		long total = collection.count(query);

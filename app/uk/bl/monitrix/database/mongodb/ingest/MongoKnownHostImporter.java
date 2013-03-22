@@ -8,6 +8,7 @@ import play.Logger;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 
+import uk.bl.monitrix.analytics.HostAnalytics;
 import uk.bl.monitrix.database.mongodb.model.MongoAlert;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHost;
 import uk.bl.monitrix.database.mongodb.model.MongoKnownHostList;
@@ -24,7 +25,7 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	
 	private static final String ALERT_MSG_TOO_MANY_SUBDOMAINS = "The host %s has a suspiciously high number of subdomains (%s)";
 	
-	// private static final String ALERT_MSG_TXT_TO_NONTEXT_RATIO = "The host %s serves a suspiciously high ratio of text vs. non-text resources";
+	private static final String ALERT_MSG_TXT_TO_NONTEXT_RATIO = "The host %s serves a suspiciously high ratio of text vs. non-text resources";
 	
 	private MongoAlertLogImporter alertLog;
 
@@ -180,6 +181,11 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	public void commit() {
 		Logger.info("Updating known hosts list (" + cache.size() +  " hosts)");
 		for (MongoKnownHost knownHost : new ArrayList<MongoKnownHost>(cache.values())) {
+			// Looks a little recursive... 
+			knownHost.setRobotsBlockPercentage(HostAnalytics.computePercentageOfRobotsTxtBlocks(knownHost));
+			knownHost.setRedirectPercentage(HostAnalytics.computePercentagOrRedirects(knownHost));
+			knownHost.setTextToNoneTextRatio(HostAnalytics.computeTextToNonTextRatio(knownHost));
+			
 			collection.save(knownHost.getBackingDBO());
 		}
 		
@@ -197,12 +203,9 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 				alert.setAlertDescription(String.format(ALERT_MSG_TOO_MANY_SUBDOMAINS, host.getHostname(), Integer.toString(subdomains)));
 				alertLog.insert(alert);
 			}
-			
-			// TODO text-to-nontext ratio
-			/* Text-to-Nontext content type ratio
-			Iterator<CrawlLogEntry> log = crawlLog.getEntriesForHost(host.getHostname(), true);
-			double ratio = LogAnalytics.getTextToNonTextResourceRatio(log);
-			if (ratio > 90) {
+
+			// Text-to-Nontext content type ratio limit
+			if (host.getTextToNoneTextRatio() > 0.9) {
 				MongoAlert alert = new MongoAlert(new BasicDBObject());
 				alert.setTimestamp(host.getLastAccess());
 				alert.setOffendingHost(host.getHostname());
@@ -210,7 +213,6 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 				alert.setAlertDescription(String.format(ALERT_MSG_TXT_TO_NONTEXT_RATIO, host.getHostname()));
 				alertLog.insert(alert);
 			}
-			*/
 		}
 		
 		cache.clear();

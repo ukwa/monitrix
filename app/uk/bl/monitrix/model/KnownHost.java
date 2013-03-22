@@ -98,6 +98,24 @@ public abstract class KnownHost {
 	public abstract Map<String, Integer> getVirusStats();
 
 	/**
+	 * Returns the percentage of HTTP request that were precluded by Robots.txt rules.
+	 * @return the percentage of blocks caused by robots.txt
+	 */
+	public abstract double getRobotsBlockPercentage();
+	
+	/**
+	 * Returns the percentage of HTTP requests that received an HTTP 3xx response.
+	 * @return the percentage of 3xx responses
+	 */
+	public abstract double getRedirectPercentage();
+	
+	/**
+	 * Returns the ratio of text vs. non-text MIME types.
+	 * @return the text vs. non-text content type ratio
+	 */
+	public abstract double getTextToNoneTextRatio();
+	
+	/**
 	 * Helper method to split a host name into tokens. Host names
 	 * will be split at the following characters: '.', '-', '_'
 	 * 

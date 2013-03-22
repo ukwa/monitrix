@@ -24,6 +24,8 @@ public class Search extends AbstractController {
 	private static final String TYPE_AVG_FETCH_DURATION = "fetch_duration";
 	private static final String TYPE_COMPRESSABILITY = "compressability";
 	private static final String TYPE_AVG_RETRIES = "avg_retries";
+	private static final String TYPE_ROBOTS_PERCENTAGE = "robots_percentage";	
+	private static final String TYPE_REDIRECT_PERCENTAGE = "redirect_percentage";
 	
 	private static DBConnector db = Global.getBackend();
 	
@@ -31,6 +33,7 @@ public class Search extends AbstractController {
 	
 	private static KnownHostList knownHostList = db.getKnownHostList();
 	
+	// TODO eliminate code duplication
 	public static Result search() {
 		String query = getQueryParam(QUERY);
 		String type = getQueryParam(TYPE);
@@ -95,6 +98,22 @@ public class Search extends AbstractController {
 				SearchResult hosts = knownHostList.searchByAverageRetries(min, max, limit, offset);
 				return ok(views.html.search.hostResults.render(hosts, null, TYPE_AVG_RETRIES, "&min=" + min + "&max=" + max));				
 			}
+		} else if (type.equalsIgnoreCase(TYPE_REDIRECT_PERCENTAGE)) {
+			double min = getQueryParamAsDouble(MIN, -1);
+			double max = getQueryParamAsDouble(MAX, -1);
+			
+			if (min > -1 && max > min) {
+				SearchResult hosts = knownHostList.searchByRedirectPercentage(min, max, limit, offset);
+				return ok(views.html.search.hostResults.render(hosts, null, TYPE_REDIRECT_PERCENTAGE, "&min=" + min + "&max=" + max));				
+			}			
+		} else if (type.equalsIgnoreCase(TYPE_ROBOTS_PERCENTAGE)) {
+			double min = getQueryParamAsDouble(MIN, -1);
+			double max = getQueryParamAsDouble(MAX, -1);
+			
+			if (min > -1 && max > min) {
+				SearchResult hosts = knownHostList.searchByRobotsBlockPercentage(min, max, limit, offset);
+				return ok(views.html.search.hostResults.render(hosts, null, TYPE_ROBOTS_PERCENTAGE, "&min=" + min + "&max=" + max));				
+			}			
 		}
 		
 		// Only happens if someone messes with the query string manually

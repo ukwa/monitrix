@@ -19,6 +19,7 @@ import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
+import uk.bl.monitrix.analytics.HostAnalytics;
 import uk.bl.monitrix.analytics.LogAnalytics;
 import uk.bl.monitrix.analytics.TimeseriesValue;
 import uk.bl.monitrix.database.DBConnector;
@@ -66,7 +67,7 @@ public class Hosts extends AbstractController {
 	
 	public static Result getRobotsHistogram() {
 		int intervals = getQueryParamAsInt("intervals", 100);
-		double increment = 100.0 / intervals;
+		double increment = 1.0 / intervals;
 		
 		List<Point2D> histogram = new ArrayList<Point2D>();
 		for (int i=0; i<=intervals; i++) {
@@ -80,7 +81,7 @@ public class Hosts extends AbstractController {
 
 	public static Result getRedirectsHistogram() {
 		int intervals = getQueryParamAsInt("intervals", 100);
-		double increment = 100.0 / intervals;
+		double increment = 1.0 / intervals;
 		
 		List<Point2D> histogram = new ArrayList<Point2D>();
 		for (int i=0; i<=intervals; i++) {
@@ -98,6 +99,11 @@ public class Hosts extends AbstractController {
 		if (knownHost == null) {
 			return notFound(); // TODO error handling
 		} else {
+			Logger.debug("Computed redirect percentage: " + HostAnalytics.computePercentagOfRedirects(knownHost));
+			Logger.debug("Stored redirect percentage: " + knownHost.getRedirectPercentage());
+			Logger.debug("Computed robots block percentage: " + HostAnalytics.computePercentageOfRobotsTxtBlocks(knownHost));
+			Logger.debug("Stored robots block percentage: " + knownHost.getRobotsBlockPercentage());
+			
 			return ok(views.html.hosts.hostinfo.render(knownHost, db.getCrawlLog(), db.getAlertLog()));
 		}
 	}

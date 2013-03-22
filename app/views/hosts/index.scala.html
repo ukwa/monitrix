@@ -76,7 +76,7 @@
             </div>
             <div class="monitrix-barchart-container-right">
               <div class="monitrix-barchart-chart-area" id="robots-percentage-histogram"></div>
-              <div class="monitrix-barchart-x-label">Percent of Requests Precluded by robots.txt (0 - 100)</div>
+              <div class="monitrix-barchart-x-label">Percent of Requests Precluded by robots.txt (0 - 1)</div>
             </div>
           </div>
           
@@ -97,7 +97,7 @@
             </div>
             <div class="monitrix-barchart-container-right">
               <div class="monitrix-barchart-chart-area" id="redirect-percentage-histogram"></div>
-              <div class="monitrix-barchart-x-label">Percent of Requests that Received an HTTP 3xx Response (0 - 100)</div>
+              <div class="monitrix-barchart-x-label">Percent of Requests that Received an HTTP 3xx Response (0 - 1)</div>
             </div>
           </div>
           
@@ -123,8 +123,7 @@
   <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>
   <script src="@routes.Assets.at("javascripts/querystring.js")" type="text/javascript"></script>    
   <script>
-    var lastHoveredDelay;    
-    var lastHoveredRetries;
+    var lastHoveredValue;    
     
     Morris.Bar({
         element: 'hosts-barchart',
@@ -140,7 +139,7 @@
         barColors: [ '#850303' ], 
         hoverCallback: function(index, options) {
           var row = options.data[index];
-          lastHoveredTLD = row.tld;
+          lastHoveredValue = row.tld;
           
           var html =        	  
       	    '<div class="morris-hover-row-label">.' + row.tld + '</div>' + 
@@ -179,7 +178,7 @@
             barColors: [ '#850303' ],
             hoverCallback: function(index, options) {
               var row = data[index];
-              lastHoveredRetries = row.x;
+              lastHoveredValue = row.x;
             
               var html =        	  
           	    '<div class="morris-hover-row-label">' + row.x + '  - ' + (row.x + 1) + ' Retries</div>' + 
@@ -192,7 +191,7 @@
           
           $('#average-retries-histogram').mouseup(function() {
             var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-            window.location.href='/search?type=avg_retries&min=' + lastHoveredRetries + '&max=' + (lastHoveredRetries + 1) + embeddable;
+            window.location.href='/search?type=avg_retries&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + 1) + embeddable;
           });
         });
     }
@@ -217,7 +216,7 @@
           barColors: [ '#850303' ],
           hoverCallback: function(index, options) {
             var row = data[index];
-            lastHoveredDelay = row.x;
+            lastHoveredValue = row.x;
         
             var html =        	  
       	    '<div class="morris-hover-row-label">Delay ' + row.x / 1000 + 's - ' + (row.x + delayInc) / 1000 + 's</div>' + 
@@ -230,7 +229,7 @@
     
         $('#average-delay-histogram').mouseup(function() {
           var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-          window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc) + embeddable;
+          window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + delayInc) + embeddable;
         });
       });
     }
@@ -255,10 +254,10 @@
             barColors: [ '#850303' ],
             hoverCallback: function(index, options) {
               var row = data[index];
-              lastHoveredDelay = row.x;
+              lastHoveredValue = row.x;
           
               var html =        	  
-        	    '<div class="morris-hover-row-label">' + row.x + '&#37; Blocked</div>' + 
+        	    '<div class="morris-hover-row-label">' + Math.round(row.x * 100) + '&#37; Blocked</div>' + 
         	    '<div class="morris-hover-point" style="color: #850303">' +
                   row.y + ' Hosts' +
                 '</div>';
@@ -268,7 +267,7 @@
       
           $('#robots-percentage-histogram').mouseup(function() {
             var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-            window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc) + embeddable;
+            window.location.href='/search?type=robots_percentage&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + increment) + embeddable;
           });
         });
     }
@@ -293,10 +292,10 @@
             barColors: [ '#850303' ],
             hoverCallback: function(index, options) {
               var row = data[index];
-              lastHoveredDelay = row.x;
+              lastHoveredValue = row.x;
           
               var html =        	  
-        	    '<div class="morris-hover-row-label">' + row.x  + '&#37; Redirected</div>' + 
+        	    '<div class="morris-hover-row-label">' + Math.round(row.x * 100)  + '&#37; Redirected</div>' + 
         	    '<div class="morris-hover-point" style="color: #850303">' +
                   row.y + ' Hosts' +
                 '</div>';
@@ -306,7 +305,7 @@
       
           $('#redirect-percentage-histogram').mouseup(function() {
             var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-            window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc) + embeddable;
+            window.location.href='/search?type=redirect_percentage&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + increment) + embeddable;
           });
         });
     }

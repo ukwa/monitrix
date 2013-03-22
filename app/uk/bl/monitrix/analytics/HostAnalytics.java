@@ -17,7 +17,7 @@ public class HostAnalytics {
 	 * @param host the host
 	 * @return the percentage of requests that received an HTTP 3xx repsonse
 	 */
-	public static double computePercentagOrRedirects(KnownHost host) {
+	public static double computePercentagOfRedirects(KnownHost host) {
 		Map<String, Integer> statusDistribution = host.getFetchStatusDistribution();
 		if (statusDistribution.size() == 0)
 			return 0;
@@ -28,7 +28,7 @@ public class HostAnalytics {
 				redirects++;
 		}
 		
-		return redirects / statusDistribution.size();
+		return redirects / host.getCrawledURLs();
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class HostAnalytics {
 		if (blocked == null)
 			return 0;
 		
-		return ((double) blocked.intValue()) / statusDistribution.size();
+		return ((double) blocked.intValue()) / host.getCrawledURLs();
 	}
 	
 	/**

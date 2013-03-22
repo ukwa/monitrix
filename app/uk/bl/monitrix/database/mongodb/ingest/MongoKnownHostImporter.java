@@ -183,7 +183,7 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 		for (MongoKnownHost knownHost : new ArrayList<MongoKnownHost>(cache.values())) {
 			// Looks a little recursive... 
 			knownHost.setRobotsBlockPercentage(HostAnalytics.computePercentageOfRobotsTxtBlocks(knownHost));
-			knownHost.setRedirectPercentage(HostAnalytics.computePercentagOrRedirects(knownHost));
+			knownHost.setRedirectPercentage(HostAnalytics.computePercentagOfRedirects(knownHost));
 			knownHost.setTextToNoneTextRatio(HostAnalytics.computeTextToNonTextRatio(knownHost));
 			
 			collection.save(knownHost.getBackingDBO());

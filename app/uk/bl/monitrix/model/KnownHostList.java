@@ -82,6 +82,28 @@ public interface KnownHostList {
 	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset);
 	
 	/**
+	 * Returns the hosts where the percentage of robots.txt-precluded fetch attempt lies within
+	 * a specified range.
+	 * @param min the minimum robots.txt-block percentage
+	 * @param max the maximum robots.txt-block percentage
+	 * @param limit the pagination limit
+	 * @param offset the pagination offset
+	 * @return the search result
+	 */
+	public SearchResult searchByRobotsBlockPercentage(double min, double max, int limit, int offset);
+	
+	/**
+	 * Returns the hosts where the percentage of redirects (HTTP 3xx) lies within
+	 * a specified range.
+	 * @param min the minimum redirect percentage
+	 * @param max the maximum redirect percentage
+	 * @param limit the pagination limit
+	 * @param offset the pagination offset
+	 * @return the search result
+	 */
+	public SearchResult searchByRedirectPercentage(double min, double max, int limit, int offset);
+	
+	/**
 	 * Retruns the names of the hosts which have been crawled since the
 	 * specified timestamp.
 	 * @param since the timestamp

@@ -36,6 +36,8 @@ GET     /hosts/:hostname                   controllers.Hosts.getHostInfo(hostnam
 GET     /hosts                             controllers.Hosts.index()
 GET     /api/hosts/average-delay           controllers.Hosts.getAvergageDelayHistogram()
 GET     /api/hosts/average-retries         controllers.Hosts.getAvergageRetriesHistogram()
+GET     /api/hosts/robots-histogram        controllers.Hosts.getRobotsHistogram()
+GET     /api/hosts/redirects-histogram     controllers.Hosts.getRedirectsHistogram()
 GET     /api/hosts/:hostname/urls-crawled  controllers.Hosts.getURLHistoryForHost(hostname: String)
 
 # URLs

@@ -67,6 +67,48 @@
     </tr>
     
     <tr>
+      <td class="monitrix-hostinfo-label">% of Robots.txt Blocks</td>
+      <td>
+        <div class="not-loaded not-loaded-robots">
+          <div class="monitrix-barchart-container">
+            <div class="monitrix-barchart-y-label-container">
+              <span class="monitrix-barchart-y-label">Number of Hosts</span>
+            </div>
+            <div class="monitrix-barchart-container-right">
+              <div class="monitrix-barchart-chart-area" id="robots-percentage-histogram"></div>
+              <div class="monitrix-barchart-x-label">Percent of Requests Precluded by robots.txt (0 - 100)</div>
+            </div>
+          </div>
+          
+          <div class="load-button load-button-robots">
+            <span class="btn" onclick="loadRobots();">Generate Histogram</span>
+          </div>
+        </div>
+      </td>
+    </tr>
+    
+    <tr>
+      <td class="monitrix-hostinfo-label">% of Redirects</td>
+      <td>
+        <div class="not-loaded not-loaded-redirects">
+          <div class="monitrix-barchart-container">
+            <div class="monitrix-barchart-y-label-container">
+              <span class="monitrix-barchart-y-label">Number of Hosts</span>
+            </div>
+            <div class="monitrix-barchart-container-right">
+              <div class="monitrix-barchart-chart-area" id="redirect-percentage-histogram"></div>
+              <div class="monitrix-barchart-x-label">Percent of Requests that Received an HTTP 3xx Response (0 - 100)</div>
+            </div>
+          </div>
+          
+          <div class="load-button load-button-redirects">
+            <span class="btn" onclick="loadRedirects();">Generate Histogram</span>
+          </div>
+        </div>
+      </td>
+    </tr>
+    
+    <tr>
       <td class="monitrix-hostinfo-label">Capped Hosts (@cappedHosts.size)</td>
       <td class="monitrix-three-column-text" style="width:90%">
         @for(host <- cappedHosts) {
@@ -191,6 +233,82 @@
           window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc) + embeddable;
         });
       });
+    }
+    
+    function loadRobots() {
+        $('.load-button-robots').remove();
+        $('.not-loaded-robots').addClass('loading');
+          
+        $.getJSON('/api/hosts/robots-histogram', function(data) {
+      	$('.not-loaded-robots').removeClass('not-loaded').removeClass('loading');
+      	var increment = (data[1].x - data[0].x);
+      	var logData = logify(data);
+      	
+          Morris.Bar({
+            element: 'robots-percentage-histogram',
+            data: logData,
+            xkey: 'x',
+            ykeys: ['y'],
+            yLabelFormat: function(y) { return Math.round(Math.pow(10, y)); },
+            labels: [ '# of Hosts' ],
+            hideHover: 'false',
+            barColors: [ '#850303' ],
+            hoverCallback: function(index, options) {
+              var row = data[index];
+              lastHoveredDelay = row.x;
+          
+              var html =        	  
+        	    '<div class="morris-hover-row-label">' + row.x + '&#37; Blocked</div>' + 
+        	    '<div class="morris-hover-point" style="color: #850303">' +
+                  row.y + ' Hosts' +
+                '</div>';
+              return html;
+            }
+          });
+      
+          $('#robots-percentage-histogram').mouseup(function() {
+            var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+            window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc) + embeddable;
+          });
+        });
+    }
+    
+    function loadRedirects() {
+        $('.load-button-redirects').remove();
+        $('.not-loaded-redirects').addClass('loading');
+          
+        $.getJSON('/api/hosts/redirects-histogram', function(data) {
+      	$('.not-loaded-redirects').removeClass('not-loaded').removeClass('loading');
+      	var increment = (data[1].x - data[0].x);
+      	var logData = logify(data);
+      	
+          Morris.Bar({
+            element: 'redirect-percentage-histogram',
+            data: logData,
+            xkey: 'x',
+            ykeys: ['y'],
+            yLabelFormat: function(y) { return Math.round(Math.pow(10, y)); },
+            labels: [ '# of Hosts' ],
+            hideHover: 'false',
+            barColors: [ '#850303' ],
+            hoverCallback: function(index, options) {
+              var row = data[index];
+              lastHoveredDelay = row.x;
+          
+              var html =        	  
+        	    '<div class="morris-hover-row-label">' + row.x  + '&#37; Redirected</div>' + 
+        	    '<div class="morris-hover-point" style="color: #850303">' +
+                  row.y + ' Hosts' +
+                '</div>';
+              return html;
+            }
+          });
+      
+          $('#redirect-percentage-histogram').mouseup(function() {
+            var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+            window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredDelay + '&max=' + (lastHoveredDelay + delayInc) + embeddable;
+          });
+        });
     }
   </script>
 }

@@ -98,98 +98,69 @@ public class MongoKnownHostList implements KnownHostList {
 		return wrapped;
 	}
 
-	// TODO remove code duplication
 	@Override
-	public SearchResult searchHosts(String query, int limit, int offset) {
-		long startTime = System.currentTimeMillis();
-		
+	public SearchResult searchHosts(String query, int limit, int offset) {		
 		// Parse query
 		List<String> tokens = Arrays.asList(KnownHost.tokenizeName(query));
 		DBObject q = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 
 				new BasicDBObject(MONGO_QUERY_ALL, tokens));
 		
-		// Count total no. of hosts
-		long total = collection.count(q);
-		
-		// Get result page
-		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
-		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
-		
-		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
-		// TODO we need to find a better way to handle 'search result metadata' 
-		while (cursor.hasNext()) {
-			KnownHost host = new MongoKnownHost(cursor.next());
-			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
-		}
-		
-		return new SearchResult(query, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
+		return search(query, q, limit, offset);
 	}
 	
 	@Override
 	public SearchResult searchByTopLevelDomain(String tld, int limit, int offset) {
-		long startTime = System.currentTimeMillis();
-		
 		DBObject q = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_TLD, tld);
-		
-		// Count total no. of hosts
-		long total = collection.count(q);
-		
-		// Get result page
-		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
-		DBCursor cursor = collection.find(q).skip(offset).limit(limit);
-		
-		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
-		// TODO we need to find a better way to handle 'search result metadata' 
-		while (cursor.hasNext()) {
-			KnownHost host = new MongoKnownHost(cursor.next());
-			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
-		}
-		
-		return new SearchResult(tld, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
+		return search(tld, q, limit, offset);
 	}
 	
 	@Override
 	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset) {
-		long startTime = System.currentTimeMillis();
-		
 		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, 
 				new BasicDBObject("$gt", min).append("$lte", max));
-		
-		long total = collection.count(query);
-		
-		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
-		
-		DBCursor cursor = collection.find(query).skip(offset).limit(limit);
-		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
-		// TODO we need to find a better way to handle 'search result metadata' 
-		while (cursor.hasNext()) {
-			KnownHost host = new MongoKnownHost(cursor.next());
-			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
-		}
-		
-		return new SearchResult(null, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
+		return search(null, query, limit, offset);
 	}
 	
 	@Override
-	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset) {
-		long startTime = System.currentTimeMillis();
-		
+	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset) {		
 		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE, 
 				new BasicDBObject("$gte", min).append("$lt", max));
-		
+		return search(null, query, limit, offset);
+	}
+	
+	@Override
+	public SearchResult searchByRobotsBlockPercentage(double min, double max, int limit, int offset) {
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE,
+				new BasicDBObject("$gte", min).append("$lt", max));
+		return search(null, query, limit, offset);
+	}
+
+	@Override
+	public SearchResult searchByRedirectPercentage(double min, double max, int limit, int offset) {
+		DBObject query = new BasicDBObject(MongoProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE,
+				new BasicDBObject("$gte", min).append("$lt", max));
+		return search(null, query, limit, offset);
+	}
+	
+	private SearchResult search(String queryString, DBObject query, int limit, int offset) {
+		long startTime = System.currentTimeMillis();
 		long total = collection.count(query);
-		
+					
 		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
-		DBCursor cursor = collection.find(query).skip(offset).limit(limit);
 		
-		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
-		// TODO we need to find a better way to handle 'search result metadata' 
-		while (cursor.hasNext()) {
-			KnownHost host = new MongoKnownHost(cursor.next());
-			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
+		if (limit > 0) {
+			DBCursor cursor = collection.find(query).skip(offset).limit(limit);
+			
+			// Right now the number of URLs per host are packed into the 'description field' - not ideal!
+			// TODO we need to find a better way to handle 'search result metadata' 
+			while (cursor.hasNext()) {
+				KnownHost host = new MongoKnownHost(cursor.next());
+				hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
+			}
 		}
 		
 		return new SearchResult(null, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
+		
 	}
 
 	@Override

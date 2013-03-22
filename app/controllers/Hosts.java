@@ -47,7 +47,7 @@ public class Hosts extends AbstractController {
 		for (int i=0; i<=intervals; i++) {
 			int from = i * increment;
 			int to = from + increment;
-			histogram.add(new Point2D.Double(from, hosts.searchByAverageFetchDuration(from, to, 1, 0).totalResults()));
+			histogram.add(new Point2D.Double(from, hosts.searchByAverageFetchDuration(from, to, 0, 0).totalResults()));
 		}
 		
 		return ok(Json.toJson(histogram));
@@ -58,7 +58,35 @@ public class Hosts extends AbstractController {
 		
 		List<Point2D> histogram = new ArrayList<Point2D>();
 		for (int r=0; r<intervals; r++) {
-			histogram.add(new Point2D.Double(r, hosts.searchByAverageRetries(r, r + 1, 1, 0).totalResults()));
+			histogram.add(new Point2D.Double(r, hosts.searchByAverageRetries(r, r + 1, 0, 0).totalResults()));
+		}
+		
+		return ok(Json.toJson(histogram));
+	}
+	
+	public static Result getRobotsHistogram() {
+		int intervals = getQueryParamAsInt("intervals", 100);
+		double increment = 100.0 / intervals;
+		
+		List<Point2D> histogram = new ArrayList<Point2D>();
+		for (int i=0; i<=intervals; i++) {
+			double min = increment * i;
+			double max = min + increment;
+			histogram.add(new Point2D.Double(min, hosts.searchByRobotsBlockPercentage(min, max, 0, 0).totalResults()));
+		}
+		
+		return ok(Json.toJson(histogram));
+	}
+
+	public static Result getRedirectsHistogram() {
+		int intervals = getQueryParamAsInt("intervals", 100);
+		double increment = 100.0 / intervals;
+		
+		List<Point2D> histogram = new ArrayList<Point2D>();
+		for (int i=0; i<=intervals; i++) {
+			double min = increment * i;
+			double max = min + increment;
+			histogram.add(new Point2D.Double(min, hosts.searchByRedirectPercentage(min, max, 0, 0).totalResults()));
 		}
 		
 		return ok(Json.toJson(histogram));

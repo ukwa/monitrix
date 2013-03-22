@@ -25,7 +25,7 @@ public class HostAnalytics {
 		double redirects = 0;
 		for (Entry<String, Integer> entry : statusDistribution.entrySet()) {
 			if (entry.getKey().startsWith("3"))
-				redirects++;
+				redirects += entry.getValue();
 		}
 		
 		return redirects / host.getCrawledURLs();

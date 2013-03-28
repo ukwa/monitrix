@@ -5,8 +5,8 @@
 @main("Monitrix - Image QA") {
   @navbar("/image-qa")
 } {
-  <h3>Image Quality Assurance Results - Overview</h3>
-  @for(entry <- log.listEntries.toSeq) {
+  <h3>Image Quality Assurance Results - Overview (max. first 100)</h3>
+  @for(entry <- log.listEntries.toSeq.take(100)) {
     <div class="monitrix-image-qa-result">
       <div class="monitrix-image-qa-images">
         <img class="monitrix-image-qa-thumb" src="@entry.getOriginalImageURL">

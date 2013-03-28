@@ -48,6 +48,15 @@ public interface DBConnector {
 	 * @return the virus log
 	 */
 	public VirusLog getVirusLog();
+	
+	/** 
+	 * Returns an extension table (i.e. a DB table maintained by a Monitrix extension) with
+	 * the specified name and type.
+	 * @param name the table name
+	 * @param type the type
+	 * @return the table
+	 */
+	public <T extends ExtensionTable> T getExtensionTable(String name, Class<T> type);
 
 	/**
 	 * Closes the connection

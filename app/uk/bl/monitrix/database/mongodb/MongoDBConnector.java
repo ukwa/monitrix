@@ -1,11 +1,13 @@
 package uk.bl.monitrix.database.mongodb;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 
 import uk.bl.monitrix.database.DBConnector;
+import uk.bl.monitrix.database.ExtensionTable;
 import uk.bl.monitrix.database.mongodb.model.MongoAlertLog;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlLog;
 import uk.bl.monitrix.database.mongodb.model.MongoCrawlStats;
@@ -48,6 +50,9 @@ public class MongoDBConnector implements DBConnector {
 	
 	// Virus log
 	private VirusLog virusLog;
+	
+	// Extension tables
+	private HashMap<String, ExtensionTable> extensionTables = new HashMap<String, ExtensionTable>();
 	
 	public MongoDBConnector() throws IOException {
 		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
@@ -102,6 +107,23 @@ public class MongoDBConnector implements DBConnector {
 	@Override
 	public void close() {
 		this.mongo.close();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends ExtensionTable> T getExtensionTable(String name, Class<T> type) {
+		ExtensionTable ext = extensionTables.get(name);
+		
+		if (ext == null) {
+			try {
+				ext = type.getConstructor(DB.class).newInstance(db);
+				extensionTables.put(name, ext);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+			
+		return (T) ext;
 	}
 
 }

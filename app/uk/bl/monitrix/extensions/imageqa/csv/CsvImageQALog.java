@@ -1,4 +1,4 @@
-package uk.bl.monitrix.extensions.imageqa;
+package uk.bl.monitrix.extensions.imageqa.csv;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,17 +7,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
-public class QATextLog {
+import uk.bl.monitrix.extensions.imageqa.model.ImageQALogEntry;
+
+public class CsvImageQALog {
 	
 	private File log;
 	
-	public QATextLog(String path) throws IOException {
+	public CsvImageQALog(String path) throws IOException {
 		log = new File(path);
 		if (!log.exists())
 			throw new IOException();
 	}
 	
-	public Iterator<QATextLogEntry> iterator() {
+	public Iterator<ImageQALogEntry> iterator() {
 		try {
 			return new QATextLogIterator(log);
 		} catch (IOException e) {
@@ -25,7 +27,7 @@ public class QATextLog {
 		}
 	}
 	
-	private class QATextLogIterator implements Iterator<QATextLogEntry> {
+	private class QATextLogIterator implements Iterator<ImageQALogEntry> {
 		
 		private FileInputStream is;
 		
@@ -45,9 +47,9 @@ public class QATextLog {
 		}
 
 		@Override
-		public QATextLogEntry next() {
+		public ImageQALogEntry next() {
 			try {
-				QATextLogEntry next = new QATextLogEntry(nextLine);
+				CsvImageQALogEntry next = new CsvImageQALogEntry(nextLine);
 				nextLine = reader.readLine();
 				if (nextLine == null)
 					is.close();

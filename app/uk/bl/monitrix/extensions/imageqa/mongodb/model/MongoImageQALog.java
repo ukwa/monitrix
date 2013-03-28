@@ -6,15 +6,17 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
+import uk.bl.monitrix.database.ExtensionTable;
 import uk.bl.monitrix.database.mongodb.MongoProperties;
 import uk.bl.monitrix.extensions.imageqa.model.ImageQALog;
 import uk.bl.monitrix.extensions.imageqa.model.ImageQALogEntry;
 
-public class MongoImageQALog implements ImageQALog {
+public class MongoImageQALog extends ExtensionTable implements ImageQALog {
 	
 	protected DBCollection collection;
 	
 	public MongoImageQALog(DB db) {
+		super(db);
 		this.collection = db.getCollection(MongoProperties.COLLECTION_ALERT_LOG);
 	}
 
@@ -35,8 +37,7 @@ public class MongoImageQALog implements ImageQALog {
 
 			@Override
 			public ImageQALogEntry next() {
-				// TODO implement
-				return null;
+				return new MongoImageQALogEntry(cursor.next());
 			}
 
 			@Override

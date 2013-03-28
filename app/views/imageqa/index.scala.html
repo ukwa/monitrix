@@ -1,0 +1,11 @@
+@(log: uk.bl.monitrix.extensions.imageqa.model.ImageQALog)
+
+@import tags.navbar
+
+@main("Monitrix - Image QA") {
+  @navbar("/image-qa")
+} {
+  @for(entry <- log.listEntries.toSeq) {
+    @entry.toString
+  }
+}

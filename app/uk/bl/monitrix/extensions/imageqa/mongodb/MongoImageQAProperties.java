@@ -1,6 +1,6 @@
 package uk.bl.monitrix.extensions.imageqa.mongodb;
 
-public class ImageQAMongoProperties {
+public class MongoImageQAProperties {
 	
 	/** Database collection name **/
 	public static final String COLLECTION_IMAGE_QA_LOG = "image_qa_results";

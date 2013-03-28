@@ -5,7 +5,18 @@
 @main("Monitrix - Image QA") {
   @navbar("/image-qa")
 } {
+  <h3>Image Quality Assurance Results - Overview</h3>
   @for(entry <- log.listEntries.toSeq) {
-    @entry.toString
+    <div class="monitrix-image-qa-result">
+      <div class="monitrix-image-qa-images">
+        <img class="monitrix-image-qa-thumb" src="@entry.getOriginalImageURL">
+        <img class="monitrix-image-qa-thumb" src="@entry.getWaybackImageURL">
+      </div>
+      <a href="@entry.getOriginalWebURL">@entry.getOriginalWebURL()</a>
+      <table>
+        <tr><td class="monitrix-hostinfo-label">SIFT Result</td><td>@entry.getMessage()</td></tr>
+        <tr><td class="monitrix-hostinfo-label">Bit comparison Result</td><td>@entry.getPSNRMessage()</td></tr>
+      </table>
+    </div>
   }
 }

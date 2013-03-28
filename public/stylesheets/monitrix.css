@@ -347,3 +347,14 @@ html, body {
   border-style:dotted solid solid solid;
   border-color:#ccc;
 }
+
+.monitrix-image-qa-result {
+  display:inline-block;
+  margin:0px 0px 40px 30px;
+}
+
+.monitrix-image-qa-thumb {
+  width:240px;
+  height:180px;
+  border:1px solid #ccc;
+}

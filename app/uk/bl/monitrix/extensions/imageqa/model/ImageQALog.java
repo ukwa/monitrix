@@ -15,5 +15,12 @@ public interface ImageQALog {
 	 * @return the iterator
 	 */
 	public Iterator<ImageQALogEntry> listEntries();
+	
+	/**
+	 * Returns the log entry for a specific Web page URL, if it exists
+	 * @param url the Web page URL
+	 * @return the log entry or <code>null</code>
+	 */
+	public ImageQALogEntry findForURL(String url);
 
 }

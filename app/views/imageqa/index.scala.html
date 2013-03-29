@@ -6,7 +6,7 @@
   @navbar("/image-qa")
 } {
   <h3>Image Quality Assurance Results - Overview (max. first 100)</h3>
-  @for(entry <- log.listEntries.toSeq.take(100)) {
+  @for(entry <- log.listEntries.toSeq) {
     <div class="monitrix-image-qa-result">
       <div class="monitrix-image-qa-images">
         <img class="monitrix-image-qa-thumb" src="@entry.getOriginalImageURL">
@@ -14,8 +14,18 @@
       </div>
       <a href="@entry.getOriginalWebURL">@entry.getOriginalWebURL()</a>
       <table>
-        <tr><td class="monitrix-hostinfo-label">SIFT Result</td><td>@entry.getMessage()</td></tr>
-        <tr><td class="monitrix-hostinfo-label">Bit comparison Result</td><td>@entry.getPSNRMessage()</td></tr>
+        <tr><td class="monitrix-hostinfo-label">Executed at </td><td>@entry.getTimestamp()</td></tr>
+		<tr><td class="monitrix-hostinfo-label">FC1</td><td>@entry.getFC1()</td></tr>
+		<tr><td class="monitrix-hostinfo-label">FC2</td><td>@entry.getFC2()</td></tr>
+		<tr><td class="monitrix-hostinfo-label">MC</td><td>@entry.getMC()</td></tr>
+        <tr><td class="monitrix-hostinfo-label">SIFT Result</td><td><strong>@entry.getMessage()</strong></td></tr>
+		<tr><td class="monitrix-hostinfo-label">TS1</td><td>@entry.getTS1()</td></tr>
+		<tr><td class="monitrix-hostinfo-label">TS2</td><td>@entry.getTS2()</td></tr>
+		<tr><td class="monitrix-hostinfo-label">OCR</td><td>@entry.getOCR()</td></tr>
+		<tr><td class="monitrix-hostinfo-label">PSNR SIMILARITY</td><td>@entry.getPSNRSimilarity()</td></tr>
+		<tr><td class="monitrix-hostinfo-label">PSNR THRESHOLD</td><td>@entry.getPSNRThreshold()</td></tr>
+		
+        <tr><td class="monitrix-hostinfo-label">Bit comparison Message</td><td><strong>@entry.getPSNRMessage()</strong></td></tr>
       </table>
     </div>
   }

@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.zip.GZIPOutputStream;
 
 import play.Logger;
@@ -33,7 +32,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	private static final String MSG_MALFORMED_URL = "Malformed URL: ";
 	private static final String MSG_TOO_MANY_PATH_SEGMENTS = "Too many path segments in URL: ";
 	
-	private static DateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+	private static DateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
 	private static DateFormat RFC2550_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	
@@ -50,10 +49,6 @@ public class LogFileEntry extends CrawlLogEntry {
 	private Double bufferedCompressability = null;
 	
 	private List<Alert> alerts = new ArrayList<Alert>();
-	
-	static {
-		ISO_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
-	}
 	
 	public LogFileEntry(String logPath, String line) {
 		this.logPath = logPath;
@@ -117,7 +112,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	@Override
 	public Date getLogTimestamp() {
 		try {
-			return ISO_FORMAT.parse(fields.get(0));
+			return ISO_FORMAT.parse(fields.get(0).replaceAll("Z$", "+0000"));
 		} catch (ParseException e) {
 			// Should never happen!
 			throw new RuntimeException(e);

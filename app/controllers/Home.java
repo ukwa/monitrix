@@ -43,5 +43,11 @@ public class Home extends Controller {
 			return ok();
 		return ok(Json.toJson(new CrawlStatsUnitMapper(mostRecent.get(1))));
 	}
+
+        public static Result getTotals() {
+           String total = ""+log.countEntries();
+	   String revisits = ""+log.searchByAnnotation("warcRevisit:digest", 1, 0).totalResults();
+	   return ok(Json.toJson(new String[] {total, revisits}));
+	}
 	  
 }

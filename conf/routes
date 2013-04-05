@@ -6,6 +6,7 @@
 GET     /                                  controllers.Home.index()
 
 GET     /api/log/recent                    controllers.Home.getMostRecentLogEntries()
+GET     /api/log/totals                    controllers.Home.getTotals()
 GET     /api/stats/recent                  controllers.Home.getMostRecentStats()
 
 # Crawl Timeline

@@ -40,7 +40,7 @@ public class IngestActor extends UntypedActor {
 	
 	private ActorSystem system;
 	
-	private static long sleepInterval = 15000;
+	private static long sleepInterval = 1000;
 	
 	private Map<String, WatchedLog> newLogs = new HashMap<String, WatchedLog>();
 	

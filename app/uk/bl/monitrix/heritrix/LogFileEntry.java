@@ -32,7 +32,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	private static final String MSG_MALFORMED_URL = "Malformed URL: ";
 	private static final String MSG_TOO_MANY_PATH_SEGMENTS = "Too many path segments in URL: ";
 	
-	private static DateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	private static DateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	
 	private static DateFormat RFC2550_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	

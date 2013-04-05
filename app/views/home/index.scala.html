@@ -104,7 +104,7 @@
     	  
           var crawlRate = $('#gauge-crawl-rate');
           crawlRate.data('easyPieChart').update(50 + average.crawl_rate / @uk.bl.monitrix.analytics.LogAnalytics.getAverageCrawlRate(mostRecent.iterator));
-          $('span', crawlRate).text(average.crawl_rate);
+          $('span', crawlRate).text(average.crawl_rate.toPrecision(3));
         	
           var downloadRate = $('#gauge-download-rate');
           downloadRate.data('easyPieChart').update(50 * average.download_rate / @uk.bl.monitrix.analytics.LogAnalytics.getAverageDownloadRate(mostRecent.iterator));

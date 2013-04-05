@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.zip.GZIPOutputStream;
 
 import play.Logger;
@@ -49,6 +50,10 @@ public class LogFileEntry extends CrawlLogEntry {
 	private Double bufferedCompressability = null;
 	
 	private List<Alert> alerts = new ArrayList<Alert>();
+	
+	static {
+		ISO_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+	}
 	
 	public LogFileEntry(String logPath, String line) {
 		this.logPath = logPath;

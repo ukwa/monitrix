@@ -46,7 +46,7 @@ public class Admin extends AbstractController{
 		}
 		
 		// Check if the crawledId is already in use:
-		if( ingestSchedule.getLog(crawlerId) != null ) {
+		if( ingestSchedule.getLogForCrawlerId(crawlerId) != null ) {
 			Logger.info("Attempt to add an already added crawler ID: " + crawlerId);
 			flash("error", "The crawler ID '" + crawlerId + "' has already been registered");
 			return redirect(routes.Admin.index());			

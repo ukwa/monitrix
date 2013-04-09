@@ -86,14 +86,14 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	}
 
 	@Override
-	public int getDownloadSize() {
+	public long getDownloadSize() {
 		if (fields == null)
 			parseEntry();
 		
 		if (fields.get(2).equals("-"))
 			return 0;
 		
-		return Integer.parseInt(fields.get(2));
+		return Long.parseLong(fields.get(2));
 	}
 
 	@Override

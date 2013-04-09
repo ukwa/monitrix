@@ -79,7 +79,13 @@
                 </thead>
                 <tbody>
                   @for((mime, value) <- knownHost.getContentTypeDistribution().toSeq.sortWith(_._2 > _._2)) {
-                    <tr><td>@value</td><td>@mime</td></tr>
+                    <tr><td>@value</td><td>
+@if(mime.length > 20) {
+<abbr title="@mime">@mime.substring(0,20)...</abbr>
+} else {
+@mime
+}
+</td></tr>
                   }
                 </tbody>
               </table>

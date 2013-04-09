@@ -4,7 +4,7 @@
 
   case "1" => { <span>Successful DNS lookup</span> }
 
-  case "0" => { <span>Fetch never tried (perhaps protocol unsupported or illegal URI)</span> }
+  case "0" => { <abbr title="Fetch never tried (perhaps protocol unsupported or illegal URI)">Fetch never tried</abbr> }
   
   case "-1" => { <span>DNS lookup failed </span> }
   
@@ -40,7 +40,7 @@
   
   case "-4002" => { <span>The URI is too many embed/transitive hops away from the last URI in scope</span> }
   
-  case "-5000" => { <span>The URI is out of scope upon reexamination - this only happens if the scope changes during the crawl</span> }
+  case "-5000" => { <span title="The URI is out of scope upon reexamination - this only happens if the scope changes during the crawl">Reexamined URI out of scope</span> }
   
   case "-5001" => { <span>Blocked from fetch by user setting</span> }
   
@@ -52,7 +52,7 @@
   
   case "-6000" => { <span>Deleted from Frontier by user</span> }
   
-  case "-7000" => { <span>Processing thread was killed by the operator - this could happen if a thread is an a non-responsive condition</span> }
+  case "-7000" => { <span title="Processing thread was killed by the operator - this could happen if a thread is an a non-responsive condition">Processing thread killed by operator</span> }
   
   case "-9998" => { <span>Robots.txt rules precluded fetch</span> } 
   

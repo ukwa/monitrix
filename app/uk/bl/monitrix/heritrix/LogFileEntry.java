@@ -227,8 +227,9 @@ public class LogFileEntry extends CrawlLogEntry {
 	@Override
 	public double getCompressability() {
 		if (bufferedCompressability == null) {
+		  try {
 			String url = getURL();
-			try {			
+			try {
 				ByteArrayOutputStream b64os = new ByteArrayOutputStream();
 				GZIPOutputStream gzip = new GZIPOutputStream(b64os);
 				gzip.write(url.getBytes());
@@ -243,6 +244,9 @@ public class LogFileEntry extends CrawlLogEntry {
 			} catch (IOException e) {
 				Logger.error("Could not analyse URL for compressability: " + url);
 			}
+		  } catch (Exception e ) {
+			  Logger.error("Caught exception "+e+" when reading this URL from crawl log line: "+ this.line);
+		  }
 		}
 		
 		return bufferedCompressability;

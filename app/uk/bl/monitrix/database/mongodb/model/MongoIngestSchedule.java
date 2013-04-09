@@ -30,7 +30,7 @@ public class MongoIngestSchedule extends IngestSchedule {
 	@Override
 	public IngestedLog addLog(String path, String crawlerId, boolean monitor) {
 		// Check if this log is already in the DB (path and crawlerID must be unique):
-		if( getLog(crawlerId) != null ) return null;
+		if( getLogForCrawlerId(crawlerId) != null ) return null;
 		if( getLogForPath(path) != null ) return null;
 		// Add the log:
 		MongoIngestedLog log = new MongoIngestedLog(new BasicDBObject());
@@ -54,6 +54,15 @@ public class MongoIngestSchedule extends IngestSchedule {
 	@Override
 	public IngestedLog getLog(String id) {
 		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_INGEST_SCHEDULE_ID, new ObjectId(id)));
+		if (dbo == null)
+			return null;
+		
+		return new MongoIngestedLog(dbo);
+	}
+	
+	@Override
+	public IngestedLog getLogForCrawlerId(String crawlerId) {
+		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_CRAWLER_ID, crawlerId));
 		if (dbo == null)
 			return null;
 		

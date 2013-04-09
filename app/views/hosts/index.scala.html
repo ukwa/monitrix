@@ -25,6 +25,15 @@
     </tr>
     
     <tr>
+      <td class="monitrix-hostinfo-label">Capped Hosts (@cappedHosts.size)</td>
+      <td class="monitrix-three-column-text" style="width:90%">
+        @for(host <- cappedHosts) {
+          <a href="@routes.Hosts.getHostInfo(host)@embedParam()">@host</a><br/>
+        }
+      </td>
+    </tr>
+    
+    <tr>
       <td class="monitrix-hostinfo-label">Average Retries</td>
       <td>
         <div class="not-loaded not-loaded-retries">
@@ -108,14 +117,6 @@
       </td>
     </tr>
     
-    <tr>
-      <td class="monitrix-hostinfo-label">Capped Hosts (@cappedHosts.size)</td>
-      <td class="monitrix-three-column-text" style="width:90%">
-        @for(host <- cappedHosts) {
-          <a href="@routes.Hosts.getHostInfo(host)@embedParam()">@host</a><br/>
-        }
-      </td>
-    </tr>
   </table>  
 
   <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/morris.css")">
@@ -142,7 +143,7 @@
           lastHoveredValue = row.tld;
           
           var html =        	  
-      	    '<div class="morris-hover-row-label">.' + row.tld + '</div>' + 
+      	    '<div class="morris-hover-row-label"><a href="/search?type=tld&query=@row.tld">.' + row.tld + '</a></div>' + 
       	    '<div class="morris-hover-point" style="color: #850303">' +
                 row.count + ' Hosts' +
               '</div>';

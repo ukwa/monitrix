@@ -35,11 +35,11 @@ public class MongoCrawlStatsUnit extends CrawlStatsUnit {
 	}
 
 	@Override
-	public int getDownloadVolume() {
-		return (Integer) dbo.get(MongoProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME);
+	public long getDownloadVolume() {
+		return (Long) dbo.get(MongoProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME);
 	}
 	
-	public void setDownloadVolume(int volume) {
+	public void setDownloadVolume(long volume) {
 		dbo.put(MongoProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME, volume);
 	}
 
@@ -62,16 +62,16 @@ public class MongoCrawlStatsUnit extends CrawlStatsUnit {
 	}
 
 	@Override
-	public int countCompletedHosts() {
-		Integer count = (Integer) dbo.get(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS);
+	public long countCompletedHosts() {
+		Long count = (Long) dbo.get(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS);
 		if (count == null)
 			return 0;
 		
 		return count.intValue();
 	}
 	
-	public void setCompletedHosts(int completedHosts) {
-		dbo.put(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS, completedHosts);
+	public void setCompletedHosts(long l) {
+		dbo.put(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS, l);
 	}
 
 }

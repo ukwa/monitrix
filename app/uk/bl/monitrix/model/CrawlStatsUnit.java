@@ -17,7 +17,7 @@ public abstract class CrawlStatsUnit implements Comparable<CrawlStatsUnit> {
 	 * Accumulated data volume downloaded within this unit timeslot.
 	 * @return the download volume in this timeslot
 	 */
-	public abstract int getDownloadVolume();
+	public abstract long getDownloadVolume();
 	
 	/**
 	 * Number of URLs crawled within this unit timeslot.
@@ -37,7 +37,7 @@ public abstract class CrawlStatsUnit implements Comparable<CrawlStatsUnit> {
 	 * The number of hosts that were 'completed' (i.e. last accessed) within this unit timeslot.
 	 * @return the number of completed hosts
 	 */	
-	public abstract int countCompletedHosts();
+	public abstract long countCompletedHosts();
 	
 	/**
 	 * The list of hostnames that were 'completed' (i.e. last accessed) within this unit timeslot.

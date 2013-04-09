@@ -42,11 +42,11 @@ public abstract class CrawlLog {
 	
 	/**
 	 * Utility method: returns true if the last crawl activity was
-	 * more than 2 minutes ago (in which case we consider the crawl idle)
+	 * more than 5 minutes ago (in which case we consider the crawl idle)
 	 * @return <code>true</code> if the crawl is idle 
 	 */
 	public boolean isIdle() {
-		return (System.currentTimeMillis() - getTimeOfLastCrawlActivity()) > 120000; 
+		return (System.currentTimeMillis() - getTimeOfLastCrawlActivity()) > 5*60*1000; 
 	}
 
 	/**

@@ -20,7 +20,7 @@
         @for(host <- offendingHosts) {
           @defining(alertLog.getAlertTypesForHost(host)) { alertTypes =>
             <tr>
-              <td rowspan="@alertTypes.size"><a href="@routes.Hosts.getHostInfo(host)@embedParam()">@host</a></td>
+              <td rowspan="@alertTypes.size"><a href="@routes.Hosts.getHostInfo(host)@embedParam()">${host.length() > 80 ? (host[0..80]+'...' : host} </a></td>
               <td>@alertTag(alertTypes.head)</td>
               <td>@alertLog.countAlertsForHost(host, alertTypes.head)</td>
             </tr>

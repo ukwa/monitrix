@@ -69,7 +69,7 @@
         	  displayURL = displayURL.substring(0, 55) + '...' + displayURL.substring(displayURL.length - 15);
           
             var div = $('<div class="monitrix-flash-url"></div>');
-            div.html('<a href="' + data[randomIndex].url + '" target="_blank">' + displayURL + '</a>');
+            div.html('<a href="/url/' + data[randomIndex].url + '" target="_blank">' + displayURL + '</a>');
             $('#monitrix-flash-panel').append(div);
           
             div.css({

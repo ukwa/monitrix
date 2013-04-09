@@ -45,6 +45,20 @@ public class Admin extends AbstractController{
 			return redirect(routes.Admin.index());
 		}
 		
+		// Check if the crawledId is already in use:
+		if( ingestSchedule.getLog(crawlerId) != null ) {
+			Logger.info("Attempt to add an already added crawler ID: " + crawlerId);
+			flash("error", "The crawler ID '" + crawlerId + "' has already been registered");
+			return redirect(routes.Admin.index());			
+		}
+		
+		// Check if the path is already known:
+		if( ingestSchedule.getLogForPath(path) != null ) {
+			Logger.info("Attempt to add already known log file: " + path);
+			flash("error", "The file '" + path + "' has already been registered");
+			return redirect(routes.Admin.index());			
+		}
+		
 		ingestSchedule.addLog(path, crawlerId, true);
 		ingestWatcher.refresh();
 		return redirect(routes.Admin.index());

@@ -29,7 +29,10 @@ public class MongoIngestSchedule extends IngestSchedule {
 
 	@Override
 	public IngestedLog addLog(String path, String crawlerId, boolean monitor) {
-		// TODO check if this log is already in the DB (path and crawlerID must be unique) 
+		// Check if this log is already in the DB (path and crawlerID must be unique):
+		if( getLog(crawlerId) != null ) return null;
+		if( getLogForPath(path) != null ) return null;
+		// Add the log:
 		MongoIngestedLog log = new MongoIngestedLog(new BasicDBObject());
 		log.setPath(path);
 		log.setCrawlerId(crawlerId);

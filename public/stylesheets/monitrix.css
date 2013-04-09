@@ -23,7 +23,7 @@ html, body {
   background:-ms-linear-gradient(45deg,  #582828 0%,#351515 100%); /* IE10+ */
   background:-webkit-gradient(linear, left bottom, right top, color-stop(0%,#582828), color-stop(100%,#351515)); /* Chrome,Safari4+ */
   background:linear-gradient(45deg,  #582828 0%,#351515 100%); /* W3C */
-  filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#020031', endColorstr='#6d3353',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+  filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#582828', endColorstr='#351515',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
   text-shadow:0 1px 3px rgba(0, 0, 0, .4), 0 0 30px rgba(0, 0, 0, .075);
   -webkit-box-shadow: inset 0 3px 7px rgba(0, 0, 0, .1), inset 0 -3px 7px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .2);
   -moz-box-shadow: inset 0 3px 7px rgba(0,0,0,.1), inset 0 -3px 7px rgba(0,0,0,.1), 0 1px 3px rgba(0, 0, 0, .2);

@@ -31,7 +31,7 @@ public abstract class CrawlLogEntry {
 	 * Column #3 - the download file size in bytes.
 	 * @return the filesize
 	 */
-	public abstract int getDownloadSize();
+	public abstract long getDownloadSize();
 	
 	/**
 	 * Column #4 - the URL of the crawled document.

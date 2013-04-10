@@ -25,7 +25,7 @@ public class URLs extends AbstractController {
 	
 	public static Result getCompressability() {
 		int intervals = getQueryParamAsInt("intervals", 50);
-		double increment = 1.0 / intervals;
+		double increment = 2.0 / intervals;
 		
 		List<Point2D> histogram = new ArrayList<Point2D>();
 		for (int i=0; i<intervals; i++) {

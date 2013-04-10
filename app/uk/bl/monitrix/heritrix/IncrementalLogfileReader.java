@@ -94,6 +94,7 @@ public class IncrementalLogfileReader {
 		FollowingLogIterator(BufferedReader reader) throws IOException {
 			this.reader = reader;
 			nextLine = reader.readLine();
+			linesRead++;
 		}
 		
 		@Override

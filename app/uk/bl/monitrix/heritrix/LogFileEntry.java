@@ -245,8 +245,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	}
 	
 
-	// TODO Switch to Snappy: http://xerial.org/snappy-java/
-	Deflater compresser = new Deflater();//(Deflater.BEST_SPEED);
+	// TODO Maybe switch to Snappy: http://xerial.org/snappy-java/
+	Deflater compresser = new Deflater(Deflater.BEST_SPEED);
 	
 	@Override
 	public double getCompressability() {

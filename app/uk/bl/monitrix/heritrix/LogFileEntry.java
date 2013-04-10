@@ -265,7 +265,7 @@ public class LogFileEntry extends CrawlLogEntry {
 				compresser.setInput(input);
 				compresser.finish();
 				int compressedDataLength = compresser.deflate(output);
-				compresser.end();
+				//compresser.end();
 				compresser.reset();
 
 				// The smaller this ratio is, the more 'compressible' the string,

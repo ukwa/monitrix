@@ -90,8 +90,9 @@ public class IncrementalLogfileReader {
 
 		@Override
 		public LogFileEntry next() {
+			LogFileEntry next =  new LogFileEntry();		
 			try {
-				LogFileEntry next = new LogFileEntry(logFile.getAbsolutePath(), nextLine);
+				next.init(logFile.getAbsolutePath(), nextLine);
 				nextLine = reader.readLine();
 				linesRead++;
 				lastModifiedValueAtLastRead = logFile.lastModified();

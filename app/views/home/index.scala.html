@@ -104,16 +104,18 @@
           $('span', visited).text(data[0]);
       });
       $.getJSON('/api/log/recent', function(data) {
-    	if ((Date.now() - data[0].timestamp) < 12000000000) {
+    	if ((Date.now() - data[0].timestamp) < 1200000) {
     	  var average = getAverage(data);
     	  
           var crawlRate = $('#gauge-crawl-rate');
-          crawlRate.data('easyPieChart').update(50 + average.crawl_rate / @uk.bl.monitrix.analytics.LogAnalytics.getAverageCrawlRate(mostRecent.iterator));
-          $('span', crawlRate).text(average.crawl_rate.toPrecision(5));
+		  var aveCrawlRate = @uk.bl.monitrix.analytics.LogAnalytics.getAverageCrawlRate(mostRecent.iterator);
+          crawlRate.data('easyPieChart').update(50 + average.crawl_rate / aveCrawlRate);
+          $('span', crawlRate).attr('title',aveCrawlRate).text(average.crawl_rate.toPrecision(5));
         	
           var downloadRate = $('#gauge-download-rate');
-          downloadRate.data('easyPieChart').update(50 * average.download_rate / @uk.bl.monitrix.analytics.LogAnalytics.getAverageDownloadRate(mostRecent.iterator));
-          $('span', downloadRate).text((average.download_rate / (1024 * 1024)).toPrecision(3) + 'MB');
+          var aveDownRate = @uk.bl.monitrix.analytics.LogAnalytics.getAverageDownloadRate(mostRecent.iterator);
+          downloadRate.data('easyPieChart').update(50 * average.download_rate / aveDownRate);
+          $('span', downloadRate).attr('title',(aveDownRate/(1024*1024))).text((average.download_rate / (1024 * 1024)).toPrecision(3) + 'MB');
     	}
 
         window.setTimeout(refreshGauges, 1000);
@@ -127,7 +129,7 @@
         lineWidth: 7,
         lineCap: 'square',
         barColor: '#850303',
-        size:80
+        size:120
       });
     });
      

@@ -51,6 +51,18 @@ public class LogFileEntry extends CrawlLogEntry {
 	private List<Alert> alerts = new ArrayList<Alert>();
 	
 	public LogFileEntry(String logPath, String line) {
+		init(logPath, line);
+	}
+	
+	/**
+	 * Package-private constructor and init method that can be used to re-use an instance of this object
+	 * thus reducing GC activity.
+	 */
+	LogFileEntry() {
+	}
+
+	
+	void init(String logPath, String line) {
 		this.logPath = logPath;
 		this.line = line;
 
@@ -58,6 +70,7 @@ public class LogFileEntry extends CrawlLogEntry {
 
 		// Column 1 - 11
 		int ctr = 0;
+		fields = new ArrayList<String>();
 		while (fields.size() < 11 && ctr < split.length) {
 			if (!split[ctr].isEmpty())
 				fields.add(split[ctr].trim());
@@ -72,9 +85,15 @@ public class LogFileEntry extends CrawlLogEntry {
 		
 		fields.add(sb.toString().trim());
 		
+		alerts = new ArrayList<Alert>();		
 		for (Alert alert : validate())
 			alerts.add(alert);
-	}
+
+		// Reset buffers
+		bufferedHost = null;
+		bufferedSubdomain = null;
+		bufferedCompressability = null;
+	}	
 	
 	private List<Alert> validate() {
 		List<Alert> alerts = new ArrayList<Alert>();
@@ -229,6 +248,10 @@ public class LogFileEntry extends CrawlLogEntry {
 		if (bufferedCompressability == null) {
 		  try {
 			String url = getURL();
+			if( url == null ) {
+				Logger.error("Got URL == null from line: '"+line+"'");
+				return 1.0;
+			}
 			try {
 				ByteArrayOutputStream b64os = new ByteArrayOutputStream();
 				GZIPOutputStream gzip = new GZIPOutputStream(b64os);
@@ -244,8 +267,8 @@ public class LogFileEntry extends CrawlLogEntry {
 			} catch (IOException e) {
 				Logger.error("Could not analyse URL for compressability: " + url);
 			}
-		  } catch (Exception e ) {
-			  Logger.error("Caught exception "+e+" when reading this URL from crawl log line: "+ this.line);
+		  } catch ( Exception e ) {
+			  Logger.error("Caught exception '"+e+"' when reading this URL from crawl log line: '"+ line + "'");
 		  }
 		}
 		

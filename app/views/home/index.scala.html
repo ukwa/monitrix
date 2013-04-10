@@ -57,7 +57,13 @@
             <tr class="monitrix-alert-table">
               <td>@alertTag(alert.getAlertType())</td>
               <td>@uk.bl.monitrix.NumberFormat.since(alert.getTimestamp, true)</td>
-              <td><a href="@routes.Hosts.getHostInfo(alert.getOffendingHost)@embedParam()">@alert.getOffendingHost</a></td>
+              <td><a href="@routes.Hosts.getHostInfo(alert.getOffendingHost)@embedParam()">
+              @if( alert.getOffendingHost.length > 30 ) {
+                @alert.getOffendingHost.substring(0,30)
+              } else {
+                @alert.getOffendingHost
+              }
+              </a></td>
             </tr>
           }
         </table>

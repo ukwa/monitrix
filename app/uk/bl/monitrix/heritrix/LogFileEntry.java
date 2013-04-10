@@ -247,8 +247,7 @@ public class LogFileEntry extends CrawlLogEntry {
 
 	// Set up the deflater-based output stream, so test compressibility.
 	// TODO Switch to Snappy: http://xerial.org/snappy-java/
-	private ByteArrayOutputStream b64os = new ByteArrayOutputStream();
-	Deflater d = new Deflater(Deflater.BEST_SPEED);
+	private Deflater d = new Deflater(Deflater.BEST_SPEED);
 
 	@Override
 	public double getCompressability() {
@@ -260,6 +259,7 @@ public class LogFileEntry extends CrawlLogEntry {
 				return 1.0;
 			}
 			try {
+				ByteArrayOutputStream b64os = new ByteArrayOutputStream();
 				DeflaterOutputStream dos = new DeflaterOutputStream(b64os,d);
 				dos.write(url.getBytes());
 				dos.flush();
@@ -269,8 +269,7 @@ public class LogFileEntry extends CrawlLogEntry {
 				bufferedCompressability = ((double) b64os.toByteArray().length) / ((double) url.length());
 				
 				dos.close();
-				//b64os.close();
-				b64os.reset();
+				b64os.close();
 			} catch (IOException e) {
 				Logger.error("Could not analyse URL for compressability: " + url);
 			}

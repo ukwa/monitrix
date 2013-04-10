@@ -70,7 +70,7 @@ public class LogFileEntry extends CrawlLogEntry {
 
 		// Column 1 - 11
 		int ctr = 0;
-		fields = new ArrayList<String>();
+		fields.clear();
 		while (fields.size() < 11 && ctr < split.length) {
 			if (!split[ctr].isEmpty())
 				fields.add(split[ctr].trim());
@@ -85,7 +85,7 @@ public class LogFileEntry extends CrawlLogEntry {
 		
 		fields.add(sb.toString().trim());
 		
-		alerts = new ArrayList<Alert>();		
+		alerts.clear();		
 		for (Alert alert : validate())
 			alerts.add(alert);
 

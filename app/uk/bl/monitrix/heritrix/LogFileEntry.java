@@ -246,6 +246,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 
 	// TODO Switch to Snappy: http://xerial.org/snappy-java/
+	Deflater compresser = new Deflater();//(Deflater.BEST_SPEED);
+	
 	@Override
 	public double getCompressability() {
 		if (bufferedCompressability == null) {
@@ -260,15 +262,15 @@ public class LogFileEntry extends CrawlLogEntry {
 				byte[] input = url.getBytes("UTF-8");
 				// Compress the bytes and get compressed length:
 				byte[] output = new byte[input.length+100];
-				Deflater compresser = new Deflater(Deflater.BEST_SPEED);
 				compresser.setInput(input);
 				compresser.finish();
 				int compressedDataLength = compresser.deflate(output);
-				compresser.end();				
+				compresser.end();
+				compresser.reset();
 
 				// The smaller this ratio is, the more 'compressible' the string,
 				// i.e. the more repetitive the URL
-				bufferedCompressability = ((double) compressedDataLength) / ((double) url.length());
+				bufferedCompressability = ((double) compressedDataLength) / ((double) input.length);
 				
 			} catch (IOException e) {
 				Logger.error("Could not analyse URL for compressability: " + url);

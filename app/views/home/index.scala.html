@@ -123,7 +123,7 @@
           var aveDownRate = @uk.bl.monitrix.analytics.LogAnalytics.getAverageDownloadRate(mostRecent.iterator);
           downloadRate.data('easyPieChart').update(50 * average.download_rate / aveDownRate);
           $('span', downloadRate).attr('title',(aveDownRate/(1024*1024)));
-          $('span', downloadRate).text((average.download_rate / (1024 * 1024)).toPrecision(3) + 'MB');
+          $('span', downloadRate).text((average.download_rate / (1024 * 1024)).toPrecision(4) + 'MB');
     	//}
 
         window.setTimeout(refreshGauges, 1000);

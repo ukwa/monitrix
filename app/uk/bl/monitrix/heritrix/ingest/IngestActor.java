@@ -219,13 +219,9 @@ public class IngestActor extends UntypedActor {
 			
 			IngestStatus status = statusList.get(log.getLogInfo().getId());			
 			status.phase = IngestStatus.Phase.CATCHING_UP;
+			reader.skipLines(linesToSkip);
 				
 			Iterator<LogFileEntry> iterator = reader.newIterator();
-			for (long i=0; i<linesToSkip; i++) {
-				if (iterator.hasNext())
-					iterator.next();
-			}
-		
 			Logger.info("Catching up with log file contents");
 			db.insert(log.getLogInfo().getId(), iterator);
 			

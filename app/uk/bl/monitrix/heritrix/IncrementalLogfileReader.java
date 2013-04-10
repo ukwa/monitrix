@@ -7,6 +7,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
+import play.Logger;
+
 /**
  * An incremental log file reader that emulates UNIX 'tail -f'-like read behavior.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
@@ -50,6 +52,16 @@ public class IncrementalLogfileReader {
 			return true;
 
 		return false;
+	}
+	
+	public void skipLines( long linesToSkip ) {
+		for (long i=0; i<linesToSkip; i++) {
+			try {
+				reader.readLine();
+			} catch (IOException e) {
+				Logger.error("Exception '"+e+"' while skipping "+linesToSkip+" lines of log file: "+this.getPath());
+			}
+		}
 	}
 
 	/**

@@ -58,6 +58,7 @@ public class IncrementalLogfileReader {
 		for (long i=0; i<linesToSkip; i++) {
 			try {
 				reader.readLine();
+				linesRead++;
 			} catch (IOException e) {
 				Logger.error("Exception '"+e+"' while skipping "+linesToSkip+" lines of log file: "+this.getPath());
 			}

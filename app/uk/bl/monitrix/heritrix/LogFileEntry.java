@@ -10,7 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 
 import play.Logger;
 
@@ -243,6 +244,12 @@ public class LogFileEntry extends CrawlLogEntry {
 		return 0;
 	}
 	
+
+	// Set up the deflater-based output stream, so test compressibility.
+	private ByteArrayOutputStream b64os = new ByteArrayOutputStream();
+	Deflater d = new Deflater(Deflater.BEST_SPEED);
+	DeflaterOutputStream dos = new DeflaterOutputStream(b64os,d);
+
 	@Override
 	public double getCompressability() {
 		if (bufferedCompressability == null) {
@@ -253,17 +260,16 @@ public class LogFileEntry extends CrawlLogEntry {
 				return 1.0;
 			}
 			try {
-				ByteArrayOutputStream b64os = new ByteArrayOutputStream();
-				GZIPOutputStream gzip = new GZIPOutputStream(b64os);
-				gzip.write(url.getBytes());
-				gzip.flush();
+				dos.write(url.getBytes());
+				dos.flush();
 				
 				// The smaller this ratio is, the more 'compressible' the string,
 				// i.e. the more repetitive the URL
 				bufferedCompressability = ((double) b64os.toByteArray().length) / ((double) url.length());
 				
-				gzip.close();
-				b64os.close();
+				//dos.close();
+				//b64os.close();
+				b64os.reset();
 			} catch (IOException e) {
 				Logger.error("Could not analyse URL for compressability: " + url);
 			}

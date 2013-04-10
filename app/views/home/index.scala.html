@@ -110,7 +110,7 @@
           $('span', visited).text(data[0]);
       });
       $.getJSON('/api/log/recent', function(data) {
-    	if ((Date.now() - data[0].timestamp) < 1200000) {
+    	//if ((Date.now() - data[0].timestamp) < 1200000) {
     	  var average = getAverage(data);
     	  
           var crawlRate = $('#gauge-crawl-rate');
@@ -124,7 +124,7 @@
           downloadRate.data('easyPieChart').update(50 * average.download_rate / aveDownRate);
           $('span', downloadRate).attr('title',(aveDownRate/(1024*1024)));
           $('span', downloadRate).text((average.download_rate / (1024 * 1024)).toPrecision(3) + 'MB');
-    	}
+    	//}
 
         window.setTimeout(refreshGauges, 1000);
       });

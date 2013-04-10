@@ -42,7 +42,8 @@ public class Global extends GlobalSettings {
 			Logger.info("Database connected");
 		} catch (Exception e) {
 			Logger.error("FATAL - could not connect to MongoDB");
-		}		
+		}
+		Logger.info("Connected to MongoDB.");
 	}
 
 	/**
@@ -93,7 +94,7 @@ public class Global extends GlobalSettings {
 	
 	/**
 	 * In case the DB is not connected, montrix redirects to a specific error
-	 * page with extra DB conntection instructions.
+	 * page with extra DB connection instructions.
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")

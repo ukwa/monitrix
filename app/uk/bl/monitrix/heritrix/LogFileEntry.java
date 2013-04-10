@@ -283,6 +283,13 @@ public class LogFileEntry extends CrawlLogEntry {
 		return bufferedCompressability;
 	}
 	
+	/**
+	 * Attempt to make sure the compressor gets cleaned up properly on GC:
+	 */
+	protected void finalize() {
+		compresser.end();
+	}
+	
 	@Override
 	public String toString() {
 		return line;

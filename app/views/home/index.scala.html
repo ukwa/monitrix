@@ -115,7 +115,7 @@
     	  
           var crawlRate = $('#gauge-crawl-rate');
 		  var aveCrawlRate = @uk.bl.monitrix.analytics.LogAnalytics.getAverageCrawlRate(mostRecent.iterator);
-          crawlRate.data('easyPieChart').update(50 + average.crawl_rate / aveCrawlRate);
+          crawlRate.data('easyPieChart').update(50 * average.crawl_rate / aveCrawlRate);
           $('span', crawlRate).attr('title',aveCrawlRate);
           $('span', crawlRate).text(average.crawl_rate.toPrecision(5));
         	
@@ -123,7 +123,7 @@
           var aveDownRate = @uk.bl.monitrix.analytics.LogAnalytics.getAverageDownloadRate(mostRecent.iterator);
           downloadRate.data('easyPieChart').update(50 * average.download_rate / aveDownRate);
           $('span', downloadRate).attr('title',(aveDownRate/(1024*1024)));
-          $('span', downloadRate).text((average.download_rate / (1024 * 1024)).toPrecision(4) + 'MB');
+          $('span', downloadRate).text((average.download_rate / (1024 * 1024)).toPrecision(5) + 'MB');
     	//}
 
         window.setTimeout(refreshGauges, 1000);

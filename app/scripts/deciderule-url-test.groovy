@@ -9,7 +9,7 @@ def printProps(obj){
   // getProperties is a groovy introspective shortcut. it returns a map
   obj.properties.each{ prop ->
     // prop is a Map.Entry
-    rawOut.println("{ "+prop.key+": "+prop.value+"},")
+    rawOut.println("{ "+prop.key+": '"+prop.value.toString().replace("'","\\'")+"' },")
   }
 }
 
@@ -27,7 +27,7 @@ curi = new CrawlURI( uuri, pathFromSeed, null, lc);
 counter = 0
 rawOut.println("{")
 appCtx.getBean("scope").rules.each { rule ->
-  rawOut.println(rule.class.name + ":{ { decision: "+rule.decisionFor(curi)+" }, ")
+  rawOut.println(rule.class.name + ":{ { decision: '"+rule.decisionFor(curi)+"' }, ")
   printProps(rule)
   rawOut.println("},")
 }

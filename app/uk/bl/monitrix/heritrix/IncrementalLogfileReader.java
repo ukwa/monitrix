@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Scanner;
 
 import play.Logger;
 
@@ -19,7 +20,7 @@ public class IncrementalLogfileReader {
 	
 	private File logFile;
 	
-	private BufferedReader reader;
+	private Scanner reader;
 	
 	private long linesRead = 0;
 	
@@ -35,7 +36,8 @@ public class IncrementalLogfileReader {
 		this.logFile = new File(log.getAbsolutePath());
 		this.lastSize = logFile.length();
 		
-		this.reader = new BufferedReader(new FileReader(log));
+		// Sometimes we get CR, so spec NL only:
+		this.reader = new Scanner(new FileReader(log)).useDelimiter("\n");
 	}
 	
 	public String getPath() {
@@ -56,12 +58,8 @@ public class IncrementalLogfileReader {
 	
 	public void skipLines( long linesToSkip ) {
 		for (long i=0; i<linesToSkip; i++) {
-			try {
-				reader.readLine();
-				linesRead++;
-			} catch (IOException e) {
-				Logger.error("Exception '"+e+"' while skipping "+linesToSkip+" lines of log file: "+this.getPath());
-			}
+			reader.next();
+			linesRead++;
 		}
 	}
 
@@ -87,13 +85,13 @@ public class IncrementalLogfileReader {
 	
 	private class FollowingLogIterator implements Iterator<LogFileEntry> {
 		
-		private BufferedReader reader;
+		private Scanner reader;
 		
 		private String nextLine;
 		
-		FollowingLogIterator(BufferedReader reader) throws IOException {
-			this.reader = reader;
-			nextLine = reader.readLine();
+		FollowingLogIterator(Scanner reader2) throws IOException {
+			this.reader = reader2;
+			nextLine = reader2.next();
 			linesRead++;
 		}
 		
@@ -105,17 +103,11 @@ public class IncrementalLogfileReader {
 		@Override
 		public LogFileEntry next() {
 			LogFileEntry next =  new LogFileEntry();		
-			try {
-				next.init(logFile.getAbsolutePath(), nextLine);
-				nextLine = reader.readLine();
-				linesRead++;
-				lastModifiedValueAtLastRead = logFile.lastModified();
-				return next;
-			} catch (IOException e) {
-				// Should never happen as we've already checked that the file exists
-				// in the constructor!
-				throw new RuntimeException(e);
-			}
+			next.init(logFile.getAbsolutePath(), nextLine);
+			nextLine = reader.next();
+			linesRead++;
+			lastModifiedValueAtLastRead = logFile.lastModified();
+			return next;
 		}
 
 		@Override

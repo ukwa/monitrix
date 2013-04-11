@@ -51,6 +51,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	
 	private List<Alert> alerts = new ArrayList<Alert>();
 	
+	private boolean parseFailed;
+	
 	public LogFileEntry(String logPath, String line) {
 		init(logPath, line);
 	}
@@ -68,6 +70,12 @@ public class LogFileEntry extends CrawlLogEntry {
 		this.line = line;
 
 		String[] split = line.split(" ");
+		if( split.length < 11 ) {
+			this.parseFailed = true;
+			Logger.error("Got a split of length: "+split.length);
+		} else {
+			this.parseFailed = false;
+		}
 
 		// Column 1 - 11
 		int ctr = 0;
@@ -94,7 +102,11 @@ public class LogFileEntry extends CrawlLogEntry {
 		bufferedHost = null;
 		bufferedSubdomain = null;
 		bufferedCompressability = null;
-	}	
+	}
+	
+	public boolean getParseFailed() {
+		return this.parseFailed;
+	}
 	
 	private List<Alert> validate() {
 		List<Alert> alerts = new ArrayList<Alert>();

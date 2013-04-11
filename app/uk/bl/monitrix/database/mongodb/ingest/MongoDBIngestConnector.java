@@ -92,6 +92,12 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 				LogFileEntry next = iterator.next();
 				counter++;
 				
+				// Skip bad ones:
+				if( next.getParseFailed() ) {
+					Logger.error("Skipping storing a line due to a parse failure. "+counter);
+					continue;
+				}
+				
 				long timestamp = next.getLogTimestamp().getTime();
 				if (timestamp < timeOfFirstLogEntryInBatch)
 					timeOfFirstLogEntryInBatch = timestamp;

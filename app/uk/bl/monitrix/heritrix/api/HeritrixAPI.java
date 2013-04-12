@@ -2,25 +2,37 @@ package uk.bl.monitrix.heritrix.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.xml.sax.SAXException;
+
+import play.Logger;
 
 public class HeritrixAPI {
 	
@@ -85,8 +97,48 @@ public class HeritrixAPI {
 		}
 	}
 	
-	public void postScript(InputStream script) {
+	/**
+	 * Post a script to the Heritrix instance
+	 * @param job
+	 * @param lang
+	 * @param script
+	 */
+	public ScriptResult postScript(String job, String lang, String script) {
+		try {
+			// POST it
+			URI endpoint = url.toURI().resolve("engine/job/"+job+"/script");
+			Logger.info("Using endpoint: "+endpoint);
+			HttpPost post = new HttpPost(endpoint);
+			post.setHeader("Accept", "application/xml");
+			
+	        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+	        nameValuePairs.add(new BasicNameValuePair("engine", lang));
+	        nameValuePairs.add(new BasicNameValuePair("script", script));
+	        post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
+	        // Execute HTTP Post Request
+			HttpResponse response = httpClient.execute(post);			        
+			return new ScriptResult(response.getEntity().getContent());
+	    } catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

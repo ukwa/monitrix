@@ -43,7 +43,6 @@ public class Global extends GlobalSettings {
 		} catch (Exception e) {
 			Logger.error("FATAL - could not connect to MongoDB");
 		}
-		Logger.info("Connected to MongoDB.");
 	}
 
 	/**

@@ -42,14 +42,28 @@ public class IncrementalLogfileReader {
 		return logFile.getAbsolutePath();
 	}
 	
+	/**
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	public boolean isRenamed() throws IOException {
 		// If the log has become smaller - RENAMED!
 		if (logFile.length() < lastSize)
 			return true;
+		
+		// This may work better, as the problem is the 'known' log file being renamed:
+		/*
+		if( logFile.getAbsolutePath() != this.getPath() ) 
+			return true;
+		*/
 
 		// If the log was modified, but the reader didn't read anything in the past 10 minutes - RENAMED!
+		// NOTE that this does not really work - if there are many log files, the it may take > 10 mins to get around to a log file.
+		/*
 		if (lastModifiedValueAtLastRead < logFile.lastModified() - TEN_MINUTES)
 			return true;
+		*/
 
 		return false;
 	}

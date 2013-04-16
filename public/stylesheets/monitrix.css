@@ -226,6 +226,10 @@ html, body {
  position:relative;
 }
 
+.monitrix-barchart-container a, .monitrix-barchart-container a:hover {
+ color: #666 !important;
+}
+
 .monitrix-barchart-container-small {
   clear:both;
   position:relative;

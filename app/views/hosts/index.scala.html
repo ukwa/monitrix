@@ -142,8 +142,11 @@
           var row = options.data[index];
           lastHoveredValue = row.tld;
           
-          var html =        	  
-      	    '<div class="morris-hover-row-label"><a href="/search?type=tld&query='+row.tld+'">.' + row.tld + '</a></div>' + 
+          var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+          var targetLink='/search?type=tld&query=' + row.tld + embeddable;
+          
+          var html = 
+      	    '<div class="morris-hover-row-label"><a href="' + targetLink + '">.' + row.tld + '</a></div>' + 
       	    '<div class="morris-hover-point" style="color: #850303">' +
                 row.count + ' Hosts' +
               '</div>';
@@ -181,8 +184,12 @@
               var row = data[index];
               lastHoveredValue = row.x;
             
+              var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+              var targetLink='/search?type=avg_retries&min=' + lastHoveredValue +
+            		  '&max=' + (lastHoveredValue + 1) + embeddable;
+              
               var html =        	  
-          	    '<div class="morris-hover-row-label">' + row.x + '  - ' + (row.x + 1) + ' Retries</div>' + 
+          	    '<div class="morris-hover-row-label"><a href="' + targetLink + '">' + row.x + '  - ' + (row.x + 1) + ' Retries</a></div>' + 
           	    '<div class="morris-hover-point" style="color: #850303">' +
                     row.y + ' Hosts' +
                   '</div>';
@@ -190,10 +197,6 @@
             }
           });
           
-          $('#average-retries-histogram').mouseup(function() {
-            var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-            window.location.href='/search?type=avg_retries&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + 1) + embeddable;
-          });
         });
     }
     
@@ -219,8 +222,11 @@
             var row = data[index];
             lastHoveredValue = row.x;
         
+            var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+            var targetLink='/search?type=fetch_duration&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + delayInc) + embeddable;
+            
             var html =        	  
-      	    '<div class="morris-hover-row-label">Delay ' + row.x / 1000 + 's - ' + (row.x + delayInc) / 1000 + 's</div>' + 
+      	    '<div class="morris-hover-row-label"><a href="' + targetLink + '">Delay ' + row.x / 1000 + 's - ' + (row.x + delayInc) / 1000 + 's</a></div>' + 
       	    '<div class="morris-hover-point" style="color: #850303">' +
                 row.y + ' Hosts' +
               '</div>';
@@ -228,10 +234,6 @@
           }
         });
     
-        $('#average-delay-histogram').mouseup(function() {
-          var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-          window.location.href='/search?type=fetch_duration&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + delayInc) + embeddable;
-        });
       });
     }
     
@@ -257,8 +259,11 @@
               var row = data[index];
               lastHoveredValue = row.x;
           
-              var html =        	  
-        	    '<div class="morris-hover-row-label">' + Math.round(row.x * 100) + '&#37; Blocked</div>' + 
+              var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+              var targetLink='/search?type=robots_percentage&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + increment) + embeddable;
+              
+              var html = 
+        	    '<div class="morris-hover-row-label"><a href="' + targetLink + '">' + Math.round(row.x * 100) + '&#37; Blocked</a></div>' + 
         	    '<div class="morris-hover-point" style="color: #850303">' +
                   row.y + ' Hosts' +
                 '</div>';
@@ -266,10 +271,6 @@
             }
           });
       
-          $('#robots-percentage-histogram').mouseup(function() {
-            var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-            window.location.href='/search?type=robots_percentage&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + increment) + embeddable;
-          });
         });
     }
     
@@ -294,19 +295,17 @@
             hoverCallback: function(index, options) {
               var row = data[index];
               lastHoveredValue = row.x;
+              
+	          var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+              var targetLink ='/search?type=redirect_percentage&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + increment) + embeddable;
           
               var html =        	  
-        	    '<div class="morris-hover-row-label">' + Math.round(row.x * 100)  + '&#37; Redirected</div>' + 
+        	    '<div class="morris-hover-row-label"><a href="' + targetLink + '">' + Math.round(row.x * 100)  + '&#37; Redirected</a></div>' + 
         	    '<div class="morris-hover-point" style="color: #850303">' +
                   row.y + ' Hosts' +
                 '</div>';
               return html;
             }
-          });
-      
-          $('#redirect-percentage-histogram').mouseup(function() {
-            var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-            window.location.href='/search?type=redirect_percentage&query=&min=' + lastHoveredValue + '&max=' + (lastHoveredValue + increment) + embeddable;
           });
         });
     }

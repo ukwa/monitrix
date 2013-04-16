@@ -56,19 +56,18 @@
               var row = options.data[index];
               lastHoveredCompressability = row.x;
               
-              var html =        	  
-            	    '<div class="morris-hover-row-label">Compressed/Uncompressed ' + row.x + '</div>' + 
+              var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
+              var targetLink = '/search?type=compressability&min=' + lastHoveredCompressability +
+            		  '&max=' + (lastHoveredCompressability + 0.04) + embeddable;
+              
+              var html = 
+            	    '<div class="morris-hover-row-label"><a href="' + targetLink + '">Compressed/Uncompressed ' + row.x + '</a></div>' + 
             	    '<div class="morris-hover-point" style="color: #850303">' +
                       row.y + ' URLs' +
                     '</div>';
               return html;
             }
-          });
-        
-          $('#compressability-histogram').mouseup(function() {
-            var embeddable = (QueryString.get('embeddable') != undefined) ? "&embeddable=true" : "";
-            window.location.href='/search?type=compressability&min=' + lastHoveredCompressability + '&max=' + (lastHoveredCompressability + 0.02) + embeddable;
-          });	
+          });        
         });
     }
   </script>

@@ -15,7 +15,7 @@
         @for(virusRecord <- viruses) {
           @defining(virusRecord.getOccurences.toSeq) { occurences =>
             <tr>
-              <td>@virusRecord.getName</td>
+              <td><a href="http://www.google.com/search?q=@virusRecord.getName">@virusRecord.getName</a></td>
               <td>@occurences.foldLeft(0)(_ + _._2)</td>
               <td>
                 @virusRecord.getOccurences.map { case (hostname, occurences) =>

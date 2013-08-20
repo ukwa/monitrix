@@ -1,6 +1,5 @@
 package uk.bl.monitrix.heritrix;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -11,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
-
 import play.Logger;
 
 import com.google.common.net.InternetDomainName;
@@ -44,6 +41,8 @@ public class LogFileEntry extends CrawlLogEntry {
 	private List<String> fields = new ArrayList<String>();
 	
 	private String bufferedHost = null;
+	
+	private String bufferedDomain = null;
 	
 	private String bufferedSubdomain = null;
 	
@@ -127,6 +126,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	private void parseHost() {
 		HostParseResult result = LogFileEntry.extractDomainNames(this);
 		this.bufferedHost = result.host;
+		this.bufferedDomain = result.domain;
 		this.bufferedSubdomain = result.subdomain;
 		if (result.alert != null)
 			alerts.add(result.alert);
@@ -178,6 +178,14 @@ public class LogFileEntry extends CrawlLogEntry {
 	}
 	
 	@Override
+	public String getDomain() {
+		if (bufferedDomain == null)
+			parseHost();
+		
+		return bufferedDomain;
+	}
+	
+	@Override
 	public String getSubdomain() {
 		if (bufferedSubdomain == null)
 			parseHost();
@@ -209,12 +217,14 @@ public class LogFileEntry extends CrawlLogEntry {
 	public Date getFetchTimestamp() {
 		try {
 			String timestamp = fields.get(8);
+			if ("-".equals(timestamp)) return null;
 			if (timestamp.indexOf('+') > -1)
 				timestamp = timestamp.substring(0, timestamp.indexOf('+'));
 			
-			System.out.println("fetch timestamp: " + timestamp);
+			//Logger.info("fetch timestamp: " + timestamp);
 			return RFC2550_FORMAT.parse(timestamp);
 		} catch (ParseException e) {
+			Logger.error("Bad date in line: "+this.line);
 			// Should never happen!
 			throw new RuntimeException(e);
 		}
@@ -321,17 +331,18 @@ public class LogFileEntry extends CrawlLogEntry {
 			url = "http://" + url.substring(4);
 		
 		String host = null;
+		String domain = null;
 		String subdomain = "";
 		try {
 			host = new URL(url).getHost();
-			String domainName = InternetDomainName.from(host).topPrivateDomain().name();
-			if (!domainName.equals(host))
-				subdomain = host.substring(0, host.lastIndexOf(domainName) - 1);
+			domain = InternetDomainName.from(host).topPrivateDomain().name();
+			if (!domain.equals(host))
+				subdomain = host.substring(0, host.lastIndexOf(domain) - 1);
 			
-			return new HostParseResult(domainName, subdomain, null);
+			return new HostParseResult(host, domain, subdomain, null);
 		} catch (MalformedURLException e) {
 			// Logger.warn(e.getMessage());
-			return new HostParseResult(url, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(url, url, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (IllegalArgumentException e) {
 			// Will be thrown by InternetDomainName.from in case the host name looks weird
 			// Logger.warn(e.getMessage());
@@ -353,14 +364,14 @@ public class LogFileEntry extends CrawlLogEntry {
 				StringBuilder hostBuilder = new StringBuilder();
 				for (int i=offendingToken + 1; i<tokens.length; i++)
 					hostBuilder.append("." + tokens[i]);
-				host = hostBuilder.toString().substring(1);
+				domain = hostBuilder.toString().substring(1);
 			}
 
-			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(host, domain, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), host, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (IllegalStateException e) {
 			// Will be thrown by InternetDomainName.from in case the host name looks weird
 			Logger.warn(e.getMessage());
-			return new HostParseResult(host, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
+			return new HostParseResult(host, domain, subdomain, new DefaultAlert(entry.getLogTimestamp().getTime(), url, AlertType.MALFORMED_CRAWL_URL, MSG_MALFORMED_URL + url));
 		} catch (Throwable e) {
 			Logger.warn("Offending host: " + host);
 			Logger.warn("Extracted subdomain: " + subdomain);
@@ -375,12 +386,15 @@ public class LogFileEntry extends CrawlLogEntry {
 		
 		private String host;
 		
+		private String domain;
+		
 		private String subdomain;
 		
 		private Alert alert;
 		
-		HostParseResult(String host, String subdomain, Alert alert) {
+		HostParseResult(String host, String domain, String subdomain, Alert alert) {
 			this.host = host;
+			this.domain = domain;
 			this.subdomain = subdomain;
 			this.alert = alert;
 		}

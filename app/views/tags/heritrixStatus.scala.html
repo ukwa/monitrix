@@ -16,13 +16,13 @@
   
   case "-5" => { <span>Unexpected runtime exception -  see runtime-errors.log</span> }
   
-  case "-6" => { <span>Prerequisite domain-lookup failed, precluding fetch attempt</span> }
+  case "-6" => { <abbr title="Prerequisite domain-lookup failed, precluding fetch attempt">Prerequisite domain-lookup failed</abbr> }
   
   case "-7" => { <span>URI recognized as unsupported or illegal</span> }
   
   case "-8" => { <span>Multiple retries failed, retry limit reached</span> }
   
-  case "-50" => { <span>Temporary status assigned to URIs awaiting preconditions - appearance in logs may be a bug</span> }
+  case "-50" => { <abbr title="Temporary status assigned to URIs awaiting preconditions - appearance in logs may be a bug">Temporary status!</abbr> }
       
   case "-60" => { <span>URIs assigned a failure status - they could not be queued by the Frontier and may be unfetchable</span> }
   
@@ -40,7 +40,7 @@
   
   case "-4002" => { <span>The URI is too many embed/transitive hops away from the last URI in scope</span> }
   
-  case "-5000" => { <span title="The URI is out of scope upon reexamination - this only happens if the scope changes during the crawl">Reexamined URI out of scope</span> }
+  case "-5000" => { <abbr title="The URI is out of scope upon reexamination - this only happens if the scope changes during the crawl">Reexamined URI out of scope</abbr> }
   
   case "-5001" => { <span>Blocked from fetch by user setting</span> }
   
@@ -52,7 +52,7 @@
   
   case "-6000" => { <span>Deleted from Frontier by user</span> }
   
-  case "-7000" => { <span title="Processing thread was killed by the operator - this could happen if a thread is an a non-responsive condition">Processing thread killed by operator</span> }
+  case "-7000" => { <abbr title="Processing thread was killed by the operator - this could happen if a thread is an a non-responsive condition">Processing thread killed by operator</abbr> }
   
   case "-9998" => { <span>Robots.txt rules precluded fetch</span> } 
   

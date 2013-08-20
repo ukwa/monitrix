@@ -115,6 +115,15 @@ public class MongoCrawlLogEntry extends CrawlLogEntry {
 	}
 	
 	@Override
+	public String getDomain() {
+		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_DOMAIN);
+	}
+	
+	public void setDomain(String domain) {
+		dbo.put(MongoProperties.FIELD_CRAWL_LOG_DOMAIN, domain);
+	}
+
+	@Override
 	public String getSubdomain() {
 		return (String) dbo.get(MongoProperties.FIELD_CRAWL_LOG_SUBDOMAIN);
 	}

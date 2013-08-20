@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.codehaus.jackson.node.ObjectNode;
 
-import akka.util.Duration;
+import scala.concurrent.duration.Duration;
 
 import controllers.mapping.TimeseriesValueMapper;
 
@@ -118,6 +118,7 @@ public class Hosts extends AbstractController {
 			Cache.set(hostname, cachedProgress);
 			
 			// Start async computation
+
 			Akka.system().scheduler().scheduleOnce(Duration.fromNanos(0), new Runnable() {
 				@Override
 				public void run() {
@@ -139,8 +140,8 @@ public class Hosts extends AbstractController {
 					List<TimeseriesValue> result = LogAnalytics.getCrawledURLsHistory(entries, maxpoints);
 					cachedProgress.result = result;
 				}
-			});
-			
+			},Akka.system().dispatcher());
+		
 			progress = cachedProgress;
 		} else {
 			if (progress.result != null) {

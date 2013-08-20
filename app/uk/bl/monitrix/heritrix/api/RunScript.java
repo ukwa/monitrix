@@ -27,7 +27,8 @@ public class RunScript {
 	public static void main(String[] args) throws IOException {
 		// Set the parameters:
 		String uri = "http://static.guim.co.uk/sys-images/Guardian/Pix/pictures/2013/4/11/1365681260808/Egyptian-women-protest-008.jpg";
-		String pathFromSeed = "-";
+		uri = "https://www.gov.uk/government/publications?page=2";
+		String pathFromSeed = "L";
 		
 		// Find script, from resource path:
 		InputStream in = HeritrixAPI.class.getResourceAsStream("/scripts/deciderule-url-test.groovy");
@@ -40,10 +41,10 @@ public class RunScript {
 		script = parameters + script;
 		
 		// Connect to H3 instance:
-		HeritrixAPI h = new HeritrixAPI(new URL("https://localhost:8443/"),"admin","admin");
+		HeritrixAPI h = new HeritrixAPI(new URL("https://crawler02.bl.uk:8444/"),"admin","bl_uk");
 		
 		// Issue POST to execute script:
-		ScriptResult sr = h.postScript("test", "groovy", script );
+		ScriptResult sr = h.postScript("crawl1-20130412144637", "groovy", script );
 		
 		// Print results:
 		if( sr.getException() != null ) {

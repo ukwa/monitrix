@@ -44,9 +44,15 @@ public abstract class CrawlLogEntry {
 	 * @return the hostname
 	 */
 	public abstract String getHost(); 
+
+	/**
+	 * The domain, extracted from the host name.
+	 * @return the domain
+	 */
+	public abstract String getDomain();
 	
 	/**
-	 * The subdomain, extracted from the URL.
+	 * The subdomain, extracted from the host name.
 	 * @return the subdomain
 	 */
 	public abstract String getSubdomain();

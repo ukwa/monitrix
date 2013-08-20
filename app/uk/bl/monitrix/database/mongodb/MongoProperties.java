@@ -43,6 +43,7 @@ public class MongoProperties {
 	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "timestamp";
 	public static final String FIELD_CRAWL_LOG_URL = "url";
 	public static final String FIELD_CRAWL_LOG_HOST = "host";
+	public static final String FIELD_CRAWL_LOG_DOMAIN = "domain";
 	public static final String FIELD_CRAWL_LOG_SUBDOMAIN = "subdomain";
 	public static final String FIELD_CRAWL_LOG_CRAWLER_ID = "crawler_id";
 	public static final String FIELD_CRAWL_LOG_HTTP_CODE = "http_code";

@@ -11,10 +11,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActorFactory;
-import akka.dispatch.Await;
-import akka.dispatch.Future;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
 import akka.pattern.Patterns;
-import akka.util.Duration;
+import scala.concurrent.duration.Duration;
 import akka.util.Timeout;
 
 import uk.bl.monitrix.database.DBIngestConnector;

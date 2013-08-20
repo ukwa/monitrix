@@ -352,6 +352,10 @@ html, body {
   border-color:#ccc;
 }
 
+.rickshaw_graph .x_label {
+  bottom: 30px;
+}
+
 .monitrix-image-qa-result {
   display:inline-block;
   margin:20px 50px 40px 0px;

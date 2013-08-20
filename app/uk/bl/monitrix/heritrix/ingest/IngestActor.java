@@ -13,16 +13,16 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import play.Logger;
+import play.libs.Akka;
 import uk.bl.monitrix.database.DBIngestConnector;
 import uk.bl.monitrix.heritrix.IncrementalLogfileReader;
 import uk.bl.monitrix.heritrix.LogFileEntry;
 import uk.bl.monitrix.heritrix.ingest.IngestStatus.Phase;
 import uk.bl.monitrix.model.IngestSchedule;
 import uk.bl.monitrix.model.IngestedLog;
-
 import akka.actor.ActorSystem;
 import akka.actor.UntypedActor;
-import akka.dispatch.Future;
+import scala.concurrent.Future;
 import akka.dispatch.Futures;
 import akka.dispatch.OnSuccess;
 
@@ -145,7 +145,7 @@ public class IngestActor extends UntypedActor {
 				return estimatedLines;
 			}
 		}, system.dispatcher());
-		
+	
 		f.onSuccess(new OnSuccess<Long>() {
 			@Override
 			public void onSuccess(Long estimatedLineCount) throws Throwable {
@@ -153,7 +153,7 @@ public class IngestActor extends UntypedActor {
 				watchedLog.setEstimatedLineCount(estimatedLineCount);
 				newLogs.put(log.getId(), watchedLog);
 			}		
-		});
+		}, Akka.system().dispatcher());
 	}
 	
 	private void startSynchronizationLoop() throws InterruptedException, IOException {

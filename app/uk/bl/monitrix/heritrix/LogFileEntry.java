@@ -63,7 +63,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	 * Package-private constructor and init method that can be used to re-use an instance of this object
 	 * thus reducing GC activity.
 	 */
-	LogFileEntry() {
+	public LogFileEntry() {
 	}
 
 	

@@ -13,7 +13,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import play.Logger;
-import play.libs.Akka;
 import uk.bl.monitrix.database.DBIngestConnector;
 import uk.bl.monitrix.heritrix.IncrementalLogfileReader;
 import uk.bl.monitrix.heritrix.LogFileEntry;
@@ -145,22 +144,25 @@ public class IngestActor extends UntypedActor {
 				return estimatedLines;
 			}
 		}, system.dispatcher());
-	
+
+		Logger.info("Setting an onSuccess handler for watching " + log.getPath());
+
 		f.onSuccess(new OnSuccess<Long>() {
 			@Override
 			public void onSuccess(Long estimatedLineCount) throws Throwable {
+				Logger.info("Adding a WatchedLog for  " + log.getPath());
 				WatchedLog watchedLog = new WatchedLog(log, new IncrementalLogfileReader(log.getPath()));
 				watchedLog.setEstimatedLineCount(estimatedLineCount);
 				newLogs.put(log.getId(), watchedLog);
 			}		
-		}, Akka.system().dispatcher());
+		}, system.dispatcher());
 	}
 	
 	private void startSynchronizationLoop() throws InterruptedException, IOException {
 		Futures.future(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-				Logger.info("Starting log synchronization loop");
+				Logger.info("Starting log synchronization loop, "+keepRunning+", "+newLogs.size());
 				
 				IngestSchedule schedule = db.getIngestSchedule();
 				
@@ -171,6 +173,7 @@ public class IngestActor extends UntypedActor {
 						toAdd.add(watchedLog);
 					
 					for (WatchedLog log : toAdd) {
+						//Logger.info("Checking "+log.getLogInfo());
 						// TODO performance improvement
 						if (schedule.isMonitoringEnabled(log.getLogInfo().getId())) {
 							Logger.info("Catching up with log file " + log.getReader().getPath());
@@ -235,7 +238,7 @@ public class IngestActor extends UntypedActor {
 	private void synchronizeWithLog(WatchedLog log) {
 		try {
 			IngestStatus status = statusList.get(log.getLogInfo().getId());
-			status.phase = IngestStatus.Phase.SYNCHRONIZING;		
+			status.phase = IngestStatus.Phase.SYNCHRONIZING;
 			db.insert(log.getLogInfo().getId(), log.getReader().newIterator());		
 			status.phase = IngestStatus.Phase.IDLE;
 		} catch (Throwable t) {

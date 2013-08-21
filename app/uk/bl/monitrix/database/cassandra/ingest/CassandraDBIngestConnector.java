@@ -6,13 +6,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import play.Logger;
-
+import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.DBIngestConnector;
+import uk.bl.monitrix.database.cassandra.CassandraDBConnector;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraAlert;
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLogEntry;
 import uk.bl.monitrix.database.cassandra.model.CassandraIngestSchedule;
 import uk.bl.monitrix.heritrix.LogFileEntry;
+import uk.bl.monitrix.heritrix.LogFileEntry.DefaultAlert;
 import uk.bl.monitrix.model.Alert;
 import uk.bl.monitrix.model.IngestSchedule;
 
@@ -25,6 +27,9 @@ import uk.bl.monitrix.model.IngestSchedule;
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CassandraDBIngestConnector implements DBIngestConnector {
+	
+	// DB connection:
+	private CassandraDBConnector db;
 	
 	// Ingest schedule
 	private CassandraIngestSchedule ingestSchedule;
@@ -40,24 +45,27 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 	
 	// Crawl stats
 	private CassandraCrawlStatsImporter crawlStatsImporter;
-	
-	public CassandraDBIngestConnector() throws IOException {
-//		init(CassandraProperties.DB_HOST, CassandraProperties.DB_NAME, CassandraProperties.DB_PORT);
+
+	public CassandraDBIngestConnector(DBConnector db) throws IOException {
+		this.db = (CassandraDBConnector) db;
+		this.init();
 	}
-	
-	public CassandraDBIngestConnector(String hostName, String dbName, int dbPort) throws IOException {
-		init(hostName, dbName, dbPort);
-	}
-	
-	private void init(String hostName, String dbName, int dbPort) throws IOException {
-//		this.mongo = new Cassandra(hostName, dbPort);
-//		this.db = mongo.getDB(dbName);
-//
-//		this.ingestSchedule = new CassandraIngestSchedule(db);
-//		this.crawlLogImporter = new CassandraCrawlLogImporter(session);
-//		this.alertLogImporter = new CassandraAlertLogImporter(db);
-//		this.knownHostImporter = new CassandraKnownHostImporter(db, this.alertLogImporter);
-//		this.crawlStatsImporter = new CassandraCrawlStatsImporter(db, knownHostImporter, new CassandraVirusLogImporter(db));
+		
+	private void init() throws IOException {
+		this.ingestSchedule = new CassandraIngestSchedule(db.getSession());
+		this.crawlLogImporter = new CassandraCrawlLogImporter(db.getSession());
+		this.alertLogImporter = new CassandraAlertLogImporter(db.getSession());
+		this.knownHostImporter = new CassandraKnownHostImporter(db.getSession(), this.alertLogImporter);
+		this.crawlStatsImporter = new CassandraCrawlStatsImporter(db.getSession(), knownHostImporter, new CassandraVirusLogImporter(db.getSession()));
+		
+		// Insert one automatically, if empty:
+		if( this.ingestSchedule.getLogForCrawlerId("test-crawler-id") == null ) {
+			this.ingestSchedule.addLog(
+					"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log",
+					"test-crawler-id", 
+					true
+					);
+		}
 	}
 	
 	@Override
@@ -73,8 +81,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		while (iterator.hasNext()) {
 			long bulkStart = System.currentTimeMillis();
 			
-			List<CassandraCrawlLogEntry> logEntryBatch = new ArrayList<CassandraCrawlLogEntry>();
-			List<CassandraAlert> alertBatch = new ArrayList<CassandraAlert>();
+			List<DefaultAlert> alertBatch = new ArrayList<DefaultAlert>();
 			
 			int counter = 0; // Should be slightly faster than using list.size() to count
 			long timeOfFirstLogEntryInBatch = Long.MAX_VALUE;
@@ -91,22 +98,10 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				long timestamp = next.getLogTimestamp().getTime();
 				if (timestamp < timeOfFirstLogEntryInBatch)
 					timeOfFirstLogEntryInBatch = timestamp;
-
-				// Assemble CassandraDB entity
-//				CassandraCrawlLogEntry dbo = new CassandraCrawlLogEntry(new BasicDBObject());
-//				dbo.setLogId(logId);
-//				dbo.setTimestamp(timestamp);
-//				dbo.setURL(next.getURL());
-//				dbo.setHost(next.getHost());
-//				dbo.setSubdomain(next.getSubdomain());
-//				dbo.setCrawlerID(next.getWorkerThread());
-//				dbo.setHTTPCode(next.getHTTPCode());
-//				dbo.setAnnotations(next.getAnnotations());
-//				dbo.setLogLine(next.toString());
-//				dbo.setRetries(next.getRetries());
-//				dbo.setCompressability(next.getCompressability());
-//				logEntryBatch.add(dbo);	
 								
+				// Store the log entry:
+				crawlLogImporter.insert(next);
+
 				// Update pre-aggregated stats
 				crawlStatsImporter.update(next);
 				
@@ -115,22 +110,15 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				
 				// Log-entry-level alerts
 				for (Alert a : next.getAlerts()) {
-//					CassandraAlert alert = new CassandraAlert(new BasicDBObject());
-//					alert.setTimestamp(next.getLogTimestamp().getTime());
-//					alert.setOffendingHost(a.getOffendingHost());
-//					alert.setAlertType(a.getAlertType());
-//					alert.setAlertDescription(a.getAlertDescription());
-//					alertBatch.add(alert);
+					alertBatch.add((DefaultAlert) a);
 				}
 			}
 			
 			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
 			bulkStart = System.currentTimeMillis();
 			
-			//crawlLogImporter.insert(logEntryBatch);
-			logEntryBatch.clear();
 			
-			//alertLogImporter.insert(alertBatch);
+			alertLogImporter.insert(alertBatch);
 			alertBatch.clear();		
 			
 			crawlStatsImporter.commit();

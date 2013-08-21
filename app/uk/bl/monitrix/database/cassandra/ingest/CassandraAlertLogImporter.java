@@ -16,14 +16,15 @@ import uk.bl.monitrix.heritrix.LogFileEntry.DefaultAlert;
  */
 class CassandraAlertLogImporter extends CassandraAlertLog {
 
+	PreparedStatement statement = null;
+	
 	public CassandraAlertLogImporter(Session db) {
 		super(db);
+		this.statement = session.prepare(
+			      "INSERT INTO crawl_uris.alerts " +
+					      "(host, alert_ts, alert_type, description) " +
+					      "VALUES (?, ?, ?, ?);");
 	}
-	
-	PreparedStatement statement = session.prepare(
-		      "INSERT INTO crawl_uris.alerts " +
-		      "(host, alert_ts, alert_type, description) " +
-		      "VALUES (?, ?, ?, ?);");
 	
 	public void insert(DefaultAlert alert) {
 		BoundStatement boundStatement = new BoundStatement(statement);

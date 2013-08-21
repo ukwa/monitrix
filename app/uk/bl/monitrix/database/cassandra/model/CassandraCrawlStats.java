@@ -57,7 +57,7 @@ public class CassandraCrawlStats implements CrawlStats {
 		
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.stats WHERE stat_ts="+timestamp+";");
 		
-		if (results.isExhausted()) {
+		if (results.isExhausted() ) {
 			return null;
 		} else {
 			CassandraCrawlStatsUnit stats = new CassandraCrawlStatsUnit(results.one());

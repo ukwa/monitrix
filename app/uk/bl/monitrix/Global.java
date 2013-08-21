@@ -15,6 +15,8 @@ import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Results;
 import uk.bl.monitrix.database.DBConnector;
+import uk.bl.monitrix.database.cassandra.CassandraDBConnector;
+import uk.bl.monitrix.database.cassandra.ingest.CassandraDBIngestConnector;
 import uk.bl.monitrix.database.mongodb.MongoDBConnector;
 import uk.bl.monitrix.database.mongodb.ingest.MongoDBIngestConnector;
 import uk.bl.monitrix.heritrix.api.HeritrixAPI;
@@ -35,13 +37,15 @@ public class Global extends GlobalSettings {
 
 	private void connectBackend() {
 		try {
-			ingestWatcher = new IngestWatcher(new MongoDBIngestConnector(), Akka.system());
+			db = new CassandraDBConnector();
+			
+			ingestWatcher = new IngestWatcher(new CassandraDBIngestConnector(db), Akka.system());
 			ingestWatcher.startWatching();
 			
-			db = new MongoDBConnector();
 			Logger.info("Database connected");
 		} catch (Exception e) {
-			Logger.error("FATAL - could not connect to MongoDB");
+			Logger.error("FATAL - could not connect to database "+e);
+			e.printStackTrace();
 		}
 	}
 

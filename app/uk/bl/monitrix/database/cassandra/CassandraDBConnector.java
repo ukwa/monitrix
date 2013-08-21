@@ -41,7 +41,7 @@ public class CassandraDBConnector implements DBConnector {
 	public static final long HOUR_AS_MILLIS = 1000*60*60;
 	
 	// Ingest schedule
-	private IngestSchedule ingestSchedule;
+	private volatile IngestSchedule ingestSchedule;
 	
 	// Crawl log
 	private CrawlLog crawlLog;
@@ -82,6 +82,7 @@ public class CassandraDBConnector implements DBConnector {
 		session = cluster.connect();
 		
 		// Add schema if needed:
+		this.dropSchema();
 		if( ! this.isSchemaThere() ) this.createSchema();
 		
 		this.ingestSchedule = new CassandraIngestSchedule(session);
@@ -175,21 +176,80 @@ public class CassandraDBConnector implements DBConnector {
 						"start_ts timestamp," +
 						"end_ts timestamp," +
 						"profile text," +
-						"total_urls counter," +
+						"total_urls bigint," +
 						"PRIMARY KEY (crawl_id, start_ts)" +
 				");");
+		session.execute("CREATE INDEX profile_idx ON crawl_uris.crawls (profile)");
 
 		// Add a crawl log file table:
 		session.execute(
 		"CREATE TABLE crawl_uris.log_files (" +
 				"path text," +
 				"crawler_id text," +
-				"monitor boolean," +
+				"is_monitored boolean," +
+				"PRIMARY KEY (path)" +
+		");");
+		session.execute("CREATE INDEX crawler_id_idx ON crawl_uris.log_files (crawler_id)");
+		session.execute(
+		"CREATE TABLE crawl_uris.log_file_counters (" +
+				"path text," +
 				"ingested_lines counter," +
 				"PRIMARY KEY (path)" +
 		");");
 		
+		
+		// Alerts log
+		// host, alert_ts, alert_type, description
+		session.execute(
+		"CREATE TABLE crawl_uris.alerts (" +
+				"host text," +
+				"alert_ts timestamp," +
+				"alert_type text," +
+				"description text," +
+				"PRIMARY KEY (host, alert_ts)" +
+		");");
+		session.execute("CREATE INDEX alert_type_idx ON crawl_uris.alerts (alert_type)");
+		
+		// Virus log:
+		session.execute(
+		"CREATE TABLE crawl_uris.virus_log (" +
+				"virus_name text," +
+				"host_map map<text,int>," +
+				"PRIMARY KEY (virus_name)" +
+		");");
+		//session.execute("CREATE INDEX alert_type_idx ON crawl_uris.alerts (alert_type)");
+		
+		// Crawl stats:
+		session.execute(
+		"CREATE TABLE crawl_uris.stats (" +
+				"stat_ts timestamp," +
+				"crawl_id text," +
+				"stats_map map<text,int>," +
+				"PRIMARY KEY (stat_ts, crawl_id)" +
+		");");
+		//session.execute("CREATE INDEX stats_crawl_id_idx ON crawl_uris.stats (crawl_id)");
+		
+		// Known hosts lookup:
+		session.execute(
+		"CREATE TABLE crawl_uris.known_hosts (" +
+				"host text," +
+				"tld text," +
+				"first_access timestamp," +
+				"last_access timestamp," +
+				"successfully_fetched_urls bigint," +
+				"PRIMARY KEY (host)" +
+		");");
+		
 	}
+	
+	public void dropSchema() {
+		session.execute("DROP KEYSPACE crawl_uris");
+	}
+	
+	public Session getSession() {
+		return this.session;
+	}
+	
 	
 	@Override
 	public IngestSchedule getIngestSchedule() {

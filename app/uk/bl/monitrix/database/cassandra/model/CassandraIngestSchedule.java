@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bson.types.ObjectId;
+import play.Logger;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
@@ -24,14 +24,15 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	
 	protected Session session; 
 
-	PreparedStatement statement = session.prepare(
-		      "INSERT INTO crawl_uris.log_files " +
-		      "(path, crawler_id, monitor, ingested_lines) " +
-		      "VALUES (?, ?, ?, ?);");
+	PreparedStatement statement = null;
 
 	
 	public CassandraIngestSchedule(Session session) {
 		this.session = session;
+		this.statement = session.prepare(
+			      "INSERT INTO crawl_uris.log_files " +
+					      "(path, crawler_id, is_monitored) " +
+					      "VALUES (?, ?, ?);");
 	}
 
 	@Override
@@ -44,46 +45,62 @@ public class CassandraIngestSchedule extends IngestSchedule {
 		session.execute(boundStatement.bind(
 				path,
 				crawlerId,
-				monitor,
-				0
+				monitor
 				));
-		return new CassandraIngestedLog(session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+path+"'").one());
+		//session.execute("INSERT INTO crawl_uris.log_file_counters (path) VALUES ('"+path+"');");
+		//session.execute("UPDATE crawl_uris.log_file_counters SET ingested_lines = 0 WHERE path='"+path+"'");
+		return new CassandraIngestedLog(
+				session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+path+"'").one(),
+				session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+path+"'").one()
+				);
 	}
 	
 	@Override
 	public List<IngestedLog> getLogs() {
+		System.out.println("Getting logs...");
 		List<IngestedLog> logs = new ArrayList<IngestedLog>();
 		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.log_files;").iterator();
-		while(cursor.hasNext())
-			logs.add(new CassandraIngestedLog(cursor.next()));
+		while(cursor.hasNext()) {
+			Row r = cursor.next();
+			ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+r.getString("path")+"';");
+			Row t = totals.one();
+			CassandraIngestedLog cil = new CassandraIngestedLog(r,t);
+			logs.add(cil);
+		}
 		return logs;
 	}
 	
 	@Override
 	public IngestedLog getLog(String id) {
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+id+"';");
-		if (results.isExhausted())
-			return null;
+		if (results.isExhausted()) return null;
 		
-		return new CassandraIngestedLog(results.one());
+		Row r = results.one();
+		
+		ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+r.getString("path")+"';");		
+		
+		return new CassandraIngestedLog(r, totals.one());
 	}
 	
 	@Override
 	public IngestedLog getLogForCrawlerId(String crawlerId) {
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_files WHERE crawler_id='"+crawlerId+"';");
-		if (results.isExhausted())
-			return null;
+		if (results.isExhausted()) return null;
 		
-		return new CassandraIngestedLog(results.one());
+		Row r = results.one();
+		ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+r.getString("path")+"';");
+		
+		return new CassandraIngestedLog(r, totals.one());
 	}
 	
 	@Override
 	public IngestedLog getLogForPath(String path) {
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+path+"';");
-		if (results.isExhausted())
-			return null;
-		
-		return new CassandraIngestedLog(results.one());
+		if (results.isExhausted()) return null;
+
+		ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+path+"';");
+
+		return new CassandraIngestedLog(results.one(), totals.one());
 	}
 	
 	@Override
@@ -104,7 +121,8 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	}
 	
 	public void incrementIngestedLogLines(String id, long increment) {
-		session.execute("UPDATE crawl_uris.log_files SET ingested_lines = ingested_lines + "+increment+" WHERE path='"+id+"'");
+		Logger.warn("INCREMENTING "+id+" "+increment);
+		session.execute("UPDATE crawl_uris.log_file_counters SET ingested_lines = ingested_lines + "+increment+" WHERE path='"+id+"'");
 	}
 
 }

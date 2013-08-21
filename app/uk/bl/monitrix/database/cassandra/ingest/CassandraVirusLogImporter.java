@@ -13,14 +13,16 @@ import uk.bl.monitrix.model.VirusRecord;
 
 public class CassandraVirusLogImporter extends CassandraVirusLog {
 
+	private PreparedStatement statement;
+
 	public CassandraVirusLogImporter(Session db) {
 		super(db);
+		statement = session.prepare(
+			      "INSERT INTO crawl_uris.virus_log " +
+			      "(virus_name, host_map) " +
+			      "VALUES (?, ?);");
+		
 	}
-	
-	PreparedStatement statement = session.prepare(
-		      "INSERT INTO crawl_uris.virus_log " +
-		      "(virus_name, host_map) " +
-		      "VALUES (?, ?);");
 	
 	private void insert(DefaultVirusRecord defaultVirusRecord) {
 		BoundStatement boundStatement = new BoundStatement(statement);

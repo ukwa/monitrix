@@ -41,8 +41,13 @@ public class CassandraKnownHostList implements KnownHostList {
 	
 	@Override
 	public long countSuccessful() {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.known_hosts WHERE successful=TRUE;");
-		return results.one().getLong("count");
+		ResultSet results = session.execute("SELECT successfully_fetched_urls FROM crawl_uris.known_hosts;");
+		long total = 0;
+		Iterator<Row> rows = results.iterator();
+		while( rows.hasNext() ) {
+			total += rows.next().getLong("successfully_fetched_urls");
+		}
+		return total;
 	}
 	
 	@Override

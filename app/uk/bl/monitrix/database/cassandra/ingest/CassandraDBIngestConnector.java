@@ -7,15 +7,11 @@ import java.util.List;
 
 import play.Logger;
 
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.mongodb.BasicDBObject;
-
 import uk.bl.monitrix.database.DBIngestConnector;
-import uk.bl.monitrix.database.mongodb.MongoProperties;
-import uk.bl.monitrix.database.mongodb.model.MongoAlert;
-import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
-import uk.bl.monitrix.database.mongodb.model.MongoIngestSchedule;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
+import uk.bl.monitrix.database.cassandra.model.CassandraAlert;
+import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLogEntry;
+import uk.bl.monitrix.database.cassandra.model.CassandraIngestSchedule;
 import uk.bl.monitrix.heritrix.LogFileEntry;
 import uk.bl.monitrix.model.Alert;
 import uk.bl.monitrix.model.IngestSchedule;
@@ -30,29 +26,23 @@ import uk.bl.monitrix.model.IngestSchedule;
  */
 public class CassandraDBIngestConnector implements DBIngestConnector {
 	
-	// MongoDB host
-	private Mongo mongo;
-
-	// Monitrix database
-	private DB db;
-	
 	// Ingest schedule
-	private MongoIngestSchedule ingestSchedule;
+	private CassandraIngestSchedule ingestSchedule;
 	
 	// Crawl log
-	private MongoCrawlLogImporter crawlLogImporter;
+	private CassandraCrawlLogImporter crawlLogImporter;
 	
 	// Alert log
-	private MongoAlertLogImporter alertLogImporter;
+	private CassandraAlertLogImporter alertLogImporter;
 	
 	// Known host list
-	private MongoKnownHostImporter knownHostImporter;
+	private CassandraKnownHostImporter knownHostImporter;
 	
 	// Crawl stats
-	private MongoCrawlStatsImporter crawlStatsImporter;
+	private CassandraCrawlStatsImporter crawlStatsImporter;
 	
 	public CassandraDBIngestConnector() throws IOException {
-		init(MongoProperties.DB_HOST, MongoProperties.DB_NAME, MongoProperties.DB_PORT);
+//		init(CassandraProperties.DB_HOST, CassandraProperties.DB_NAME, CassandraProperties.DB_PORT);
 	}
 	
 	public CassandraDBIngestConnector(String hostName, String dbName, int dbPort) throws IOException {
@@ -60,14 +50,14 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 	}
 	
 	private void init(String hostName, String dbName, int dbPort) throws IOException {
-		this.mongo = new Mongo(hostName, dbPort);
-		this.db = mongo.getDB(dbName);
-
-		this.ingestSchedule = new MongoIngestSchedule(db);
-		this.crawlLogImporter = new MongoCrawlLogImporter(db);
-		this.alertLogImporter = new MongoAlertLogImporter(db);
-		this.knownHostImporter = new MongoKnownHostImporter(db, this.alertLogImporter);
-		this.crawlStatsImporter = new MongoCrawlStatsImporter(db, knownHostImporter, new MongoVirusLogImporter(db));
+//		this.mongo = new Cassandra(hostName, dbPort);
+//		this.db = mongo.getDB(dbName);
+//
+//		this.ingestSchedule = new CassandraIngestSchedule(db);
+//		this.crawlLogImporter = new CassandraCrawlLogImporter(session);
+//		this.alertLogImporter = new CassandraAlertLogImporter(db);
+//		this.knownHostImporter = new CassandraKnownHostImporter(db, this.alertLogImporter);
+//		this.crawlStatsImporter = new CassandraCrawlStatsImporter(db, knownHostImporter, new CassandraVirusLogImporter(db));
 	}
 	
 	@Override
@@ -83,12 +73,12 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		while (iterator.hasNext()) {
 			long bulkStart = System.currentTimeMillis();
 			
-			List<MongoCrawlLogEntry> logEntryBatch = new ArrayList<MongoCrawlLogEntry>();
-			List<MongoAlert> alertBatch = new ArrayList<MongoAlert>();
+			List<CassandraCrawlLogEntry> logEntryBatch = new ArrayList<CassandraCrawlLogEntry>();
+			List<CassandraAlert> alertBatch = new ArrayList<CassandraAlert>();
 			
 			int counter = 0; // Should be slightly faster than using list.size() to count
 			long timeOfFirstLogEntryInBatch = Long.MAX_VALUE;
-			while (iterator.hasNext() && (counter < MongoProperties.BULK_INSERT_CHUNK_SIZE)) {
+			while (iterator.hasNext() && (counter < CassandraProperties.BULK_INSERT_CHUNK_SIZE)) {
 				LogFileEntry next = iterator.next();
 				counter++;
 				
@@ -102,20 +92,20 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				if (timestamp < timeOfFirstLogEntryInBatch)
 					timeOfFirstLogEntryInBatch = timestamp;
 
-				// Assemble MongoDB entity
-				MongoCrawlLogEntry dbo = new MongoCrawlLogEntry(new BasicDBObject());
-				dbo.setLogId(logId);
-				dbo.setTimestamp(timestamp);
-				dbo.setURL(next.getURL());
-				dbo.setHost(next.getHost());
-				dbo.setSubdomain(next.getSubdomain());
-				dbo.setCrawlerID(next.getWorkerThread());
-				dbo.setHTTPCode(next.getHTTPCode());
-				dbo.setAnnotations(next.getAnnotations());
-				dbo.setLogLine(next.toString());
-				dbo.setRetries(next.getRetries());
-				dbo.setCompressability(next.getCompressability());
-				logEntryBatch.add(dbo);	
+				// Assemble CassandraDB entity
+//				CassandraCrawlLogEntry dbo = new CassandraCrawlLogEntry(new BasicDBObject());
+//				dbo.setLogId(logId);
+//				dbo.setTimestamp(timestamp);
+//				dbo.setURL(next.getURL());
+//				dbo.setHost(next.getHost());
+//				dbo.setSubdomain(next.getSubdomain());
+//				dbo.setCrawlerID(next.getWorkerThread());
+//				dbo.setHTTPCode(next.getHTTPCode());
+//				dbo.setAnnotations(next.getAnnotations());
+//				dbo.setLogLine(next.toString());
+//				dbo.setRetries(next.getRetries());
+//				dbo.setCompressability(next.getCompressability());
+//				logEntryBatch.add(dbo);	
 								
 				// Update pre-aggregated stats
 				crawlStatsImporter.update(next);
@@ -125,22 +115,22 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				
 				// Log-entry-level alerts
 				for (Alert a : next.getAlerts()) {
-					MongoAlert alert = new MongoAlert(new BasicDBObject());
-					alert.setTimestamp(next.getLogTimestamp().getTime());
-					alert.setOffendingHost(a.getOffendingHost());
-					alert.setAlertType(a.getAlertType());
-					alert.setAlertDescription(a.getAlertDescription());
-					alertBatch.add(alert);
+//					CassandraAlert alert = new CassandraAlert(new BasicDBObject());
+//					alert.setTimestamp(next.getLogTimestamp().getTime());
+//					alert.setOffendingHost(a.getOffendingHost());
+//					alert.setAlertType(a.getAlertType());
+//					alert.setAlertDescription(a.getAlertDescription());
+//					alertBatch.add(alert);
 				}
 			}
 			
 			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
 			bulkStart = System.currentTimeMillis();
 			
-			crawlLogImporter.insert(logEntryBatch);
+			//crawlLogImporter.insert(logEntryBatch);
 			logEntryBatch.clear();
 			
-			alertLogImporter.insert(alertBatch);
+			//alertLogImporter.insert(alertBatch);
 			alertBatch.clear();		
 			
 			crawlStatsImporter.commit();

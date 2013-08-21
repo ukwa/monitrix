@@ -38,7 +38,7 @@ public class CassandraDBConnector implements DBConnector {
 	private Session session;
 	
 	// The resolution of the time-wise logging
-	private static final long HOUR_AS_MILLIS = 1000*60*60;
+	public static final long HOUR_AS_MILLIS = 1000*60*60;
 	
 	// Ingest schedule
 	private IngestSchedule ingestSchedule;

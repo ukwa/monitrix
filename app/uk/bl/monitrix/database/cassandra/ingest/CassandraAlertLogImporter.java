@@ -1,41 +1,44 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
-import java.util.AbstractList;
 import java.util.List;
 
-import com.mongodb.DB;
-import com.mongodb.DBObject;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Session;
 
-import uk.bl.monitrix.database.mongodb.model.MongoAlert;
-import uk.bl.monitrix.database.mongodb.model.MongoAlertLog;
+import uk.bl.monitrix.database.cassandra.model.CassandraAlert;
+import uk.bl.monitrix.database.cassandra.model.CassandraAlertLog;
+import uk.bl.monitrix.heritrix.LogFileEntry.DefaultAlert;
 
 /**
- * An extended version of {@link MongoAlertLog} that adds insert capability.
+ * An extended version of {@link CassandraAlertLog} that adds insert capability.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-class CassandraAlertLogImporter extends MongoAlertLog {
+class CassandraAlertLogImporter extends CassandraAlertLog {
 
-	public CassandraAlertLogImporter(DB db) {
+	public CassandraAlertLogImporter(Session db) {
 		super(db);
 	}
 	
-	public void insert(MongoAlert alert) {
-		collection.insert(alert.getBackingDBO());
+	PreparedStatement statement = session.prepare(
+		      "INSERT INTO crawl_uris.alerts " +
+		      "(host, alert_ts, alert_type, description) " +
+		      "VALUES (?, ?, ?, ?);");
+	
+	public void insert(DefaultAlert alert) {
+		BoundStatement boundStatement = new BoundStatement(statement);
+		session.execute(boundStatement.bind(
+				alert.getOffendingHost(),
+				alert.getTimestamp(),
+				alert.getAlertType(),
+				alert.getAlertDescription()
+				));
 	}
 	
-	public void insert(final List<MongoAlert> alerts) {
-		List<DBObject> mapped = new AbstractList<DBObject>() {
-			@Override
-			public DBObject get(int index) {
-				return alerts.get(index).getBackingDBO();
-			}
-
-			@Override
-			public int size() {
-				return alerts.size();
-			}
-		};
-		collection.insert(mapped);
+	public void insert(final List<DefaultAlert> alerts) {
+		for( DefaultAlert alert : alerts ) {
+			this.insert(alert);
+		}
 	}
 
 }

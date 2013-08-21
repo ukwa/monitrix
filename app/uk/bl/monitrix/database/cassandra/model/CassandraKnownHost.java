@@ -6,8 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.datastax.driver.core.Row;
 
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.KnownHost;
@@ -19,215 +18,108 @@ import uk.bl.monitrix.model.KnownHost;
  */
 public class CassandraKnownHost extends KnownHost {
 	
-	private DBObject dbo;
+	private Row row;
 	
-	public CassandraKnownHost(DBObject dbo) {
-		this.dbo = dbo;
+	public CassandraKnownHost(Row row) {
+		this.row = row;
 	}
 	
-	/**
-	 * Returns the CassandraDB entity that's backing this object.
-	 * @return the DBObject
-	 */
-	public DBObject getBackingDBO() {
-		return dbo;
-	}
-
 	@Override
 	public String getHostname() {
-		return (String) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME);
-	}
-	
-	public void setHostname(String hostname) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME, hostname);
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED,
-				Arrays.asList(KnownHost.tokenizeName(hostname)));
+		return (String) row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME);
 	}
 	
 	@Override
 	public String getTopLevelDomain() {
-		return (String) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_TLD);
-	}
-	
-	public void setTopLevelDomain(String tld) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_TLD, tld);
+		return (String) row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_TLD);
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<String> getSubdomains() {
-		return (List<String>) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS);
+		return row.getList(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS, String.class);
 	}
 	
-	public void addSubdomain(String subdomain) {
-		List<String> subdomains = getSubdomains();
-		if (subdomains == null)
-			subdomains = new ArrayList<String>();
-		
-		if (!subdomains.contains(subdomain))
-			subdomains.add(subdomain);
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS, subdomains);
-		
-		// TODO add tokenized subdomain name? (Could be useful for search)
-	}
-
 	@Override
 	public long getFirstAccess() {
-		return (Long) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS);
+		return row.getDate(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS).getTime();
 	}
 	
-	public void setFirstAccess(long firstAccess) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS, firstAccess);
-	}
-
 	@Override
 	public long getLastAccess() {
-		return (Long) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS);
+		return row.getDate(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS).getTime();
 	}
 	
-	public void setLastAccess(long lastAccess) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, lastAccess);
-	}
-	
-
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<String> getCrawlerIDs() {
-		List<String> crawlers = (List<String>) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS);
-		if (crawlers == null)
-			return new ArrayList<String>();
-		
-		return crawlers;
+		return row.getList(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS, String.class);
 	}
 	
-	public void addCrawlerID(String id) {
-		List<String> crawlers = getCrawlerIDs();
-		
-		if (!crawlers.contains(id))
-			crawlers.add(id);
-		
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS, crawlers);
-	}
-
 	@Override
 	public long getCrawledURLs() {
-		Long crawledURLs = (Long) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS);
-		if (crawledURLs == null)
-			return 0;
-		else
-			return crawledURLs;
+		return row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS);
 	}
 		
-	public void setCrawledURLs(long urls) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS, urls);
-	}
-	
 	@Override
 	public long getSuccessfullyFetchedURLs() {
-		Long fetchedURLs = (Long) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS);
-		if (fetchedURLs == null)
-			return 0;
-		else
-			return fetchedURLs;
+		return row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS);
 	}
 	
-	public void setSuccessfullyFetchedURLs(long urls) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS, urls);
-	}
-		
 	@Override
 	public double getAverageFetchDuration() {
-		Double duration = (Double) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION);
+		Double duration = row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION);
 		if (duration == null)
 			return 0;
 		else
 			return duration;
 	}
 
-	public void setAverageFetchDuration(double avg) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, avg);			
-	}
-	
 	@Override
 	public double getAverageRetryRate() {
-		Double retryRate = (Double) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE);
+		Double retryRate = row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE);
 		if (retryRate == null)
 			return 0;
 		else
 			return retryRate;
 	}
 	
-	public void setAverageRetryRate(double rate) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE, rate);
-	}
-	
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getFetchStatusDistribution() {
-		DBObject fetchStatusCodes = (DBObject) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES);
+		Map<String, Integer> fetchStatusCodes = row.getMap(CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES, String.class, Integer.class);
 		if (fetchStatusCodes == null)
 			return new HashMap<String, Integer>();
-		
-		return fetchStatusCodes.toMap();
-	}
-	
-	public void setFetchStatusDistribution(Map<String, Integer> fetchStatusDistribution) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES, new BasicDBObject(fetchStatusDistribution));
+		return fetchStatusCodes;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getContentTypeDistribution() {
-		DBObject contentTypeDistribution = (DBObject) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES);
+		Map<String, Integer> contentTypeDistribution = row.getMap(CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES, String.class, Integer.class);
 		if (contentTypeDistribution == null)
 			return new HashMap<String, Integer>();
 		
-		return contentTypeDistribution.toMap();
-	}
-	
-	public void setContentTypeDistribution(Map<String, Integer> contentTypeDistribution) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES, new BasicDBObject(contentTypeDistribution));
+		return contentTypeDistribution;
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getVirusStats() {
-		DBObject virusStats = (DBObject) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS);
+		Map<String, Integer> virusStats = row.getMap(CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS, String.class, Integer.class);
 		if (virusStats == null)
-			return new HashMap<String, Integer>();
-		
-		return virusStats.toMap();
-	}
-	
-	public void setVirusStats(Map<String, Integer> virusStats) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS, new BasicDBObject(virusStats));
+			return new HashMap<String, Integer>();		
+		return virusStats;
 	}
 	
 	@Override
 	public double getRobotsBlockPercentage() {
-		return (Double) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE);
+		return row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE);
 	}
 	
-	public void setRobotsBlockPercentage(double percentage) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE, percentage);
-	}
-
 	@Override
 	public double getRedirectPercentage() {
-		return (Double) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE);
+		return row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE);
 	}
 	
-	public void setRedirectPercentage(double percentage) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE, percentage);		
-	}
-
 	@Override
 	public double getTextToNoneTextRatio() {
-		return (Double) dbo.get(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO);
+		return row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO);
 	}
 	
-	public void setTextToNoneTextRatio(double ratio) {
-		dbo.put(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO, ratio);
-	}
-
 }

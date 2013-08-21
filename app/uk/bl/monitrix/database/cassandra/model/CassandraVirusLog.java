@@ -2,12 +2,9 @@ package uk.bl.monitrix.database.cassandra.model;
 
 import java.util.Iterator;
 
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.datastax.driver.core.Row;
 
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.VirusLog;
@@ -15,27 +12,25 @@ import uk.bl.monitrix.model.VirusRecord;
 
 public class CassandraVirusLog implements VirusLog {
 	
-	protected DBCollection collection;
+	protected Session session;
 	
 	public CassandraVirusLog(Session session) {
-		this.collection = session.getCollection(CassandraProperties.COLLECTION_VIRUS_LOG);
-		
-		// Virus Log collection is indexed by virus name
-		this.collection.ensureIndex(new BasicDBObject(CassandraProperties.FIELD_VIRUS_LOG_NAME, 1));
+		this.session = session;
 	}
 	
 	@Override
 	public VirusRecord getRecordForVirus(String virusName) {
-		DBObject dbo = collection.findOne(new BasicDBObject(CassandraProperties.FIELD_VIRUS_LOG_NAME, virusName));
-		if (dbo == null)
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.virus_log WHERE virus_name='"+virusName+"';");
+		if (results.isExhausted())
 			return null;
 		
-		return new CassandraVirusRecord(dbo);
+		return new CassandraVirusRecord(results.one());
 	}
 
 	@Override
 	public Iterator<VirusRecord> getVirusRecords() {
-		final DBCursor cursor = collection.find();
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.virus_log;");
+		final Iterator<Row> cursor = results.iterator();
 		return new Iterator<VirusRecord>() {
 			@Override
 			public boolean hasNext() {

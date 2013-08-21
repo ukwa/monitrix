@@ -1,17 +1,33 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Session;
 
-import uk.bl.monitrix.database.mongodb.model.MongoVirusLog;
-import uk.bl.monitrix.database.mongodb.model.MongoVirusRecord;
+import uk.bl.monitrix.database.cassandra.model.CassandraVirusLog;
+import uk.bl.monitrix.heritrix.LogFileEntry.DefaultVirusRecord;
+import uk.bl.monitrix.model.VirusRecord;
 
-public class CassandraVirusLogImporter extends MongoVirusLog {
+public class CassandraVirusLogImporter extends CassandraVirusLog {
 
-	public CassandraVirusLogImporter(DB db) {
+	public CassandraVirusLogImporter(Session db) {
 		super(db);
+	}
+	
+	PreparedStatement statement = session.prepare(
+		      "INSERT INTO crawl_uris.virus_log " +
+		      "(virus_name, host_map) " +
+		      "VALUES (?, ?);");
+	
+	private void insert(DefaultVirusRecord defaultVirusRecord) {
+		BoundStatement boundStatement = new BoundStatement(statement);
+		session.execute(boundStatement.bind(
+				defaultVirusRecord.getName(),
+				defaultVirusRecord.getOccurences()
+				));
 	}
 
 	/**
@@ -20,22 +36,22 @@ public class CassandraVirusLogImporter extends MongoVirusLog {
 	 */
 	public void recordOccurence(String virusName, String hostname) {
 		// In this case we know it's a safe cast
-		MongoVirusRecord record = (MongoVirusRecord) getRecordForVirus(virusName);
+		VirusRecord record = (VirusRecord) getRecordForVirus(virusName);
+		Map<String, Integer> occurences = null;
 		if (record == null) {
-			record = new MongoVirusRecord(new BasicDBObject());
-			record.setName(virusName);
+			occurences = new HashMap<String,Integer>();
+		} else {
+			occurences = record.getOccurences();
 		}
 		
-		Map<String, Integer> occurences = record.getOccurences();
 		if (occurences.containsKey(hostname)) {
 			int count = occurences.get(hostname);
 			occurences.put(hostname, count + 1);
 		} else {
 			occurences.put(hostname, 1);
 		}
-		record.setOccurences(occurences);
 		
-		collection.save(record.getBackingDBO());
+		this.insert(new DefaultVirusRecord(virusName,occurences));
 	}
 
 }

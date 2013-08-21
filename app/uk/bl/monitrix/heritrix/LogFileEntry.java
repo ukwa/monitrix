@@ -9,7 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.Deflater;
+
 import play.Logger;
 
 import com.google.common.net.InternetDomainName;
@@ -17,6 +19,7 @@ import com.google.common.net.InternetDomainName;
 import uk.bl.monitrix.model.Alert;
 import uk.bl.monitrix.model.Alert.AlertType;
 import uk.bl.monitrix.model.CrawlLogEntry;
+import uk.bl.monitrix.model.VirusRecord;
 
 /**
  * An in-memory implementation of {@link CrawlLogEntry}, for use with {@link SimpleLogfileReader}.
@@ -404,7 +407,7 @@ public class LogFileEntry extends CrawlLogEntry {
 	/**
 	 * An in-memory implementation of {@link Alert}.
 	 */
-	private static class DefaultAlert implements Alert {
+	public static class DefaultAlert implements Alert {
 		
 		private long timestamp;
 		
@@ -441,6 +444,31 @@ public class LogFileEntry extends CrawlLogEntry {
 			return description;
 		}
 
+	}
+	
+	/**
+	 * An in-memory representation of a {@link VirusRecord}.
+	 */
+	public static class DefaultVirusRecord implements VirusRecord {
+		
+		private String name;
+		private Map<String, Integer> occurences;
+
+		public DefaultVirusRecord(String name, Map<String, Integer> occurences ) {
+			this.name = name;
+			this.occurences = occurences;
+		}
+
+		@Override
+		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public Map<String, Integer> getOccurences() {
+			return this.occurences;
+		}
+		
 	}
 
 }

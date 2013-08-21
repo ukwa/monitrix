@@ -1,29 +1,28 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
+import com.datastax.driver.core.Session;
+
 import play.Logger;
 import uk.bl.monitrix.analytics.LogAnalytics;
-import uk.bl.monitrix.database.mongodb.MongoProperties;
-import uk.bl.monitrix.database.mongodb.model.MongoCrawlStats;
-import uk.bl.monitrix.database.mongodb.model.MongoCrawlStatsUnit;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
+import uk.bl.monitrix.database.cassandra.model.CassandraCrawlStats;
+import uk.bl.monitrix.database.cassandra.model.CassandraCrawlStatsUnit;
 import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
 
-import com.mongodb.DB;
-import com.mongodb.BasicDBObject;
-
 /**
- * An extended version of {@link MongoCrawlStats} that adds ingest capability.
+ * An extended version of {@link CassandraCrawlStats} that adds ingest capability.
  * The ingest is 'smart' in the sense as it also performs various aggregation computations,
  * including those involving the known hosts list.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
-class CassandraCrawlStatsImporter extends MongoCrawlStats {
+class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 	
-	private MongoKnownHostImporter knownHosts;
+	private CassandraKnownHostImporter knownHosts;
 	
-	private MongoVirusLogImporter virusLog;
+	private CassandraVirusLogImporter virusLog;
 	
-	public CassandraCrawlStatsImporter(DB db, MongoKnownHostImporter knownHosts, MongoVirusLogImporter virusLog) {
+	public CassandraCrawlStatsImporter(Session db, CassandraKnownHostImporter knownHosts, CassandraVirusLogImporter virusLog) {
 		super(db);
 		
 		this.knownHosts = knownHosts;
@@ -41,18 +40,18 @@ class CassandraCrawlStatsImporter extends MongoCrawlStats {
 		long timeslot = toTimeslot(entry.getLogTimestamp().getTime());
 				
 		// Step 2 - update data for this timeslot
-		MongoCrawlStatsUnit currentUnit = (MongoCrawlStatsUnit) getStatsForTimestamp(timeslot);
+		CassandraCrawlStatsUnit currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot);
 		if (currentUnit == null) {
 			// Step 3a - init data for this timeslot
-			currentUnit = new MongoCrawlStatsUnit(new BasicDBObject());
-			currentUnit.setTimestamp(timeslot);
-			currentUnit.setNumberOfURLsCrawled(1);
-			currentUnit.setDownloadVolume(entry.getDownloadSize());	
-			currentUnit.setNumberOfNewHostsCrawled(0);
+//			currentUnit = new CassandraCrawlStatsUnit(session);
+//			currentUnit.setTimestamp(timeslot);
+//			currentUnit.setNumberOfURLsCrawled(1);
+//			currentUnit.setDownloadVolume(entry.getDownloadSize());	
+//			currentUnit.setNumberOfNewHostsCrawled(0);
 		} else {
 			// Step 3b - update existing data for this timeslot
-			currentUnit.setNumberOfURLsCrawled(currentUnit.getNumberOfURLsCrawled() + 1);
-			currentUnit.setDownloadVolume(currentUnit.getDownloadVolume() + entry.getDownloadSize());
+//			currentUnit.setNumberOfURLsCrawled(currentUnit.getNumberOfURLsCrawled() + 1);
+//			currentUnit.setDownloadVolume(currentUnit.getDownloadVolume() + entry.getDownloadSize());
 		}
 		
 		// Step 4 - update hosts info
@@ -63,9 +62,9 @@ class CassandraCrawlStatsImporter extends MongoCrawlStats {
 			// Update host completion time
 			long lastRecordedAccess = host.getLastAccess();
 			if (lastRecordedAccess < timeslot) {
-				MongoCrawlStatsUnit unitToModify = (MongoCrawlStatsUnit) getStatsForTimestamp(toTimeslot(lastRecordedAccess));
-				unitToModify.setCompletedHosts(unitToModify.countCompletedHosts() - 1);
-				currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
+				CassandraCrawlStatsUnit unitToModify = (CassandraCrawlStatsUnit) getStatsForTimestamp(toTimeslot(lastRecordedAccess));
+//				unitToModify.setCompletedHosts(unitToModify.countCompletedHosts() - 1);
+//				currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 			}
 			
 			// Update last access time
@@ -73,19 +72,19 @@ class CassandraCrawlStatsImporter extends MongoCrawlStats {
 		} else {
 			long timestamp = entry.getLogTimestamp().getTime();
 			knownHosts.addToList(hostname, timestamp);
-			currentUnit.setNumberOfNewHostsCrawled(currentUnit.getNumberOfNewHostsCrawled() + 1);
-			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
+//			currentUnit.setNumberOfNewHostsCrawled(currentUnit.getNumberOfNewHostsCrawled() + 1);
+//			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 		}
 		
 		// Note: it's a little confusing that these aggregation steps are in this class
-		// TODO move into the main MongoBatchImporter
+		// TODO move into the main CassandraBatchImporter
 		knownHosts.addSubdomain(hostname, entry.getSubdomain());
 		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
 		knownHosts.incrementCrawledURLCounter(hostname);
 		knownHosts.updateAverageResponseTimeAndRetryRate(hostname, entry.getFetchDuration(), entry.getRetries());
 		
 		// Warning: there seems to be a bug in Heritrix which sometimes leaves a 'content type template' (?)
-		// in the log line: content type = '$ctype'. This causes MongoDB to crash, because it can't use 
+		// in the log line: content type = '$ctype'. This causes CassandraDB to crash, because it can't use 
 		// strings starting with '$' as JSON keys. Therefore, we'll cut off the '$' and log a warning.
 		String contentType = entry.getContentType();
 		if (contentType.charAt(0) == '$') {
@@ -96,7 +95,7 @@ class CassandraCrawlStatsImporter extends MongoCrawlStats {
 		
 		String virusName = LogAnalytics.extractVirusName(entry);
 		if (virusName != null) {
-			// MongoDB says: fields stored in the db can't have . in them.
+			// CassandraDB says: fields stored in the db can't have . in them.
 			knownHosts.incrementVirusStats(hostname, virusName.replace('.', '@'));
 			virusLog.recordOccurence(virusName, hostname);
 		}
@@ -107,7 +106,7 @@ class CassandraCrawlStatsImporter extends MongoCrawlStats {
 	}
 	
 	private long toTimeslot(long timestamp) {
-		 return (timestamp / MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) * MongoProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
+		 return (timestamp / CassandraProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) * CassandraProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
 	}
 	
 	/**
@@ -116,7 +115,7 @@ class CassandraCrawlStatsImporter extends MongoCrawlStats {
 	public void commit() {
 		// This means we're making individual commits to the DB
 		// TODO see if we can optimize
-		for (MongoCrawlStatsUnit dbo : cache.values()) {
+		for (CassandraCrawlStatsUnit dbo : cache.values()) {
 			save(dbo);
 		}
 		
@@ -128,8 +127,8 @@ class CassandraCrawlStatsImporter extends MongoCrawlStats {
 	 * Saves the wrapped DBObject to the collection.
 	 * @param dbo the wrapped DBObject
 	 */
-	public void save(MongoCrawlStatsUnit unit) {
-		collection.save(unit.getBackingDBO());
+	public void save(CassandraCrawlStatsUnit unit) {
+//		collection.save(unit.getBackingDBO());
 	}
 	
 }

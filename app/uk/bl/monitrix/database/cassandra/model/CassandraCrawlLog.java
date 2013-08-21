@@ -1,6 +1,7 @@
 package uk.bl.monitrix.database.cassandra.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
+import uk.bl.monitrix.database.cassandra.CassandraDBConnector;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlLogEntry;
@@ -27,6 +29,10 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	public CassandraCrawlLog(Session session) {
 		this.session = session;
+	}
+	
+	protected Date getCoarseTimestamp( Date timestamp ) {
+		return new Date(CassandraDBConnector.HOUR_AS_MILLIS*(timestamp.getTime()/CassandraDBConnector.HOUR_AS_MILLIS));
 	}
 
 	@Override
@@ -55,13 +61,14 @@ public class CassandraCrawlLog extends CrawlLog {
 	public List<CrawlLogEntry> getMostRecentEntries(int n) {
 		long startTime = System.currentTimeMillis();
 		// Round the time down:
+		Date coarse_ts = this.getCoarseTimestamp(new Date(startTime));
 		// Search based on KEY, and range
-		//ResultSet results = session.execute("SELECT * FROM crawl_uris.log LIMIT 1;");
-		//DBCursor cursor = collection.find().sort(new BasicDBObject(CassandraProperties.FIELD_CRAWL_LOG_TIMESTAMP, -1)).limit(n);
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.log WHERE coarse_ts='"+coarse_ts.getTime()+"';");
+		Iterator<Row> cursor = results.iterator();
 		
 		List<CrawlLogEntry> recent = new ArrayList<CrawlLogEntry>();
-		//while(cursor.hasNext())
-		//	recent.add(new CassandraCrawlLogEntry(cursor.next()));
+		while(cursor.hasNext())
+			recent.add(new CassandraCrawlLogEntry(cursor.next()));
 
 		return recent;
 	}
@@ -98,14 +105,40 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	@Override
 	public List<CrawlLogEntry> getEntriesForURL(String url) {
+		Logger.info("Looking up "+url);
+		
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.uris " +
 		        "WHERE uri = '"+url+"';");
 		
+		Logger.info("Got "+results); 
+		
+		// Map from URI Table Results to Crawl Log Results		
+		return getLogsFromUriRows(results);
+	}
+	
+	private ResultSet getEntriesForTimestamp(Date timestamp) {
+		Date coarse_ts = this.getCoarseTimestamp(timestamp);
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.log " +
+		        "WHERE coarse_ts = '"+coarse_ts.getTime()+"' AND log_ts = '"+timestamp.getTime()+"' ;");
+		return results;
+	}
+	private CrawlLogEntry getLogEntryForUriResult(String uri, Row ur) {
+		ResultSet results = this.getEntriesForTimestamp(ur.getDate("log_ts"));
+		Iterator<Row> rows = results.iterator();
+		while( rows.hasNext() ) {
+			Row r = rows.next();
+			if(uri.equals(r.getString("uri")))
+				return new CassandraCrawlLogEntry(r);
+		}
+		return null;
+	}
+	
+	private List<CrawlLogEntry> getLogsFromUriRows( ResultSet results ) {
 		List<CrawlLogEntry> entries = new ArrayList<CrawlLogEntry>();
 		for( Row r : results.all() ) {
-			entries.add(new CassandraCrawlLogEntry(r));
+			Logger.info("One: "+r);			
+			entries.add(this.getLogEntryForUriResult(r.getString("uri"),r));
 		}
-		
 		return entries;
 	}
 
@@ -123,7 +156,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		while( rows.hasNext() ) {
 			Row r = rows.next();
 			if( i >= offset ) {
-				entries.add(new CassandraCrawlLogEntry(r));				
+				entries.add( this.getLogEntryForUriResult(query,r) );
 			}
 			if( i == off_limit ) 
 				break;
@@ -185,15 +218,15 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	@Override
 	public long countEntriesForHost(String hostname) {
-		ResultSet totalResults = session.execute("SELECT COUNT(*) FROM crawl_uris.uris " +
+		ResultSet totalResults = session.execute("SELECT COUNT(*) FROM crawl_uris.log " +
 		        "WHERE host = '"+hostname+"';");
 		return totalResults.one().getLong("count");
 	}
 
 	@Override
 	public Iterator<CrawlLogEntry> getEntriesForHost(String hostname) {
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.uris " +
-		        "WHERE host = '"+hostname+"';");
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.log " +
+		        "WHERE host='"+hostname+"';");
 
 		final Iterator<Row> cursor = results.iterator();
 		

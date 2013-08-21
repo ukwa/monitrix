@@ -121,7 +121,8 @@ public class CassandraCrawlLogEntry extends CrawlLogEntry {
 
 	@Override
 	public String toString() {
-		return row.getString(CassandraProperties.FIELD_CRAWL_LOG_LINE);
+		return row.toString();
+		//return row.getString(CassandraProperties.FIELD_CRAWL_LOG_LINE);
 	}
 
 }

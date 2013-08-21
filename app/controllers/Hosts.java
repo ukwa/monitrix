@@ -125,12 +125,14 @@ public class Hosts extends AbstractController {
 					int total = (int) db.getCrawlLog().countEntriesForHost(hostname);
 					Iterator<CrawlLogEntry> iterator = db.getCrawlLog().getEntriesForHost(hostname);
 					Collection<CrawlLogEntry> entries = new ArrayDeque<CrawlLogEntry>(total);
+					Logger.info("Got total of: "+total);
 
 					int tenPercent = total / 10;
 					int ctr = 0;
 					while (iterator.hasNext()) {
 						entries.add(iterator.next());
-						ctr++;
+						Logger.info("Got: "+ctr);
+											ctr++;
 						if (tenPercent > 0 && ctr % tenPercent == 0) {
 							cachedProgress.progress = (ctr / tenPercent) * 10;
 							Logger.info(ctr / tenPercent + "0% fetched from DB");

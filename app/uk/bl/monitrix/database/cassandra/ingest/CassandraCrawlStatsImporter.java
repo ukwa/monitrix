@@ -95,8 +95,7 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		
 		String virusName = LogAnalytics.extractVirusName(entry);
 		if (virusName != null) {
-			// CassandraDB says: fields stored in the db can't have . in them.
-			knownHosts.incrementVirusStats(hostname, virusName.replace('.', '@'));
+			knownHosts.incrementVirusStats(hostname, virusName);
 			virusLog.recordOccurence(virusName, hostname);
 		}
 				

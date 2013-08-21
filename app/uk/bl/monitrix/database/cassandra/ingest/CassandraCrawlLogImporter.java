@@ -26,9 +26,9 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		super(db);
 		this.statement = session.prepare(
 			      "INSERT INTO crawl_uris.log " +
-			      "(coarse_ts, log_ts, uri, fetch_ts, host, domain, subdomain, status_code, hash, crawl_id, " + 
-			      "annotations, discovery_path, compressibility, content_type, download_size, " + 
-			      "fetch_duration, referrer, retries, worker_thread) " +
+			      "(coarse_ts, log_ts, uri, fetch_ts, host, domain, subdomain, status_code, hash, " + 
+			      "log_id, annotations, discovery_path, compressibility, content_type, download_size, " + 
+			      "fetch_duration, referer, retries, worker_thread) " +
 			      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		this.statementUri = session.prepare(
 			      "INSERT INTO crawl_uris.uris " +
@@ -43,7 +43,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		if( fetch_ts == null ) {
 			fetch_ts = log_ts;
 		}
-		Date coarse_ts = new Date(CassandraDBConnector.HOUR_AS_MILLIS*(l.getLogTimestamp().getTime()/CassandraDBConnector.HOUR_AS_MILLIS));
+		Date coarse_ts = this.getCoarseTimestamp(log_ts);
 		
 		BoundStatement boundStatement = new BoundStatement(statement);
 		session.execute(boundStatement.bind(

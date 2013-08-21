@@ -40,13 +40,13 @@ public class CassandraProperties {
 
 	/** Database field keys (Crawl Log collection) **/
 	public static final String FIELD_CRAWL_LOG_LOG_ID = "log_id";
-	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "timestamp";
-	public static final String FIELD_CRAWL_LOG_URL = "url";
+	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "log_ts";
+	public static final String FIELD_CRAWL_LOG_URL = "uri";
 	public static final String FIELD_CRAWL_LOG_HOST = "host";
 	public static final String FIELD_CRAWL_LOG_DOMAIN = "domain";
 	public static final String FIELD_CRAWL_LOG_SUBDOMAIN = "subdomain";
-	public static final String FIELD_CRAWL_LOG_CRAWLER_ID = "crawler_id";
-	public static final String FIELD_CRAWL_LOG_HTTP_CODE = "http_code";
+	public static final String FIELD_CRAWL_LOG_CRAWLER_ID = "worker_thread";
+	public static final String FIELD_CRAWL_LOG_HTTP_CODE = "status_code";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS = "annotations";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED = "annotations_tokenized";
 	public static final String FIELD_CRAWL_LOG_RETRIES = "retries";
@@ -61,11 +61,9 @@ public class CassandraProperties {
 	public static final String FIELD_CRAWL_STATS_COMPLETED_HOSTS = "completed_hosts";
 	
 	/** Database field keys (Known Hosts collection) **/
-	public static final String FIELD_KNOWN_HOSTS_HOSTNAME = "host_name";
-	public static final String FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED = "host_name_tokenized";
+	public static final String FIELD_KNOWN_HOSTS_HOSTNAME = "host";
 	public static final String FIELD_KNOWN_HOSTS_TLD = "tld";
 	public static final String FIELD_KNOWN_HOSTS_SUBDOMAINS = "subdomains";
-	public static final String FIELD_KNOWN_HOSTS_SUBDOMAINS_TOKENIZED = "subdomains_tokenized";
 	public static final String FIELD_KNOWN_HOSTS_FIRST_ACCESS = "first_access";
 	public static final String FIELD_KNOWN_HOSTS_LAST_ACCESS = "last_access";
 	public static final String FIELD_KNOWN_HOSTS_CRAWLERS = "crawlers";
@@ -95,7 +93,7 @@ public class CassandraProperties {
 			DB_PORT = Integer.parseInt(config.getString("cassandra.port"));
 		} catch (Throwable t) {
 			DB_PORT = 9160;
-			Logger.warn("Error reading mongo.port from application.conf - defaulting to "+DB_PORT);
+			Logger.warn("Error reading cassandra.port from application.conf - defaulting to "+DB_PORT);
 		}
 	}
 

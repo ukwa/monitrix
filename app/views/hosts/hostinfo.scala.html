@@ -149,9 +149,9 @@
       window.onload = function() {
           Morris.Donut({
                        data: [
-                               @{knownHost.getFetchStatusDistribution().map { case (code, value) =>
+                               @Html({knownHost.getFetchStatusDistribution().map { case (code, value) =>
    		                          "{'label':'" + code + "','value':" + value + "}" 
-                                }.mkString(", ") }
+                                }.mkString(", ") })
                              ],
                        element: 'pie-result-codes',
                        colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
@@ -159,9 +159,9 @@
           
           Morris.Donut({
               data: [
-                      @{knownHost.getContentTypeDistribution().map { case (mime, count) =>
+                      @Html({knownHost.getContentTypeDistribution().map { case (mime, count) =>
                          "{'label':'" + mime.replace('\'', '"') + "','value':" + count  + "}" 
-                       }.mkString(", ") }
+                       }.mkString(", ") })
                     ],
               element: 'pie-mimetypes',
               colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
@@ -171,9 +171,9 @@
                        data: [
                               @defining(knownHost.getVirusStats()) { virusStats =>
                                 @if(virusStats.size > 0) {
-                                  @{virusStats.map { case (name, count) =>
+                                  @Html({virusStats.map { case (name, count) =>
                                     "{'label':'" + name + "','value':" + count  + "}" 
-                                  }.mkString(", ") }
+                                  }.mkString(", ") })
                                 } else {
                              	  { 'label': 'Clean', 'value': @totalURLs }
                                 }
@@ -199,6 +199,7 @@
           var graph = new Rickshaw.Graph({
             element: document.querySelector('#' + divId), 
             renderer: 'line',
+            interpolation: 'step-after',
             series: [{
               color: color,
               data: data,
@@ -209,6 +210,7 @@
           
           new Rickshaw.Graph.Axis.X({
         	  graph:graph,
+        	  //orientation: 'bottom',
         	  pixelsPerTick: 70,
         	  tickFormat: function(x) {
         		  var date = new Date(x);
@@ -216,20 +218,21 @@
         	  },
           });
           
-          new Rickshaw.Graph.Axis.Y({
+/*          new Rickshaw.Graph.Axis.Y({
               graph: graph,
               tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
               orientation:'left',
               element: document.getElementById(divId + '-axis')
           });
-          
+*/          
           if (opt_show_hover_detail) {
             new Rickshaw.Graph.HoverDetail({
               graph: graph,
-              // yFormatter: function(y) { return (y / (1024 * 1024 * 1024)).toPrecision(2) + ' GB'; }
+              xFormatter: function(x) { return new Date(x) },
+              yFormatter: function(y) { return y }
             });
           }
-              
+          
           $('#' + divId).removeClass('graph-tumb-loading');
           graph.render();
           
@@ -245,7 +248,7 @@
     }
     
     @if(totalURLs > 1) {
-      loadGraph('/api/hosts/@knownHost.getHostname()/urls-crawled?maxpoints=100', 'graph-urls', 'Completed Hosts', '#c05020', false);
+      loadGraph('/api/hosts/@knownHost.getHostname()/urls-crawled?maxpoints=100', 'graph-urls', '# URLs', '#c05020', true);
     }
   </script>
   }

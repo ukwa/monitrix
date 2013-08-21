@@ -138,14 +138,14 @@ public class CassandraDBConnector implements DBConnector {
 						"subdomain text, " + 
 						"status_code int," +
 						"hash text," +
-						"crawl_id text," +
+						"log_id text," +
 						"annotations text," +
 						"discovery_path text," +
 						"compressibility double," +
 						"content_type text," +
 						"download_size bigint," +
 						"fetch_duration int," +
-						"referrer text," +
+						"referer text," +
 						"retries int," +
 						"worker_thread text," +
 						"PRIMARY KEY (coarse_ts, log_ts)" +
@@ -155,7 +155,7 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute("CREATE INDEX host_idx ON crawl_uris.log (host)");
 		session.execute("CREATE INDEX domain_idx ON crawl_uris.log (domain)");
 		session.execute("CREATE INDEX status_code_idx ON crawl_uris.log (status_code)");
-		session.execute("CREATE INDEX crawl_id_idx ON crawl_uris.log (crawl_id)");
+		session.execute("CREATE INDEX log_id_idx ON crawl_uris.log (log_id)");
 
 		// Also allow pure hash-based lookups:
 		session.execute(
@@ -237,8 +237,20 @@ public class CassandraDBConnector implements DBConnector {
 				"first_access timestamp," +
 				"last_access timestamp," +
 				"successfully_fetched_urls bigint," +
+				"subdomains list<text>," +
+				"fetch_status_codes map<text,int>," +
+				"crawled_urls bigint," +
+				"avg_fetch_duration double," +
+				"avg_retry_rate double," +
+				"content_types map<text,int>," +
+				"crawlers list<text>," +
+				"text_to_nontext_ratio double," +
+				"redirect_percentage double," +
+				"robots_block_percentage double," +
+				"virus_stats map<text,int>," +
 				"PRIMARY KEY (host)" +
 		");");
+		session.execute("CREATE INDEX tld_idx ON crawl_uris.known_hosts (tld)");
 		
 	}
 	

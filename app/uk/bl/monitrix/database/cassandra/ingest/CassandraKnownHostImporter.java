@@ -1,8 +1,13 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 
 import play.Logger;
@@ -27,9 +32,15 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	private CassandraAlertLogImporter alertLog;
 
+	private PreparedStatement statement;
+
 	public CassandraKnownHostImporter(Session db, CassandraAlertLogImporter alertLog) {
 		super(db);
 		this.alertLog = alertLog;
+		this.statement = session.prepare(
+			      "INSERT INTO crawl_uris.known_hosts " +
+			      "(host, tld, first_access, last_access, successfully_fetched_urls) " +
+			      "VALUES (?, ?, ?, ?, ?);");
 	}
 	
 	/**
@@ -40,14 +51,15 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 * @param accessTime the access time
 	 */
 	public CassandraKnownHost addToList(String hostname, long accessTime) {	
-//		CassandraKnownHost knownHost = new CassandraKnownHost(new BasicDBObject());
-//		knownHost.setHostname(hostname);
-//		knownHost.setTopLevelDomain(hostname.substring(hostname.lastIndexOf('.') + 1));
-//		knownHost.setFirstAccess(accessTime);
-//		knownHost.setLastAccess(accessTime);
-//		cache.put(hostname, knownHost);
-//		return knownHost;
-		return null;
+		BoundStatement boundStatement = new BoundStatement(statement);
+		session.execute(boundStatement.bind(
+				hostname,
+				hostname.substring(hostname.lastIndexOf('.') + 1),
+				new Date(accessTime),
+				new Date(accessTime),
+				0L
+				));
+		return getKnownHostFromDB(hostname);
 	}
 	
 	/**
@@ -58,12 +70,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 * @param lastAccess the new last access time
 	 */
 	public void setLastAccess(String hostname, long lastAccess) {		
-		// In this case we know it's a safe cast
-		CassandraKnownHost dbo = (CassandraKnownHost) getKnownHost(hostname);
-//		if (dbo != null)
-//			dbo.setLastAccess(lastAccess);
-//		else
-//			Logger.warn("Attempt to write last access info to unknown host: " + hostname);
+		session.execute("UPDATE crawl_uris.known_hosts SET last_access="+lastAccess+" WHERE host='"+hostname+"';");
 	}
 	
 	/**
@@ -74,64 +81,70 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 * @param subdomain the subdomain to add
 	 */
 	public void addSubdomain(String hostname, String subdomain) {
-		// In this case we know it's a safe cast
-		CassandraKnownHost dbo = (CassandraKnownHost) getKnownHost(hostname);
-//		if (dbo != null)
-//			dbo.addSubdomain(subdomain);
-//		else
-//			Logger.warn("Attempt to write subdomain info to unknown host: " + hostname);
+		CassandraKnownHost item = getKnownHostFromDB(hostname);
+		if (item != null) {
+			List<String> subs = item.getSubdomains();
+			if( ! subs.contains(subdomain)) {
+				session.execute("UPDATE crawl_uris.known_hosts SET subdomains = subdomains + [ '"+subdomain+"' ] WHERE host='"+hostname+"';");
+			}
+		} else {
+			Logger.warn("Attempt to write subdomain info to unknown host: " + hostname);
+		}
 	}
 	
 	public void addCrawlerID(String hostname, String crawlerId) {
 		// In this case we know it's a safe cast
-		CassandraKnownHost dbo = (CassandraKnownHost) getKnownHost(hostname);
-//		if (dbo != null)
-//			dbo.addCrawlerID(crawlerId);
-//		else
-//			Logger.warn("Attempt to write crawlerID info to unknown host: " + hostname);		
+		CassandraKnownHost dbo = getKnownHostFromDB(hostname);
+		if (dbo != null) {
+			List<String> cids = dbo.getCrawlerIDs();
+			if( ! cids.contains(crawlerId)) {
+				session.execute("UPDATE crawl_uris.known_hosts SET crawlers = crawlers + [ '"+crawlerId+"' ] WHERE host='"+hostname+"';");
+			}
+		}
+		else {
+			Logger.warn("Attempt to write crawlerID info to unknown host: " + hostname);
+		}
 	}
 
 	public void incrementFetchStatusCounter(String hostname, int fetchStatus) {
 		// In this case we know it's a safe cast
-		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
+		CassandraKnownHost host = getKnownHostFromDB(hostname);
 		if (host != null) {
 			String key = Integer.toString(fetchStatus);
 			Map<String, Integer> fetchStatusMap = host.getFetchStatusDistribution();
 			Integer value = fetchStatusMap.get(key);
 			if (value == null)
-				fetchStatusMap.put(key, 1);
+				value = new Integer(1);
 			else
-				fetchStatusMap.put(key, value.intValue() + 1);
-//			host.setFetchStatusDistribution(fetchStatusMap);
+				value = new Integer( value.intValue() + 1);
+			session.execute("UPDATE crawl_uris.known_hosts SET fetch_status_codes = fetch_status_codes + { '"+key+"': "+value+" } WHERE host='"+hostname+"';");
 		} else {
 			Logger.warn("Attempt to write fetch status info to unknown host: " + hostname);
 		}
 	}
 	
 	public void incrementCrawledURLCounter(String hostname) {
-		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
+		CassandraKnownHost host = getKnownHostFromDB(hostname);
 		if (host != null) {
-			long crawledURLs = host.getCrawledURLs();
-//			host.setCrawledURLs(crawledURLs + 1);
+			long crawledURLs = host.getCrawledURLs() + 1;
+			Logger.info("Updating "+hostname+" "+crawledURLs);
+			session.execute("UPDATE crawl_uris.known_hosts SET crawled_urls="+crawledURLs+" WHERE host='"+hostname+"';");
 		} else {
 			Logger.warn("Attempt to increment crawled URL counter for unknown host: " + hostname);
 		}			
 	}
 
 	public void incrementContentTypeCounter(String hostname, String contentType) {
-		// According to CassandraDB rules: "fields stored in the db can't have . in them"
-		contentType = contentType.replace('.', '@');		
-		
 		// In this case we know it's a safe cast
-		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
+		CassandraKnownHost host = getKnownHostFromDB(hostname);
 		if (host != null) {
 			Map<String, Integer> contentTypeMap = host.getContentTypeDistribution();
 			Integer value = contentTypeMap.get(contentType);
 			if (value == null)
-				contentTypeMap.put(contentType, 1);
+				value = new Integer(1);
 			else
-				contentTypeMap.put(contentType, value.intValue() + 1);
-//			host.setContentTypeDistribution(contentTypeMap);
+				value = new Integer( value.intValue() + 1);
+			session.execute("UPDATE crawl_uris.known_hosts SET content_types = content_types + { '"+contentType+"': "+value+" } WHERE host='"+hostname+"';");
 		} else {
 			Logger.warn("Attempt to write content type info to unknown host: " + hostname);
 		}		
@@ -139,7 +152,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	public void incrementVirusStats(String hostname, String virusName) {
 		// In this case we know it's a safe cast
-		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
+		CassandraKnownHost host = getKnownHostFromDB(hostname);
 		if (host != null) {
 			Map<String, Integer> virusMap = host.getVirusStats();
 			Integer value = virusMap.get(virusName);
@@ -155,7 +168,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	public void updateAverageResponseTimeAndRetryRate(String hostname, int fetchDuration, int retries) {
 		if (fetchDuration > 0) {
-			CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
+			CassandraKnownHost host = getKnownHostFromDB(hostname);
 			if (host != null) {
 				long successCount = host.getSuccessfullyFetchedURLs();
 				
@@ -165,9 +178,9 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 				double currentAvgRetryRate = host.getAverageRetryRate();
 				double newAvgRetryRate = (currentAvgRetryRate * successCount + retries) / (successCount + 1);
 				
-//				host.setSuccessfullyFetchedURLs(successCount + 1);
-//				host.setAverageFetchDuration(newAvgResponseTime);
-//				host.setAverageRetryRate(newAvgRetryRate);
+				session.execute("UPDATE crawl_uris.known_hosts SET successfully_fetched_urls="+(successCount + 1)+" WHERE host='"+hostname+"';");
+				session.execute("UPDATE crawl_uris.known_hosts SET avg_fetch_duration="+newAvgResponseTime+" WHERE host='"+hostname+"';");
+				session.execute("UPDATE crawl_uris.known_hosts SET avg_retry_rate="+newAvgRetryRate+" WHERE host='"+hostname+"';");
 			} else {
 				Logger.warn("Attempt to update average response time for known host: " + hostname);
 			}

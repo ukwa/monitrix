@@ -19,6 +19,9 @@ import com.google.common.net.InternetDomainName;
 import uk.bl.monitrix.model.Alert;
 import uk.bl.monitrix.model.Alert.AlertType;
 import uk.bl.monitrix.model.CrawlLogEntry;
+import uk.bl.monitrix.model.KnownHost;
+import uk.bl.monitrix.model.KnownHostList;
+import uk.bl.monitrix.model.SearchResult;
 import uk.bl.monitrix.model.VirusRecord;
 
 /**
@@ -470,5 +473,5 @@ public class LogFileEntry extends CrawlLogEntry {
 		}
 		
 	}
-
+		
 }

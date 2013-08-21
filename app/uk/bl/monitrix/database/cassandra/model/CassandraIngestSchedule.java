@@ -47,8 +47,6 @@ public class CassandraIngestSchedule extends IngestSchedule {
 				crawlerId,
 				monitor
 				));
-		//session.execute("INSERT INTO crawl_uris.log_file_counters (path) VALUES ('"+path+"');");
-		//session.execute("UPDATE crawl_uris.log_file_counters SET ingested_lines = 0 WHERE path='"+path+"'");
 		return new CassandraIngestedLog(
 				session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+path+"'").one(),
 				session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+path+"'").one()

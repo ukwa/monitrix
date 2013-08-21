@@ -78,16 +78,6 @@ public class CassandraKnownHostList implements KnownHostList {
 
 	@Override
 	public KnownHost getKnownHost(String hostname) {
-		if (cache.containsKey(hostname))
-			return cache.get(hostname);
-		
-		CassandraKnownHost wrapped = getKnownHostFromDB(hostname);
-		if( wrapped != null) 
-			cache.put(hostname, wrapped);
-		return wrapped;
-	}
-
-	protected CassandraKnownHost getKnownHostFromDB(String hostname) {
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.known_hosts WHERE host='"+hostname+"';");
 		if (results.isExhausted())
 			return null;

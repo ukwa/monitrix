@@ -59,7 +59,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 				new Date(accessTime),
 				0L
 				));
-		return getKnownHostFromDB(hostname);
+		return (CassandraKnownHost) getKnownHost(hostname);
 	}
 	
 	/**
@@ -81,7 +81,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 * @param subdomain the subdomain to add
 	 */
 	public void addSubdomain(String hostname, String subdomain) {
-		CassandraKnownHost item = getKnownHostFromDB(hostname);
+		CassandraKnownHost item = (CassandraKnownHost) getKnownHost(hostname);
 		if (item != null) {
 			List<String> subs = item.getSubdomains();
 			if( ! subs.contains(subdomain)) {
@@ -94,7 +94,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	public void addCrawlerID(String hostname, String crawlerId) {
 		// In this case we know it's a safe cast
-		CassandraKnownHost dbo = getKnownHostFromDB(hostname);
+		CassandraKnownHost dbo = (CassandraKnownHost) getKnownHost(hostname);
 		if (dbo != null) {
 			List<String> cids = dbo.getCrawlerIDs();
 			if( ! cids.contains(crawlerId)) {
@@ -108,7 +108,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 
 	public void incrementFetchStatusCounter(String hostname, int fetchStatus) {
 		// In this case we know it's a safe cast
-		CassandraKnownHost host = getKnownHostFromDB(hostname);
+		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
 		if (host != null) {
 			String key = Integer.toString(fetchStatus);
 			Map<String, Integer> fetchStatusMap = host.getFetchStatusDistribution();
@@ -124,10 +124,9 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	}
 	
 	public void incrementCrawledURLCounter(String hostname) {
-		CassandraKnownHost host = getKnownHostFromDB(hostname);
+		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
 		if (host != null) {
 			long crawledURLs = host.getCrawledURLs() + 1;
-			Logger.info("Updating "+hostname+" "+crawledURLs);
 			session.execute("UPDATE crawl_uris.known_hosts SET crawled_urls="+crawledURLs+" WHERE host='"+hostname+"';");
 		} else {
 			Logger.warn("Attempt to increment crawled URL counter for unknown host: " + hostname);
@@ -136,7 +135,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 
 	public void incrementContentTypeCounter(String hostname, String contentType) {
 		// In this case we know it's a safe cast
-		CassandraKnownHost host = getKnownHostFromDB(hostname);
+		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
 		if (host != null) {
 			Map<String, Integer> contentTypeMap = host.getContentTypeDistribution();
 			Integer value = contentTypeMap.get(contentType);
@@ -152,7 +151,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	public void incrementVirusStats(String hostname, String virusName) {
 		// In this case we know it's a safe cast
-		CassandraKnownHost host = getKnownHostFromDB(hostname);
+		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
 		if (host != null) {
 			Map<String, Integer> virusMap = host.getVirusStats();
 			Integer value = virusMap.get(virusName);
@@ -168,7 +167,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	public void updateAverageResponseTimeAndRetryRate(String hostname, int fetchDuration, int retries) {
 		if (fetchDuration > 0) {
-			CassandraKnownHost host = getKnownHostFromDB(hostname);
+			CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
 			if (host != null) {
 				long successCount = host.getSuccessfullyFetchedURLs();
 				

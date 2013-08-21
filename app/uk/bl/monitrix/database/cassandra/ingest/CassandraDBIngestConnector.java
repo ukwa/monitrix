@@ -108,7 +108,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
 				
 				// Log-entry-level alerts
-				Logger.info("Got Alerts "+next.getAlerts().size());
+				//Logger.info("Got Alerts "+next.getAlerts().size());
 				for (Alert a : next.getAlerts()) {
 					alertBatch.add((DefaultAlert) a);
 				}

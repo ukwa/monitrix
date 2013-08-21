@@ -248,14 +248,12 @@ public class LogAnalytics {
 		// Compute timeseries resolution (= # of millis in one data point bucket)
 		if( count < 2 * maxDatapoints ) maxDatapoints = (int) (count / 2);
 		long resolution = (logEndTime - logStartTime) / maxDatapoints;
-		Logger.info("Res: "+resolution+" of "+maxDatapoints+"  over "+logStartTime+" to "+logEndTime);
 		
 		// (timeslot -> # of URLs)
 		Map<Long, TimeseriesValue> graph = new HashMap<Long, TimeseriesValue>(maxDatapoints);
 		
 		for (CrawlLogEntry entry : log) {
 			long timeslot = (entry.getLogTimestamp().getTime() - logStartTime) / resolution;
-			Logger.info(" in "+timeslot+" to "+maxDatapoints);
 			
 			TimeseriesValue urlCount = graph.get(timeslot);
 			if (urlCount == null)

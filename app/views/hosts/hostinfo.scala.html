@@ -202,15 +202,13 @@
             interpolation: 'step-after',
             series: [{
               color: color,
-              data: data,
-              name: name
+              data: data
             }]
           });
           
           
           new Rickshaw.Graph.Axis.X({
         	  graph:graph,
-        	  //orientation: 'bottom',
         	  pixelsPerTick: 70,
         	  tickFormat: function(x) {
         		  var date = new Date(x);
@@ -229,7 +227,7 @@
             new Rickshaw.Graph.HoverDetail({
               graph: graph,
               xFormatter: function(x) { return new Date(x) },
-              yFormatter: function(y) { return y }
+              yFormatter: function(y) { return y + " " + name }
             });
           }
           
@@ -248,7 +246,7 @@
     }
     
     @if(totalURLs > 1) {
-      loadGraph('/api/hosts/@knownHost.getHostname()/urls-crawled?maxpoints=100', 'graph-urls', '# URLs', '#c05020', true);
+      loadGraph('/api/hosts/@knownHost.getHostname()/urls-crawled?maxpoints=100', 'graph-urls', 'URLs', '#c05020', true);
     }
   </script>
   }

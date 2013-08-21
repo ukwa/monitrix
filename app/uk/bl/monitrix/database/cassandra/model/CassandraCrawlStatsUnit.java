@@ -1,77 +1,50 @@
 package uk.bl.monitrix.database.cassandra.model;
 
+import com.datastax.driver.core.Row;
 import com.mongodb.DBObject;
 
-import uk.bl.monitrix.database.mongodb.MongoProperties;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.CrawlStatsUnit;
 
 /**
- * A MongoDB-backed implementation of {@link CrawlStatsUnit}.
+ * A CassandraDB-backed implementation of {@link CrawlStatsUnit}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CassandraCrawlStatsUnit extends CrawlStatsUnit {
 	
-	private DBObject dbo;
+	private Row row;
 
-	public CassandraCrawlStatsUnit(DBObject dbo) {
-		this.dbo = dbo;
+	public CassandraCrawlStatsUnit(Row row) {
+		this.row = row;
 	}
 	
-	/**
-	 * Returns the MongoDB entity that's backing this object.
-	 * @return the DBObject
-	 */
-	public DBObject getBackingDBO() {
-		return dbo;
-	}
-
 	@Override
 	public long getTimestamp() {
-		return (Long) dbo.get(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP);
+		return row.getDate(CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP).getTime();
 	}
 	
-	public void setTimestamp(long timestamp) {
-		dbo.put(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP, timestamp);
-	}
-
 	@Override
 	public long getDownloadVolume() {
-		return (Long) dbo.get(MongoProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME);
+		return row.getLong(CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME);
 	}
 	
-	public void setDownloadVolume(long volume) {
-		dbo.put(MongoProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME, volume);
-	}
-
 	@Override
 	public long getNumberOfURLsCrawled() {
-		return (Long) dbo.get(MongoProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED);
+		return row.getLong(CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED);
 	}
 	
-	public void setNumberOfURLsCrawled(long numberOfURLs) {
-		dbo.put(MongoProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED, numberOfURLs);
-	}
-
 	@Override
 	public long getNumberOfNewHostsCrawled() {
-		return (Long) dbo.get(MongoProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED);
+		return row.getLong(CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED);
 	}
 	
-	public void setNumberOfNewHostsCrawled(long newHostsCrawled) {
-		dbo.put(MongoProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED, newHostsCrawled);
-	}
-
 	@Override
 	public long countCompletedHosts() {
-		Long count = (Long) dbo.get(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS);
+		Long count = row.getLong(CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS);
 		if (count == null)
 			return 0;
 		
 		return count.intValue();
 	}
 	
-	public void setCompletedHosts(long l) {
-		dbo.put(MongoProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS, l);
-	}
-
 }

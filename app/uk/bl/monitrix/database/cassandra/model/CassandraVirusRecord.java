@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import uk.bl.monitrix.database.mongodb.MongoProperties;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.VirusRecord;
 
 public class CassandraVirusRecord implements VirusRecord {
@@ -19,7 +19,7 @@ public class CassandraVirusRecord implements VirusRecord {
 	}
 	
 	/**
-	 * Returns the MongoDB entity that's backing this object.
+	 * Returns the CassandraDB entity that's backing this object.
 	 * @return the DBObject
 	 */
 	public DBObject getBackingDBO() {
@@ -28,17 +28,17 @@ public class CassandraVirusRecord implements VirusRecord {
 
 	@Override
 	public String getName() {
-		return (String) dbo.get(MongoProperties.FIELD_VIRUS_LOG_NAME);
+		return (String) dbo.get(CassandraProperties.FIELD_VIRUS_LOG_NAME);
 	}
 	
 	public void setName(String name) {
-		dbo.put(MongoProperties.FIELD_VIRUS_LOG_NAME, name);
+		dbo.put(CassandraProperties.FIELD_VIRUS_LOG_NAME, name);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getOccurences() {
-		DBObject occurences = (DBObject) dbo.get(MongoProperties.FIELD_VIRUS_LOG_OCCURENCES);
+		DBObject occurences = (DBObject) dbo.get(CassandraProperties.FIELD_VIRUS_LOG_OCCURENCES);
 		if (occurences == null)
 			return new HashMap<String, Integer>();
 		
@@ -56,7 +56,7 @@ public class CassandraVirusRecord implements VirusRecord {
 			escaped.put(entry.getKey().replace(".", "@@@"), entry.getValue());
 		}
 		
-		dbo.put(MongoProperties.FIELD_VIRUS_LOG_OCCURENCES, new BasicDBObject(escaped));
+		dbo.put(CassandraProperties.FIELD_VIRUS_LOG_OCCURENCES, new BasicDBObject(escaped));
 	}
 
 }

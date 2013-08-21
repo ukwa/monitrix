@@ -7,37 +7,31 @@ import java.util.List;
 import java.util.Map;
 
 import com.datastax.driver.core.Session;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 
-import uk.bl.monitrix.database.mongodb.MongoProperties;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.CrawlStats;
 import uk.bl.monitrix.model.CrawlStatsUnit;
 
 /**
- * A MongoDB-backed implementation of {@link CrawlStats}.
+ * A CassandraDB-backed implementation of {@link CrawlStats}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CassandraCrawlStats implements CrawlStats {
 	
-	protected DBCollection collection; 
+	protected Session session; 
 	
 	// A simple in-memory buffer for quick stats lookups
-	protected Map<Long, MongoCrawlStatsUnit> cache = new HashMap<Long, MongoCrawlStatsUnit>();
+	protected Map<Long, CassandraCrawlStatsUnit> cache = new HashMap<Long, CassandraCrawlStatsUnit>();
 	
 	public CassandraCrawlStats(Session session) {
-		this.collection = session.getCollection(MongoProperties.COLLECTION_CRAWL_STATS);
-		
-		// Collection is indexed by timestamp (will be skipped automatically if index exists)
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP, 1));
+		this.session = session;
 	}
 
 	@Override
 	public Iterator<CrawlStatsUnit> getCrawlStats() {
-		final DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP, 1));
+		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats;").iterator();
 		return new Iterator<CrawlStatsUnit>() {
 			@Override
 			public boolean hasNext() {
@@ -46,7 +40,7 @@ public class CassandraCrawlStats implements CrawlStats {
 
 			@Override
 			public CrawlStatsUnit next() {
-				return new MongoCrawlStatsUnit(cursor.next());
+				return new CassandraCrawlStatsUnit(cursor.next());
 			}
 
 			@Override
@@ -61,13 +55,12 @@ public class CassandraCrawlStats implements CrawlStats {
 		if (cache.containsKey(timestamp))
 			return cache.get(timestamp);
 		
-		DBObject query = new BasicDBObject(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP, timestamp);
-		DBObject result = collection.findOne(query);
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.stats WHERE stat_ts="+timestamp+";");
 		
-		if (result == null) {
+		if (results.isExhausted()) {
 			return null;
 		} else {
-			MongoCrawlStatsUnit stats = new MongoCrawlStatsUnit(result);
+			CassandraCrawlStatsUnit stats = new CassandraCrawlStatsUnit(results.one());
 			cache.put(timestamp, stats);
 			return stats;
 		}
@@ -75,11 +68,11 @@ public class CassandraCrawlStats implements CrawlStats {
 
 	@Override
 	public List<CrawlStatsUnit> getMostRecentStats(int n) {
-		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_CRAWL_STATS_TIMESTAMP, -1)).limit(n);
+		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats LIMIT "+n+";").iterator();
 		
 		List<CrawlStatsUnit> recent = new ArrayList<CrawlStatsUnit>();
 		while(cursor.hasNext())
-			recent.add(new MongoCrawlStatsUnit(cursor.next()));
+			recent.add(new CassandraCrawlStatsUnit(cursor.next()));
 
 		return recent;
 	}

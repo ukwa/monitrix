@@ -2,110 +2,96 @@ package uk.bl.monitrix.database.cassandra.model;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.poi.hssf.record.formula.functions.Rows;
+
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 
-import uk.bl.monitrix.database.mongodb.MongoProperties;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.Alert;
 import uk.bl.monitrix.model.Alert.AlertType;
 import uk.bl.monitrix.model.AlertLog;
 
 /**
- * A MongoDB-backed implementation of {@link AlertLog}.
+ * A CassandraDB-backed implementation of {@link AlertLog}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CassandraAlertLog implements AlertLog {
 	
-	protected DBCollection collection;
+	protected Session session;
 	
 	public CassandraAlertLog(Session session) {
-		this.collection = session.getCollection(MongoProperties.COLLECTION_ALERT_LOG);
-		
-		// Collection is indexed by timestamp and host (will be skipped automatically if index exists)
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, 1));
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, 1));
+		this.session = session;
 	}
 
 	@Override
 	public long countAll() {
-		return collection.count();
+		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.alerts;");
+		return results.one().getLong("count");
 	}
 
 	@Override
 	public Iterator<Alert> listAll() {
-		return map(collection.find().sort(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, -1)));
+		return map(session.execute("SELECT * FROM crawl_uris.alerts;").iterator());
 	}
 	
 	@Override
 	public List<Alert> getMostRecent(int n) {
-		DBCursor cursor = collection.find().sort(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, -1)).limit(n);
+		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.alerts LIMIT "+n+";").iterator();
 		
 		List<Alert> recent = new ArrayList<Alert>();
-		while(cursor.hasNext())
-			recent.add(new MongoAlert(cursor.next()));
+		while(rows.hasNext())
+			recent.add(new CassandraAlert(rows.next()));
 
 		return recent;
 	}
 
 	@Override
 	public List<String> getOffendingHosts() {
-		@SuppressWarnings("rawtypes")
-		final List offendingHosts = collection.distinct(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST);
-		return new AbstractList<String>() {
-			@Override
-			public String get(int index) {
-				return offendingHosts.get(index).toString();
-			}
-
-			@Override
-			public int size() {
-				return offendingHosts.size();
-			}
-		};
+		Iterator<Row> rows = session.execute("SELECT host FROM crawl_uris.alerts;").iterator();
+		Set<String> hosts = new HashSet<String>();
+		while(rows.hasNext()) {
+			hosts.add( rows.next().getString("host"));
+		}
+		List<String> hostList = new ArrayList<String>();
+		hostList.addAll(hosts);
+		return hostList;
 	}
 
 	@Override
 	public long countAlertsForHost(String hostname) {
-		return collection.count(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname));
+		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.alerts WHERE host='"+hostname+"';");
+		return results.one().getLong("count");
 	}
 	
 	@Override
 	public long countAlertsForHost(String hostname, AlertType type) {
-		DBObject query = new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname)
-			.append(MongoProperties.FIELD_ALERT_LOG_ALERT_TYPE, type.name());
-		
-		return collection.count(query);
+		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.alerts WHERE host='"+hostname+"' AND alert_type='"+type+"';");
+		return results.one().getLong("count");
 	}
 	
 	@Override
 	public List<AlertType> getAlertTypesForHost(String hostname) {
-		@SuppressWarnings("rawtypes")
-		final List types = collection.distinct(MongoProperties.FIELD_ALERT_LOG_ALERT_TYPE, new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname));
-				
-		return new AbstractList<Alert.AlertType>() {
-			@Override
-			public AlertType get(int index) {
-				return AlertType.valueOf(types.get(index).toString());
-			}
-
-			@Override
-			public int size() {
-				return types.size();
-			}
-		};
+		Iterator<Row> rows = session.execute("SELECT alert_type FROM crawl_uris.alerts WHERE host='"+hostname+"';").iterator();
+		Set<AlertType> set = new HashSet<AlertType>();
+		while(rows.hasNext()) {
+			set.add( AlertType.valueOf(rows.next().getString("alert_type")));
+		}
+		List<AlertType> list = new ArrayList<AlertType>();
+		list.addAll(set);
+		return list;
 	}
 
 
 	@Override
 	public Iterator<Alert> listAlertsForHost(String hostname) {
-		return map(collection.find(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname)).sort(new BasicDBObject(MongoProperties.FIELD_ALERT_LOG_TIMESTAMP, -1)));
+		return map(session.execute("SELECT * FROM crawl_uris.alerts WHERE host='"+hostname+"';").iterator());
 	}
 	
 	/**
@@ -113,7 +99,7 @@ public class CassandraAlertLog implements AlertLog {
 	 * @param cursor the DB cursor
 	 * @return the domain objects
 	 */
-	private static Iterator<Alert> map(final DBCursor cursor) {
+	private static Iterator<Alert> map(final Iterator<Row> cursor) {
 		return new Iterator<Alert>() {		
 			@Override
 			public boolean hasNext() {
@@ -122,7 +108,7 @@ public class CassandraAlertLog implements AlertLog {
 
 			@Override
 			public Alert next() {
-				return new MongoAlert(cursor.next());
+				return new CassandraAlert(cursor.next());
 			}
 
 			@Override

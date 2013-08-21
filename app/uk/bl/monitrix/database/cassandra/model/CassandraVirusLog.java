@@ -9,7 +9,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-import uk.bl.monitrix.database.mongodb.MongoProperties;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.VirusLog;
 import uk.bl.monitrix.model.VirusRecord;
 
@@ -18,19 +18,19 @@ public class CassandraVirusLog implements VirusLog {
 	protected DBCollection collection;
 	
 	public CassandraVirusLog(Session session) {
-		this.collection = session.getCollection(MongoProperties.COLLECTION_VIRUS_LOG);
+		this.collection = session.getCollection(CassandraProperties.COLLECTION_VIRUS_LOG);
 		
 		// Virus Log collection is indexed by virus name
-		this.collection.ensureIndex(new BasicDBObject(MongoProperties.FIELD_VIRUS_LOG_NAME, 1));
+		this.collection.ensureIndex(new BasicDBObject(CassandraProperties.FIELD_VIRUS_LOG_NAME, 1));
 	}
 	
 	@Override
 	public VirusRecord getRecordForVirus(String virusName) {
-		DBObject dbo = collection.findOne(new BasicDBObject(MongoProperties.FIELD_VIRUS_LOG_NAME, virusName));
+		DBObject dbo = collection.findOne(new BasicDBObject(CassandraProperties.FIELD_VIRUS_LOG_NAME, virusName));
 		if (dbo == null)
 			return null;
 		
-		return new MongoVirusRecord(dbo);
+		return new CassandraVirusRecord(dbo);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class CassandraVirusLog implements VirusLog {
 
 			@Override
 			public VirusRecord next() {
-				return new MongoVirusRecord(cursor.next());
+				return new CassandraVirusRecord(cursor.next());
 			}
 
 			@Override

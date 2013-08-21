@@ -137,6 +137,7 @@ public class CassandraIngestTool {
 						"start_ts timestamp," +
 						"end_ts timestamp," +
 						"profile text," +
+						"total_urls counter," +
 						"PRIMARY KEY (crawl_id, start_ts)" +
 				");");
 

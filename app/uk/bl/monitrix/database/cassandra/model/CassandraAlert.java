@@ -1,9 +1,9 @@
 package uk.bl.monitrix.database.cassandra.model;
 
+import com.datastax.driver.core.Row;
+
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.Alert;
-
-import com.mongodb.DBObject;
 
 /**
  * An implementation of {@link Alert} backed by CassandraDB.
@@ -11,54 +11,30 @@ import com.mongodb.DBObject;
  */
 public class CassandraAlert implements Alert {
 
-	private DBObject dbo;
+	private Row row;
 	
-	public CassandraAlert(DBObject dbo) {
-		this.dbo = dbo;
-	}
-	
-	/**
-	 * Returns the CassandraDB entity that's backing this object.
-	 * @return the DBObject
-	 */
-	public DBObject getBackingDBO() {
-		return dbo;
+	public CassandraAlert(Row row) {
+		this.row = row;
 	}
 	
 	@Override
 	public long getTimestamp() {
-		return (Long) dbo.get(CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP);
-	}
-	
-	public void setTimestamp(long timestamp) {
-		dbo.put(CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP, timestamp);
+		return row.getDate(CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP).getTime();
 	}
 	
 	@Override
 	public String getOffendingHost() {
-		return dbo.get(CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST).toString();
-	}
-	
-	public void setOffendingHost(String hostname) {
-		dbo.put(CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST, hostname);
+		return row.getString(CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST).toString();
 	}
 	
 	@Override
 	public AlertType getAlertType() {
-		return AlertType.valueOf(dbo.get(CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE).toString());
-	}
-	
-	public void setAlertType(AlertType alertType) {
-		dbo.put(CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE, alertType.name());
+		return AlertType.valueOf(row.getString(CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE).toString());
 	}
 	
 	@Override
 	public String getAlertDescription() {
-		return dbo.get(CassandraProperties.FIELD_ALERT_LOG_DESCRIPTION).toString();
+		return row.getString(CassandraProperties.FIELD_ALERT_LOG_DESCRIPTION).toString();
 	}
-	
-	public void setAlertDescription(String description) {
-		dbo.put(CassandraProperties.FIELD_ALERT_LOG_DESCRIPTION, description);
-	}
-	
+		
 }

@@ -3,6 +3,8 @@ package uk.bl.monitrix.database.cassandra;
 import java.io.IOException;
 import java.util.HashMap;
 
+import play.Logger;
+
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Metadata;
@@ -73,11 +75,9 @@ public class CassandraDBConnector implements DBConnector {
 		cluster = Cluster.builder()
 				.addContactPoint(hostName).build();
 		Metadata metadata = cluster.getMetadata();
-		System.out.printf("Connected to cluster: %s\n", 
-				metadata.getClusterName());
+	    Logger.info("Connected to Cassandra cluster: " + metadata.getClusterName());
 		for ( Host host : metadata.getAllHosts() ) {
-			System.out.printf("Datacenter: %s; Host: %s; Rack: %s\n",
-					host.getDatacenter(), host.getAddress(), host.getRack());
+		    Logger.info("Datacenter: "+host.getDatacenter()+"; Host: "+host.getAddress()+"; Rack: "+host.getRack());
 		}
 		session = cluster.connect();
 		
@@ -214,7 +214,7 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute(
 		"CREATE TABLE crawl_uris.virus_log (" +
 				"virus_name text," +
-				"host_map map<text,int>," +
+				"occurences map<text,int>," +
 				"PRIMARY KEY (virus_name)" +
 		");");
 		//session.execute("CREATE INDEX alert_type_idx ON crawl_uris.alerts (alert_type)");

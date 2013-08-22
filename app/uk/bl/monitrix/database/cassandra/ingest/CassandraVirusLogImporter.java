@@ -19,7 +19,7 @@ public class CassandraVirusLogImporter extends CassandraVirusLog {
 		super(db);
 		statement = session.prepare(
 			      "INSERT INTO crawl_uris.virus_log " +
-			      "(virus_name, host_map) " +
+			      "(virus_name, occurences) " +
 			      "VALUES (?, ?);");
 		
 	}
@@ -33,8 +33,6 @@ public class CassandraVirusLogImporter extends CassandraVirusLog {
 	}
 
 	/**
-	 * TODO this class should have caching as well.
-	 * Main problem is the escaping/unescaping of hostnames that takes place on every update.
 	 */
 	public void recordOccurence(String virusName, String hostname) {
 		// In this case we know it's a safe cast

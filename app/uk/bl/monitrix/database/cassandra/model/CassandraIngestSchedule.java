@@ -55,7 +55,6 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	
 	@Override
 	public List<IngestedLog> getLogs() {
-		System.out.println("Getting logs...");
 		List<IngestedLog> logs = new ArrayList<IngestedLog>();
 		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.log_files;").iterator();
 		while(cursor.hasNext()) {

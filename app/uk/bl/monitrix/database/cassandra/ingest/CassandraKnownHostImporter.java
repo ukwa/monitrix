@@ -139,10 +139,10 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			Map<String, Integer> virusMap = host.getVirusStats();
 			Integer value = virusMap.get(virusName);
 			if (value == null)
-				virusMap.put(virusName, 1);
+				value = new Integer(1);
 			else
-				virusMap.put(virusName, value.intValue() + 1);
-//			host.setVirusStats(virusMap);
+				value = new Integer( value.intValue() + 1);
+			session.execute("UPDATE crawl_uris.known_hosts SET virus_stats = virus_stats + { '"+virusName+"': "+value+" } WHERE host='"+hostname+"';");
 		} else {
 			Logger.warn("Attempt to write virus stats info to unknown host: " + hostname);
 		}			

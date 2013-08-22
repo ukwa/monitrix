@@ -146,10 +146,10 @@
           var targetLink='/search?type=tld&query=' + row.tld + embeddable;
           
           var html = 
-      	    '<div class="morris-hover-row-label"><a href="' + targetLink + '">.' + row.tld + '</a></div>' + 
-      	    '<div class="morris-hover-point" style="color: #850303">' +
+      	    '<a href="' + targetLink + '"><div class="morris-hover-row-label">.' + row.tld + '</div>' + 
+      	    '<div class="morris-hover-point" style="color: #850303">' + 
                 row.count + ' Hosts' +
-              '</div>';
+              '</div></a>';
           return html;
         }
     });

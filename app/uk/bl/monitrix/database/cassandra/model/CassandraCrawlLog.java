@@ -136,7 +136,6 @@ public class CassandraCrawlLog extends CrawlLog {
 	private List<CrawlLogEntry> getLogsFromUriRows( ResultSet results ) {
 		List<CrawlLogEntry> entries = new ArrayList<CrawlLogEntry>();
 		for( Row r : results.all() ) {
-			Logger.info("One: "+r);			
 			entries.add(this.getLogEntryForUriResult(r.getString("uri"),r));
 		}
 		return entries;

@@ -35,6 +35,10 @@ public class CassandraKnownHost extends KnownHost {
 	}
 	
 	@Override
+	public String getDomain() {
+		return (String) row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_DOMAIN);
+	}
+	@Override
 	public List<String> getSubdomains() {
 		return row.getList(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS, String.class);
 	}

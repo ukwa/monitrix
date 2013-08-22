@@ -233,11 +233,12 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute(
 		"CREATE TABLE crawl_uris.known_hosts (" +
 				"host text," +
-				"tld text," +
 				"first_access timestamp," +
 				"last_access timestamp," +
-				"successfully_fetched_urls bigint," +
+				"tld text," +
+				"domain text," +
 				"subdomains list<text>," +
+				"successfully_fetched_urls bigint," +
 				"fetch_status_codes map<text,int>," +
 				"crawled_urls bigint," +
 				"avg_fetch_duration double," +

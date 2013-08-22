@@ -59,8 +59,8 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		// Insert one automatically, if empty:
 		if( this.ingestSchedule.getLogForCrawlerId("test-crawler-id") == null ) {
 			this.ingestSchedule.addLog(
-					//"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log.cp00001-20130605082749",
-					"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log",
+					"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log.cp00001-20130605082749",
+					//"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log",
 					"test-crawler-id", 
 					true
 					);

@@ -39,8 +39,8 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		this.alertLog = alertLog;
 		this.statement = session.prepare(
 			      "INSERT INTO crawl_uris.known_hosts " +
-			      "(host, tld, first_access, last_access, successfully_fetched_urls) " +
-			      "VALUES (?, ?, ?, ?, ?);");
+			      "(host, tld, domain, first_access, last_access, successfully_fetched_urls) " +
+			      "VALUES (?, ?, ?, ?, ?, ?);");
 	}
 	
 	/**
@@ -50,11 +50,12 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 * @param hostname the host name
 	 * @param accessTime the access time
 	 */
-	public CassandraKnownHost addToList(String hostname, long accessTime) {	
+	public CassandraKnownHost addToList(String hostname, String domain, long accessTime) {	
 		BoundStatement boundStatement = new BoundStatement(statement);
 		session.execute(boundStatement.bind(
 				hostname,
 				hostname.substring(hostname.lastIndexOf('.') + 1),
+				domain,
 				new Date(accessTime),
 				new Date(accessTime),
 				0L

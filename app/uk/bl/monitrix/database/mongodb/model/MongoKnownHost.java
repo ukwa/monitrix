@@ -52,7 +52,13 @@ public class MongoKnownHost extends KnownHost {
 	public void setTopLevelDomain(String tld) {
 		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_TLD, tld);
 	}
-	
+
+	@Override
+	public String getDomain() {
+		// FIXME This should store and pick out the domain.
+		return "";
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<String> getSubdomains() {

@@ -3,9 +3,11 @@ package uk.bl.monitrix.database.cassandra.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
@@ -174,10 +176,15 @@ public class CassandraKnownHostList implements KnownHostList {
 
 	@Override
 	public List<String> getTopLevelDomains() {
-		List<String> tlds = new ArrayList<String>();
-		tlds.add("uk");
-//		return (List<String>) collection.distinct(CassandraProperties.FIELD_KNOWN_HOSTS_TLD);		
-		return tlds;
+		// FIXME This is not efficient, as it loops over results from all hosts. Replace with a map in the crawls table?
+		Set<String> tlds = new HashSet<String>();
+		Iterator<Row> rows = session.execute("SELECT tld from crawl_uris.known_hosts;").iterator();
+		while( rows.hasNext() ) {
+			tlds.add(rows.next().getString("tld"));
+		}
+		List<String> tld_list = new ArrayList<String>();
+		tld_list.addAll(tlds);
+		return tld_list;
 	}
 	
 	@Override

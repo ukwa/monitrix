@@ -23,6 +23,13 @@ public abstract class KnownHost {
 	public abstract String getTopLevelDomain();
 	
 	/**
+	 * The domain name (a.k.a. private suffix), excluding any subdomains (e.g. bbc.co.uk).
+	 * 
+	 * @return the domain name
+	 */
+	public abstract String getDomain();
+	
+	/**
 	 * The list of subdomains encountered during the crawl.
 	 * @return the subdomains
 	 */

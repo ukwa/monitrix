@@ -42,3 +42,9 @@ located in the /test folder of the project:
 * Use ``mongo monitrix --eval "db.dropDatabase()"`` to drop the monitrix DB (replacing 'monitrix' with your database
   name, if needed.) 
 * MongoDB REST interface docs are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface).
+
+
+## Apache Cassandra Cheat Sheet
+
+* Install it, e.g. http://www.datastax.com/documentation/cassandra/1.2/webhelp/index.html#cassandra/install/installRHEL_t.html
+

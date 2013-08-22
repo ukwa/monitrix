@@ -71,7 +71,7 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 			knownHosts.setLastAccess(hostname, entry.getLogTimestamp().getTime());
 		} else {
 			long timestamp = entry.getLogTimestamp().getTime();
-			knownHosts.addToList(hostname, timestamp);
+			knownHosts.addToList(hostname, entry.getDomain(), timestamp);
 //			currentUnit.setNumberOfNewHostsCrawled(currentUnit.getNumberOfNewHostsCrawled() + 1);
 //			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 		}

@@ -117,15 +117,17 @@
         </td>
       </tr>
       <tr>
+          <td class="monitrix-hostinfo-label">Domain</td>
+          <td colspan="3" class="monitrix-three-column-text">
+            @knownHost.getDomain
+          </td>
+      </tr>
+      <tr>
         @defining(knownHost.getSubdomains) { subdomains =>
           <td class="monitrix-hostinfo-label">Subdomains (@subdomains.size)</td>
           <td colspan="3" class="monitrix-three-column-text">
             @for(subdomain <- subdomains) {
-              @if(subdomain.isEmpty) {
-                @knownHost.getHostname
-              } else {
-                @{subdomain}.@knownHost.getHostname<br/>
-              }
+              @{subdomain}.@knownHost.getDomain<br/>
             }
           </td>
         }

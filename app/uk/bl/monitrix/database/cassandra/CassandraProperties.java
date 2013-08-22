@@ -63,6 +63,7 @@ public class CassandraProperties {
 	/** Database field keys (Known Hosts collection) **/
 	public static final String FIELD_KNOWN_HOSTS_HOSTNAME = "host";
 	public static final String FIELD_KNOWN_HOSTS_TLD = "tld";
+	public static final String FIELD_KNOWN_HOSTS_DOMAIN = "domain";
 	public static final String FIELD_KNOWN_HOSTS_SUBDOMAINS = "subdomains";
 	public static final String FIELD_KNOWN_HOSTS_FIRST_ACCESS = "first_access";
 	public static final String FIELD_KNOWN_HOSTS_LAST_ACCESS = "last_access";

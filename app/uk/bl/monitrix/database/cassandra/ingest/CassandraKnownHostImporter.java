@@ -39,8 +39,8 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		this.alertLog = alertLog;
 		this.statement = session.prepare(
 			      "INSERT INTO crawl_uris.known_hosts " +
-			      "(host, tld, domain, first_access, last_access, successfully_fetched_urls) " +
-			      "VALUES (?, ?, ?, ?, ?, ?);");
+			      "(host, tld, domain, subdomain, first_access, last_access, successfully_fetched_urls) " +
+			      "VALUES (?, ?, ?, ?, ?, ?, ?);");
 	}
 	
 	/**
@@ -50,12 +50,13 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 * @param hostname the host name
 	 * @param accessTime the access time
 	 */
-	public CassandraKnownHost addToList(String hostname, String domain, long accessTime) {	
+	public CassandraKnownHost addToList(String hostname, String domain, String subdomain, long accessTime) {	
 		BoundStatement boundStatement = new BoundStatement(statement);
 		session.execute(boundStatement.bind(
 				hostname,
 				hostname.substring(hostname.lastIndexOf('.') + 1),
 				domain,
+				subdomain,
 				new Date(accessTime),
 				new Date(accessTime),
 				0L
@@ -72,25 +73,6 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 */
 	public void setLastAccess(String hostname, long lastAccess) {		
 		session.execute("UPDATE crawl_uris.known_hosts SET last_access="+lastAccess+" WHERE host='"+hostname+"';");
-	}
-	
-	/**
-	 * Adds a subdomain to the specified host. Note that this method ONLY
-	 * writes to the in-memory cache! In order to write to the database, execute the .commit()
-	 * method after your additions are done.
-	 * @param hostname the hostname
-	 * @param subdomain the subdomain to add
-	 */
-	public void addSubdomain(String hostname, String subdomain) {
-		CassandraKnownHost item = (CassandraKnownHost) getKnownHost(hostname);
-		if (item != null) {
-			List<String> subs = item.getSubdomains();
-			if( ! subs.contains(subdomain)) {
-				session.execute("UPDATE crawl_uris.known_hosts SET subdomains = subdomains + [ '"+subdomain+"' ] WHERE host='"+hostname+"';");
-			}
-		} else {
-			Logger.warn("Attempt to write subdomain info to unknown host: " + hostname);
-		}
 	}
 	
 	public void addCrawlerID(String hostname, String crawlerId) {
@@ -203,10 +185,11 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		
 		// Compute host-level alerts
 		// Note: we only need to consider hosts that were added in this batch - ie. those in the cache!
+		// FIXME: Moving to the host-wise model means we've lost the alerts.
 		Logger.info("Computing host-level alerts");
 		for (CassandraKnownHost host : cache.values()) {
 			// Subdomain limit
-			int subdomains = host.getSubdomains().size();
+			int subdomains = 0;//host.getSubdomain().size();
 			if (subdomains > 100) {
 //				CassandraAlert alert = new CassandraAlert(new BasicDBObject());
 //				alert.setTimestamp(host.getLastAccess());

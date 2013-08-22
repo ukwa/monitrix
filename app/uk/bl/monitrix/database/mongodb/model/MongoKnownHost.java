@@ -55,26 +55,20 @@ public class MongoKnownHost extends KnownHost {
 
 	@Override
 	public String getDomain() {
-		// FIXME This should store and pick out the domain.
-		return "";
+		return (String) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_DOMAIN);
+	}
+
+	public void setDomain(String domain) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_DOMAIN, domain);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<String> getSubdomains() {
-		return (List<String>) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS);
+	public String getSubdomain() {
+		return (String) dbo.get(MongoProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN);
 	}
 	
-	public void addSubdomain(String subdomain) {
-		List<String> subdomains = getSubdomains();
-		if (subdomains == null)
-			subdomains = new ArrayList<String>();
-		
-		if (!subdomains.contains(subdomain))
-			subdomains.add(subdomain);
-		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_SUBDOMAINS, subdomains);
-		
-		// TODO add tokenized subdomain name? (Could be useful for search)
+	public void setSubdomain(String tld) {
+		dbo.put(MongoProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN, tld);
 	}
 
 	@Override

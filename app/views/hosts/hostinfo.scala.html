@@ -122,16 +122,14 @@
             @knownHost.getDomain
           </td>
       </tr>
+      @if( knownHost.getSubdomain != null) {
       <tr>
-        @defining(knownHost.getSubdomains) { subdomains =>
-          <td class="monitrix-hostinfo-label">Subdomains (@subdomains.size)</td>
+          <td class="monitrix-hostinfo-label">Subdomain</td>
           <td colspan="3" class="monitrix-three-column-text">
-            @for(subdomain <- subdomains) {
-              @{subdomain}.@knownHost.getDomain<br/>
-            }
+            @knownHost.getSubdomain.@knownHost.getDomain
           </td>
-        }
       </tr>
+      }
       @defining(knownHost.getCrawlerIDs().sorted) { crawlers =>
         <tr><td class="monitrix-hostinfo-label">Crawlers (@crawlers.size())</td><td colspan="3">@crawlers.mkString(", ")</td></tr>
       }

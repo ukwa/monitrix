@@ -86,7 +86,6 @@
   <table class="table table-bordered">
     <thead>
       <tr>
-        <th>Log ID</th>
         <th>Crawler ID</th>
         <th>Log File Path</th>
         <th>Lines Ingested</th>
@@ -101,8 +100,7 @@
     @defining(uk.bl.monitrix.Global.getBackend.getIngestSchedule.getLogs) { logs =>
       @for(log <- logs) {
         <tr class="monitrix-log-ingest-status">
-          <td class="monitrix-log-ingest-status-logid">@log.getId</td>
-          <td>@log.getCrawlerId</td>
+          <td>@log.getCrawlerId [<abbr title="Log ID: @log.getId">log_id</abbr>]</td>
           <td class="monitrix-log-ingest-status-logpath">@log.getPath</td>
           <td class="monitrix-log-ingest-status-lines-ingested"></td>
           <td class="monitrix-log-ingest-status-trafficlight"></td>

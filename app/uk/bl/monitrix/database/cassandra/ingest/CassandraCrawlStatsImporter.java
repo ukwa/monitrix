@@ -71,14 +71,13 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 			knownHosts.setLastAccess(hostname, entry.getLogTimestamp().getTime());
 		} else {
 			long timestamp = entry.getLogTimestamp().getTime();
-			knownHosts.addToList(hostname, entry.getDomain(), timestamp);
+			knownHosts.addToList(hostname, entry.getDomain(), entry.getSubdomain(), timestamp);
 //			currentUnit.setNumberOfNewHostsCrawled(currentUnit.getNumberOfNewHostsCrawled() + 1);
 //			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 		}
 		
 		// Note: it's a little confusing that these aggregation steps are in this class
 		// TODO move into the main CassandraBatchImporter
-		knownHosts.addSubdomain(hostname, entry.getSubdomain());
 		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
 		knownHosts.incrementCrawledURLCounter(hostname);
 		knownHosts.updateAverageResponseTimeAndRetryRate(hostname, entry.getFetchDuration(), entry.getRetries());

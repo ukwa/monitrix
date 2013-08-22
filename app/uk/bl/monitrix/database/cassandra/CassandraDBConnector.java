@@ -237,7 +237,7 @@ public class CassandraDBConnector implements DBConnector {
 				"last_access timestamp," +
 				"tld text," +
 				"domain text," +
-				"subdomains list<text>," +
+				"subdomain text," +
 				"successfully_fetched_urls bigint," +
 				"fetch_status_codes map<text,int>," +
 				"crawled_urls bigint," +

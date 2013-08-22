@@ -338,7 +338,7 @@ public class LogFileEntry extends CrawlLogEntry {
 		
 		String host = null;
 		String domain = null;
-		String subdomain = "";
+		String subdomain = null;
 		try {
 			host = new URL(url).getHost();
 			domain = InternetDomainName.from(host).topPrivateDomain().name();

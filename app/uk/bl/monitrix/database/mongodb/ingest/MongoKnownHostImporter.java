@@ -41,10 +41,12 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 	 * @param hostname the host name
 	 * @param accessTime the access time
 	 */
-	public MongoKnownHost addToList(String hostname, long accessTime) {	
+	public MongoKnownHost addToList(String hostname, String domain, String subdomain, long accessTime) {	
 		MongoKnownHost knownHost = new MongoKnownHost(new BasicDBObject());
 		knownHost.setHostname(hostname);
 		knownHost.setTopLevelDomain(hostname.substring(hostname.lastIndexOf('.') + 1));
+		knownHost.setDomain(domain);
+		knownHost.setSubdomain(subdomain);
 		knownHost.setFirstAccess(accessTime);
 		knownHost.setLastAccess(accessTime);
 		cache.put(hostname, knownHost);
@@ -65,22 +67,6 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 			dbo.setLastAccess(lastAccess);
 		else
 			Logger.warn("Attempt to write last access info to unknown host: " + hostname);
-	}
-	
-	/**
-	 * Adds a subdomain to the specified host. Note that this method ONLY
-	 * writes to the in-memory cache! In order to write to the database, execute the .commit()
-	 * method after your additions are done.
-	 * @param hostname the hostname
-	 * @param subdomain the subdomain to add
-	 */
-	public void addSubdomain(String hostname, String subdomain) {
-		// In this case we know it's a safe cast
-		MongoKnownHost dbo = (MongoKnownHost) getKnownHost(hostname);
-		if (dbo != null)
-			dbo.addSubdomain(subdomain);
-		else
-			Logger.warn("Attempt to write subdomain info to unknown host: " + hostname);
 	}
 	
 	public void addCrawlerID(String hostname, String crawlerId) {
@@ -190,11 +176,12 @@ class MongoKnownHostImporter extends MongoKnownHostList {
 		}
 		
 		// Compute host-level alerts
-		// Note: we only need to consider hosts that were added in this batch - ie. those in the cache!
+		// Note: we only need to consider hosts that were added in this batch - i.e. those in the cache!
+		// FIXME: Moving to the host-wise model means we've lost the alerts.
 		Logger.info("Computing host-level alerts");
 		for (MongoKnownHost host : cache.values()) {
 			// Subdomain limit
-			int subdomains = host.getSubdomains().size();
+			int subdomains = 1; //host.getSubdomain().size();
 			if (subdomains > 100) {
 				MongoAlert alert = new MongoAlert(new BasicDBObject());
 				alert.setTimestamp(host.getLastAccess());

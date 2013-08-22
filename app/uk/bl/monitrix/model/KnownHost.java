@@ -30,10 +30,10 @@ public abstract class KnownHost {
 	public abstract String getDomain();
 	
 	/**
-	 * The list of subdomains encountered during the crawl.
+	 * The subdomain part of this host.
 	 * @return the subdomains
 	 */
-	public abstract List<String> getSubdomains();
+	public abstract String getSubdomain();
 	
 	/**
 	 * UNIX timestamp of the first recorded access to this host.

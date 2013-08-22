@@ -202,7 +202,8 @@
             interpolation: 'step-after',
             series: [{
               color: color,
-              data: data
+              data: data,
+              name: name
             }]
           });
           
@@ -216,18 +217,18 @@
         	  },
           });
           
-/*          new Rickshaw.Graph.Axis.Y({
+          new Rickshaw.Graph.Axis.Y({
               graph: graph,
               tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-              orientation:'left',
+//              orientation:'left',
               element: document.getElementById(divId + '-axis')
           });
-*/          
+          
           if (opt_show_hover_detail) {
             new Rickshaw.Graph.HoverDetail({
               graph: graph,
               xFormatter: function(x) { return new Date(x) },
-              yFormatter: function(y) { return y + " " + name }
+              yFormatter: function(y) { return y }
             });
           }
           

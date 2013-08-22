@@ -274,7 +274,7 @@ html, body {
   width:230px;
   position:absolute;
   top:10px;
-  left:-100px;
+  left:-140px;
   -webkit-transform:rotate(-90deg);
   -moz-transform:rotate(-90deg);
   -ms-transform:rotate(-90deg);
@@ -327,8 +327,8 @@ html, body {
 
 .monitrix-barchart-axis-area {
   position:absolute;
-  top:30px;
-  left:40px;
+  top:46px;
+  left:30px;
 }
 
 .monitrix-barchart-axis-area-small {

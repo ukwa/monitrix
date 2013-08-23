@@ -35,10 +35,9 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 	 * .commit() method after your updates are done.
 	 * @param entry the log entry
 	 */
-	public void update(CrawlLogEntry entry) {
+	public void update(CrawlLogEntry entry, String crawl_id) {
 		// Step 1 - compute the timeslot
 		long timeslot = toTimeslot(entry.getLogTimestamp().getTime());
-		String crawl_id = "test_crawl_id";//entry.getLogId();
 				
 		// Step 2 - update data for this timeslot
 		CassandraCrawlStatsUnit currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot);
@@ -101,7 +100,6 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 	
 	private String whereClause(long timeslot, String crawl_id) {
 	    return " WHERE stat_ts="+timeslot+" AND crawl_id='"+crawl_id+"';";
-		//return " WHERE stat_ts="+timeslot+" AND stat_ts_order="+timeslot+";";
 	}
 	
 	private long toTimeslot(long timestamp) {

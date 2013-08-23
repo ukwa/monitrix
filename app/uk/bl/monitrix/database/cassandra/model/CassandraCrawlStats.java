@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import play.Logger;
+
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -31,7 +33,17 @@ public class CassandraCrawlStats implements CrawlStats {
 
 	@Override
 	public Iterator<CrawlStatsUnit> getCrawlStats() {
-		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id='test_crawl_id' ORDER BY stat_ts;").iterator();
+		// Go through all the crawl IDs:
+		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.crawls;").iterator();
+		String keys = "(";
+		while( rows.hasNext() ) {
+			Row r = rows.next();
+			keys = keys + "'" + r.getString("crawl_id") + "'";
+			if( rows.hasNext() ) keys += ",";
+		}
+		keys += ")";
+		// Now build the query:
+		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id IN "+keys+" ORDER BY stat_ts;").iterator();
 		return new Iterator<CrawlStatsUnit>() {
 			@Override
 			public boolean hasNext() {

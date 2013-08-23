@@ -107,7 +107,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				crawlLogImporter.insert(next);
 
 				// Update pre-aggregated stats
-				crawlStatsImporter.update(next);
+				crawlStatsImporter.update(next, crawlerId);
 				
 				// Host info
 				knownHostImporter.addCrawlerID(next.getHost(), crawlerId);

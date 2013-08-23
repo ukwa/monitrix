@@ -31,6 +31,26 @@ public class CassandraCrawlStats implements CrawlStats {
 		this.session = session;
 	}
 
+	public Iterator<CrawlStatsUnit> getCrawlStats( String crawl_id ) {
+		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id='"+crawl_id+"' ORDER BY stat_ts;").iterator();
+		return new Iterator<CrawlStatsUnit>() {
+			@Override
+			public boolean hasNext() {
+				return cursor.hasNext();
+			}
+
+			@Override
+			public CrawlStatsUnit next() {
+				return new CassandraCrawlStatsUnit(cursor.next());
+			}
+
+			@Override
+			public void remove() {
+				cursor.remove();	
+			}
+		};
+	}
+
 	@Override
 	public Iterator<CrawlStatsUnit> getCrawlStats() {
 		// Go through all the crawl IDs:

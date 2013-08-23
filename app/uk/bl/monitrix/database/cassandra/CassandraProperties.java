@@ -54,10 +54,10 @@ public class CassandraProperties {
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	
 	/** Database field keys (Crawl Stats collection) **/
-	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "timestamp";
-	public static final String FIELD_CRAWL_STATS_DOWNLOAD_VOLUME = "download_volume";
-	public static final String FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED = "number_of_urls_crawled";
-	public static final String FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED = "new_hosts_crawled";
+	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "stat_ts";
+	public static final String FIELD_CRAWL_STATS_DOWNLOAD_VOLUME = "downloaded_bytes";
+	public static final String FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED = "uris_crawled";
+	public static final String FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED = "new_hosts";
 	public static final String FIELD_CRAWL_STATS_COMPLETED_HOSTS = "completed_hosts";
 	
 	/** Database field keys (Known Hosts collection) **/
@@ -87,7 +87,7 @@ public class CassandraProperties {
 	public static final int BULK_INSERT_CHUNK_SIZE = 500000;
 	
 	/** Resolution of the data pre-aggregation raster (in milliseconds) **/ 
-	public static final int PRE_AGGREGATION_RESOLUTION_MILLIS = 60000;
+	public static final int PRE_AGGREGATION_RESOLUTION_MILLIS = 60*1000;
 	
 	static {
 		try {

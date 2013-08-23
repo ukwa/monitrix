@@ -1,0 +1,25 @@
+Notes & Ideas
+=============
+
+
+Crawl log auto-discovery
+------------------------
+
+Go to all https://crawler01.bl.uk:8443/engine/job/annual-08051000
+
+and look for
+
+    loggerModule.crawlLogPath: crawl.log
+    /heritrix/output/logs/annual-08051000/20130807132026/crawl.log
+
+OR go through
+
+    https://crawler01.bl.uk:8443/engine/anypath/heritrix/output/logs/
+
+Tricky part is that checkpointing moves files, so probably need to store the hash of the first part to marry up known log files with new locations. See https://crawler01.bl.uk:8443/engine/anypath/heritrix/output/logs/annual-08051000/20130807132026/
+
+Cassandra
+---------
+
+Install it, e.g. http://www.datastax.com/documentation/cassandra/1.2/webhelp/index.html#cassandra/install/installRHEL_t.html
+

@@ -31,7 +31,7 @@ public class CassandraCrawlStats implements CrawlStats {
 
 	@Override
 	public Iterator<CrawlStatsUnit> getCrawlStats() {
-		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats;").iterator();
+		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id='test_crawl_id' ORDER BY stat_ts;").iterator();
 		return new Iterator<CrawlStatsUnit>() {
 			@Override
 			public boolean hasNext() {
@@ -55,7 +55,7 @@ public class CassandraCrawlStats implements CrawlStats {
 		if (cache.containsKey(timestamp))
 			return cache.get(timestamp);
 		
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.stats WHERE stat_ts="+timestamp+";");
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.stats WHERE stat_ts="+timestamp+" AND crawl_id='test_crawl_id' ORDER BY stat_ts;");
 		
 		if (results.isExhausted() ) {
 			return null;
@@ -68,7 +68,7 @@ public class CassandraCrawlStats implements CrawlStats {
 
 	@Override
 	public List<CrawlStatsUnit> getMostRecentStats(int n) {
-		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats LIMIT "+n+";").iterator();
+		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id='test_crawl_id' ORDER BY stat_ts LIMIT "+n+";").iterator();
 		
 		List<CrawlStatsUnit> recent = new ArrayList<CrawlStatsUnit>();
 		while(cursor.hasNext())

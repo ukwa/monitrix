@@ -43,8 +43,3 @@ located in the /test folder of the project:
   name, if needed.) 
 * MongoDB REST interface docs are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface).
 
-
-## Apache Cassandra Cheat Sheet
-
-* Install it, e.g. http://www.datastax.com/documentation/cassandra/1.2/webhelp/index.html#cassandra/install/installRHEL_t.html
-

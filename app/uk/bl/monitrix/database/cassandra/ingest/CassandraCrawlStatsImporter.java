@@ -38,21 +38,12 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 	public void update(CrawlLogEntry entry) {
 		// Step 1 - compute the timeslot
 		long timeslot = toTimeslot(entry.getLogTimestamp().getTime());
+		String crawl_id = "test_crawl_id";//entry.getLogId();
 				
 		// Step 2 - update data for this timeslot
 		CassandraCrawlStatsUnit currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot);
-		if (currentUnit == null) {
-			// Step 3a - init data for this timeslot
-//			currentUnit = new CassandraCrawlStatsUnit(session);
-//			currentUnit.setTimestamp(timeslot);
-//			currentUnit.setNumberOfURLsCrawled(1);
-//			currentUnit.setDownloadVolume(entry.getDownloadSize());	
-//			currentUnit.setNumberOfNewHostsCrawled(0);
-		} else {
-			// Step 3b - update existing data for this timeslot
-//			currentUnit.setNumberOfURLsCrawled(currentUnit.getNumberOfURLsCrawled() + 1);
-//			currentUnit.setDownloadVolume(currentUnit.getDownloadVolume() + entry.getDownloadSize());
-		}
+		session.execute("UPDATE crawl_uris.stats SET uris_crawled = uris_crawled + 1, downloaded_bytes = downloaded_bytes + " + 
+			entry.getDownloadSize() + whereClause(timeslot,crawl_id) + ";");
 		
 		// Step 4 - update hosts info
 		String hostname = entry.getHost();
@@ -62,8 +53,11 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 			// Update host completion time
 			long lastRecordedAccess = host.getLastAccess();
 			if (lastRecordedAccess < timeslot) {
-				CassandraCrawlStatsUnit unitToModify = (CassandraCrawlStatsUnit) getStatsForTimestamp(toTimeslot(lastRecordedAccess));
+				long lrtimeslot = toTimeslot(lastRecordedAccess);
+//				CassandraCrawlStatsUnit unitToModify = (CassandraCrawlStatsUnit) getStatsForTimestamp(lrtimeslot);
+				session.execute("UPDATE crawl_uris.stats SET completed_hosts = completed_hosts - 1" + whereClause(lrtimeslot,crawl_id));
 //				unitToModify.setCompletedHosts(unitToModify.countCompletedHosts() - 1);
+				session.execute("UPDATE crawl_uris.stats SET completed_hosts = completed_hosts + 1" + whereClause(timeslot,crawl_id));
 //				currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 			}
 			
@@ -72,7 +66,9 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		} else {
 			long timestamp = entry.getLogTimestamp().getTime();
 			knownHosts.addToList(hostname, entry.getDomain(), entry.getSubdomain(), timestamp);
+			session.execute("UPDATE crawl_uris.stats SET new_hosts = new_hosts + 1" + whereClause(timeslot,crawl_id));
 //			currentUnit.setNumberOfNewHostsCrawled(currentUnit.getNumberOfNewHostsCrawled() + 1);
+			session.execute("UPDATE crawl_uris.stats SET completed_hosts = completed_hosts + 1" + whereClause(timeslot,crawl_id));
 //			currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 		}
 		
@@ -103,30 +99,13 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		cache.put(timeslot, currentUnit);
 	}
 	
-	private long toTimeslot(long timestamp) {
-		 return (timestamp / CassandraProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) * CassandraProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
+	private String whereClause(long timeslot, String crawl_id) {
+	    return " WHERE stat_ts="+timeslot+" AND crawl_id='"+crawl_id+"';";
+		//return " WHERE stat_ts="+timeslot+" AND stat_ts_order="+timeslot+";";
 	}
 	
-	/**
-	 * Writes the contents of the cache to the database.
-	 */
-	public void commit() {
-		// This means we're making individual commits to the DB
-		// TODO see if we can optimize
-		for (CassandraCrawlStatsUnit dbo : cache.values()) {
-			save(dbo);
-		}
-		
-		cache.clear();
-		knownHosts.commit();
-	}
-
-	/**
-	 * Saves the wrapped DBObject to the collection.
-	 * @param dbo the wrapped DBObject
-	 */
-	public void save(CassandraCrawlStatsUnit unit) {
-//		collection.save(unit.getBackingDBO());
+	private long toTimeslot(long timestamp) {
+		 return (timestamp / CassandraProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) * CassandraProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
 	}
 	
 }

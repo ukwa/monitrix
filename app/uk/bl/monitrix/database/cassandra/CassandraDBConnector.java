@@ -131,6 +131,7 @@ public class CassandraDBConnector implements DBConnector {
 				"CREATE TABLE crawl_uris.log (" +
 						"coarse_ts timestamp," +
 						"log_ts timestamp," +
+						"entry_uuid uuid," +
 						"uri text," +
 						"fetch_ts timestamp," +
 						"host text," +
@@ -148,7 +149,7 @@ public class CassandraDBConnector implements DBConnector {
 						"referer text," +
 						"retries int," +
 						"worker_thread text," +
-						"PRIMARY KEY (coarse_ts, log_ts)" +
+						"PRIMARY KEY (coarse_ts, log_ts, entry_uuid)" +
 				");");
 		
 		// Create some indexes to help with the time-wise lookups and filtering.
@@ -220,8 +221,11 @@ public class CassandraDBConnector implements DBConnector {
 		"CREATE TABLE crawl_uris.stats (" +
 				"stat_ts timestamp," +
 				"crawl_id text," +
-				"stats_map map<text,int>," +
-				"PRIMARY KEY (stat_ts, crawl_id)" +
+				"downloaded_bytes counter," +
+				"uris_crawled counter," +
+				"new_hosts counter," +
+				"completed_hosts counter," +
+				"PRIMARY KEY (crawl_id, stat_ts)" +
 		");");
 		//session.execute("CREATE INDEX stats_crawl_id_idx ON crawl_uris.stats (crawl_id)");
 		
@@ -252,7 +256,8 @@ public class CassandraDBConnector implements DBConnector {
 	}
 	
 	public void dropSchema() {
-		session.execute("DROP KEYSPACE crawl_uris");
+		if( this.isSchemaThere() )
+			session.execute("DROP KEYSPACE crawl_uris");
 	}
 	
 	public Session getSession() {

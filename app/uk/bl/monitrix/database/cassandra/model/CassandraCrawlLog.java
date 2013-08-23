@@ -44,7 +44,6 @@ public class CassandraCrawlLog extends CrawlLog {
 			long start_ts = r.getDate("start_ts").getTime();
 			if( start_ts < crawlStartTime ) crawlStartTime = start_ts;
 		}
-		Logger.warn("crawlStartTime " + crawlStartTime);
 		if( crawlStartTime == 0 ) return -1;
 		return crawlStartTime;
 	}

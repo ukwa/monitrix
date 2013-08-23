@@ -2,6 +2,7 @@ package uk.bl.monitrix.database.cassandra.ingest;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import play.Logger;
 
@@ -11,7 +12,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
-import uk.bl.monitrix.database.cassandra.CassandraDBConnector;
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLog;
 import uk.bl.monitrix.heritrix.LogFileEntry;
 
@@ -29,10 +29,10 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		super(db);
 		this.statement = session.prepare(
 			      "INSERT INTO crawl_uris.log " +
-			      "(coarse_ts, log_ts, uri, fetch_ts, host, domain, subdomain, status_code, hash, " + 
+			      "(coarse_ts, log_ts, entry_uuid, uri, fetch_ts, host, domain, subdomain, status_code, hash, " + 
 			      "log_id, annotations, discovery_path, compressibility, content_type, download_size, " + 
 			      "fetch_duration, referer, retries, worker_thread) " +
-			      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+			      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		this.statementUri = session.prepare(
 			      "INSERT INTO crawl_uris.uris " +
 			      "(uri, log_ts, coarse_ts, fetch_ts, status_code, hash) " +
@@ -41,6 +41,10 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			      "INSERT INTO crawl_uris.crawls " +
 			      "(crawl_id, start_ts, end_ts, profile) " +
 			      "VALUES (?, ?, ?, ?);");
+		
+		Date dtest = new Date();
+		Logger.warn("UUID 1 "+uuidForDate(dtest));
+		Logger.warn("UUID 2 "+uuidForDate(dtest));
 	}
 	
 	private void addCrawlInfo(String crawl_id, long start_ts, long end_ts ) {
@@ -83,6 +87,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		session.execute(boundStatement.bind(
 				coarse_ts,
 				log_ts,
+				UUID.randomUUID(),
 				l.getURL(),
 				fetch_ts,
 				l.getHost(),
@@ -112,6 +117,31 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 				l.getSHA1Hash()
 				));
 	}
+	
+	/**
+	 * {@see http://wiki.apache.org/cassandra/FAQ#working_with_timeuuid_in_java}
+	 * 
+	 * These collide.
+	 * 
+	 * @param d
+	 * @return
+	 */
+	public static java.util.UUID uuidForDate(Date d)
+    {
+/*
+Magic number obtained from #cassandra's thobbs, who
+claims to have stolen it from a Python library.
+*/
+        final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
+
+        long origTime = d.getTime();
+        long time = origTime * 10000 + NUM_100NS_INTERVALS_SINCE_UUID_EPOCH;
+        long timeLow = time &       0xffffffffL;
+        long timeMid = time &   0xffff00000000L;
+        long timeHi = time & 0xfff000000000000L;
+        long upperLong = (timeLow << 32) | (timeMid >> 16) | (1 << 12) | (timeHi >> 48) ;
+        return new java.util.UUID(upperLong, 0xC000000000000000L);
+    }
 	
 	public void insert(final List<LogFileEntry> log) {
 		for(LogFileEntry log_entry : log ) {

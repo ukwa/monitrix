@@ -90,13 +90,8 @@ public class CassandraKnownHostList implements KnownHostList {
 
 	@Override
 	public SearchResult searchHosts(String query, int limit, int offset) {		
-//		// Parse query
-//		List<String> tokens = Arrays.asList(KnownHost.tokenizeName(query));
-//		DBObject q = new BasicDBObject(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME_TOKENIZED, 
-//				new BasicDBObject(MONGO_QUERY_ALL, tokens));
-//		
-//		return search(query, q, limit, offset);
-		return null;
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.known_hosts WHERE host='"+query+"';");
+		return search(query, results, limit, offset);
 	}
 	
 	@Override

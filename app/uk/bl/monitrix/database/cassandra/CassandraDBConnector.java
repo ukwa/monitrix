@@ -167,17 +167,13 @@ public class CassandraDBConnector implements DBConnector {
 		");");
 		
 		// Crawl-level data.
-		// Processing adds dynamically named columns:
-		//   status_code:200 
-		// (perhaps use counters?)
 		session.execute(
 				"CREATE TABLE crawl_uris.crawls (" +
 						"crawl_id text," +
 						"start_ts timestamp," +
 						"end_ts timestamp," +
 						"profile text," +
-						"total_urls bigint," +
-						"PRIMARY KEY (crawl_id, start_ts)" +
+						"PRIMARY KEY (crawl_id)" +
 				");");
 		session.execute("CREATE INDEX profile_idx ON crawl_uris.crawls (profile)");
 

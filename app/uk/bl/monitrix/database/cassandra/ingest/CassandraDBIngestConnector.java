@@ -58,15 +58,15 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		
 		// Insert one automatically, if empty:
 		/*
-		*/
-		if( this.ingestSchedule.getLogForCrawlerId("test-crawler-id") == null ) {
+		if( this.ingestSchedule.getLogForCrawlerId("sample-crawler-id") == null ) {
 			this.ingestSchedule.addLog(
 					"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log.cp00001-20130605082749",
-					//"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log",
-					"test-crawler-id", 
+					//"/Users/andy/Documents/workspace/monitrix/test/sample-log-1E3.txt",
+					"sample-crawler-id", 
 					true
 					);
 		}
+		*/
 	}
 	
 	@Override
@@ -86,6 +86,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 			
 			int counter = 0; // Should be slightly faster than using list.size() to count
 			long timeOfFirstLogEntryInBatch = Long.MAX_VALUE;
+			long timeOfLastLogEntryInPatch = 0;
 			while (iterator.hasNext() && (counter < CassandraProperties.BULK_INSERT_CHUNK_SIZE)) {
 				LogFileEntry next = iterator.next();
 				counter++;
@@ -99,6 +100,8 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				long timestamp = next.getLogTimestamp().getTime();
 				if (timestamp < timeOfFirstLogEntryInBatch)
 					timeOfFirstLogEntryInBatch = timestamp;
+				if( timestamp > timeOfLastLogEntryInPatch)
+					timeOfLastLogEntryInPatch = timestamp;
 								
 				// Store the log entry:
 				crawlLogImporter.insert(next);
@@ -110,11 +113,16 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
 				
 				// Log-entry-level alerts
-				//Logger.info("Got Alerts "+next.getAlerts().size());
 				for (Alert a : next.getAlerts()) {
 					alertBatch.add((DefaultAlert) a);
 				}
+				
+				// Update last-seen date
+				if( counter%10 == 0 )
+					crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
 			}
+			// Update with final last-seen date
+			crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
 			
 			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
 			bulkStart = System.currentTimeMillis();

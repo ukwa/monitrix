@@ -37,29 +37,34 @@ public class CassandraCrawlLog extends CrawlLog {
 
 	@Override
 	public long getCrawlStartTime() {
-		// TODO cache
-		long crawlStartTime = 0;
-		//DBCursor cursor = collection.find().limit(1).sort(new BasicDBObject(CassandraProperties.FIELD_CRAWL_LOG_TIMESTAMP, 1));
-		//while (cursor.hasNext())
-		//	crawlStartTime = new CassandraCrawlLogEntry(cursor.next()).getLogTimestamp().getTime();					
-		
+		long crawlStartTime = Long.MAX_VALUE;
+		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.crawls;").iterator();
+		while( rows.hasNext() ) {
+			Row r = rows.next();
+			long start_ts = r.getDate("start_ts").getTime();
+			if( start_ts < crawlStartTime ) crawlStartTime = start_ts;
+		}
+		Logger.warn("crawlStartTime " + crawlStartTime);
+		if( crawlStartTime == 0 ) return -1;
 		return crawlStartTime;
 	}
 
 	@Override
 	public long getTimeOfLastCrawlActivity() {
-		// TODO cache
 		long lastCrawlActivity = 0;
-		//DBCursor cursor = collection.find().limit(1).sort(new BasicDBObject(CassandraProperties.FIELD_CRAWL_LOG_TIMESTAMP, -1));
-		//while (cursor.hasNext())
-		//	lastCrawlActivity = new CassandraCrawlLogEntry(cursor.next()).getLogTimestamp().getTime();					
-		
+		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.crawls;").iterator();
+		while( rows.hasNext() ) {
+			Row r = rows.next();
+			long end_ts = r.getDate("end_ts").getTime();
+			if( end_ts > lastCrawlActivity ) lastCrawlActivity = end_ts;
+		}
+		if( lastCrawlActivity == 0 ) return -1;
 		return lastCrawlActivity;
 	}
 
 	@Override
 	public List<CrawlLogEntry> getMostRecentEntries(int n) {
-		long startTime = System.currentTimeMillis();
+		long startTime = getTimeOfLastCrawlActivity();
 		// Round the time down:
 		Date coarse_ts = this.getCoarseTimestamp(new Date(startTime));
 		// Search based on KEY, and range
@@ -75,11 +80,11 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	@Override
 	public long countEntries() {
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.crawls;");
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_file_counters;");
 		long grand_total = 0;
 		Iterator<Row> rows = results.iterator();
 		while( rows.hasNext() ) {
-			grand_total += rows.next().getLong("total_urls");
+			grand_total += rows.next().getLong("ingested_lines");
 		}
 		return grand_total;
 	}

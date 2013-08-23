@@ -24,8 +24,7 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	
 	protected Session session; 
 
-	PreparedStatement statement = null;
-
+	private PreparedStatement statement = null;
 	
 	public CassandraIngestSchedule(Session session) {
 		this.session = session;

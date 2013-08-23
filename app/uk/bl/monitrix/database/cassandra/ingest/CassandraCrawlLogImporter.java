@@ -7,6 +7,8 @@ import play.Logger;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
 import uk.bl.monitrix.database.cassandra.CassandraDBConnector;
@@ -19,8 +21,9 @@ import uk.bl.monitrix.heritrix.LogFileEntry;
  */
 class CassandraCrawlLogImporter extends CassandraCrawlLog {
 
-	PreparedStatement statement = null;
-	PreparedStatement statementUri = null;
+	private PreparedStatement statement = null;
+	private PreparedStatement statementUri = null;
+	private PreparedStatement statementCrawls = null;
 	
 	public CassandraCrawlLogImporter(Session db) {
 		super(db);
@@ -34,6 +37,37 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			      "INSERT INTO crawl_uris.uris " +
 			      "(uri, log_ts, coarse_ts, fetch_ts, status_code, hash) " +
 			      "VALUES (?, ?, ?, ?, ?, ?);");
+		this.statementCrawls = session.prepare(
+			      "INSERT INTO crawl_uris.crawls " +
+			      "(crawl_id, start_ts, end_ts, profile) " +
+			      "VALUES (?, ?, ?, ?);");
+	}
+	
+	private void addCrawlInfo(String crawl_id, long start_ts, long end_ts ) {
+		// Otherwise, insert:
+		BoundStatement boundStatement = new BoundStatement(statementCrawls);
+		session.execute(boundStatement.bind(
+				crawl_id,
+				new Date(start_ts),
+				new Date(end_ts),
+				"no-profile"
+				));		
+	}
+	
+	public void updateCrawlInfo(String crawl_id, long timeOfFirstLogEntryInPatch, long timeOfLastLogEntryInPatch ) {
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.crawls WHERE crawl_id='"+crawl_id+"';");
+		// Don't do it if that crawl-id is already known:
+		if( results.isExhausted() ) {
+			this.addCrawlInfo(crawl_id, timeOfFirstLogEntryInPatch, timeOfLastLogEntryInPatch);
+			return;
+		}
+		Row r = results.one();
+		long start_ts = r.getDate("start_ts").getTime();
+		if( timeOfFirstLogEntryInPatch < start_ts ) start_ts = timeOfFirstLogEntryInPatch;
+		long end_ts = r.getDate("end_ts").getTime();
+		if( timeOfLastLogEntryInPatch > end_ts ) end_ts = timeOfLastLogEntryInPatch;
+		// Update the timestamps, as required:
+		session.execute("UPDATE crawl_uris.crawls SET start_ts='"+start_ts+"', end_ts='"+end_ts+"' WHERE crawl_id='"+crawl_id+"';");
 	}
 	
 	public void insert(LogFileEntry l) {

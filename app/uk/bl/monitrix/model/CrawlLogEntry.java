@@ -9,6 +9,11 @@ import java.util.Date;
  */
 public abstract class CrawlLogEntry {
 	
+	public static final String ANNOTATION_CAPPED_CRAWL = "Q:serverMaxSuccessKb";
+	public static final String ANNOTATION_WARC_REVISIT = "warcRevisit";
+	public static final String ANNOTATION_WARC_REVISIT_DIGEST = "warcRevisit:digest";
+	public static final String ANNOTATION_WARC_REVISIT_NOT_MODIFIED = "warcRevisit:notModified";
+	
 	/**
 	 * The ID of the log this entry is from.
 	 * @return the log file path
@@ -128,5 +133,28 @@ public abstract class CrawlLogEntry {
 	 * @return the compressability
 	 */
 	public abstract double getCompressability();
+	
+
+	/**
+	 * Determines whether this is a revisit record.
+	 * @return
+	 */
+	public boolean isRevisitRecord() {
+		for( String anno : getAnnotations().split(",") ) {
+			if( anno.startsWith(ANNOTATION_WARC_REVISIT) ) return true;
+		}
+		return false;		
+	}
+
+	/**
+	 * Determines is this is a capped-crawl record.
+	 * @return
+	 */
+	public boolean isCappedCrawlRecord() {
+		for( String anno : getAnnotations().split(",") ) {
+			if( anno.startsWith(ANNOTATION_CAPPED_CRAWL)) return true;
+		}
+		return false;
+	}
 	
 }

@@ -89,6 +89,18 @@ public class CassandraCrawlLog extends CrawlLog {
 	}
 	
 	@Override
+	public long countRevisits() {
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_file_counters;");
+		long grand_total = 0;
+		Iterator<Row> rows = results.iterator();
+		while( rows.hasNext() ) {
+			grand_total += rows.next().getLong("revisit_records");
+		}
+		return grand_total;
+	}
+	
+	
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<String> listLogIds() {
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.crawls;");
@@ -252,12 +264,16 @@ public class CassandraCrawlLog extends CrawlLog {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<String> extractHostsForAnnotation(String annotation) {
 		List<String> hosts = new ArrayList<String>();
+		Iterator<Row> rows = session.execute("SELECT host FROM crawl_uris.annotations WHERE annotation='"+annotation+"' LIMIT 1;").iterator();
+		String host = null;
+		while( rows.hasNext() ) {
+			host = rows.next().getString("host");
+			hosts.add(host);
+			rows = session.execute("SELECT host FROM crawl_uris.annotations WHERE annotation='"+annotation+"' AND host > '"+host+"' LIMIT 1;").iterator();
+		}
 		return hosts;
-		//DBObject q = new BasicDBObject(CassandraProperties.FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED, annotation);
-		//return (List<String>) collection.distinct(CassandraProperties.FIELD_CRAWL_LOG_HOST, q);
 	}
 
 }

@@ -50,7 +50,10 @@ public interface Alert {
 		TXT_TO_NONTEXT_RATIO,
 		
 		/** The URL is very 'compressable' which means there are likely many repetitions in it **/
-		COMPRESSABILITY
+		COMPRESSABILITY,
+		
+		/** The host has hit the crawl cap and no more will be crawled **/
+		HOST_CAPPED
 		
 	}
 

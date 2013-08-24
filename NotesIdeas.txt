@@ -23,3 +23,11 @@ Cassandra
 
 Install it, e.g. http://www.datastax.com/documentation/cassandra/1.2/webhelp/index.html#cassandra/install/installRHEL_t.html
 
+
+TODO
+----
+
+* DONE For tld's to be efficient, we need an additional tld column that holds counters that get incremented during the insertions.
+* Swap crawl-caps over to be alerts.
+* Strip annotations out at the API level.
+* Tables for crawl_id level graphs, e.g. compressibility, etc. Start with ingest code, then searchers, then viewers.

@@ -155,6 +155,9 @@ public class CassandraKnownHostList implements KnownHostList {
 		
 	}
 
+	/**
+	 * FIXME this seems not to be called anywhere, so take it out as it's not simple to implement in Cassandra?
+	 */
 	@Override
 	public List<KnownHost> getCrawledHosts(long since) {
 //		DBObject query = new BasicDBObject(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS,
@@ -171,21 +174,20 @@ public class CassandraKnownHostList implements KnownHostList {
 
 	@Override
 	public List<String> getTopLevelDomains() {
-		// FIXME This is not efficient, as it loops over results from all hosts. Replace with a map in the crawls table?
-		Set<String> tlds = new HashSet<String>();
-		Iterator<Row> rows = session.execute("SELECT tld from crawl_uris.known_hosts;").iterator();
+		List<String> tlds = new ArrayList<String>();
+		Iterator<Row> rows = session.execute("SELECT tld from crawl_uris.known_tlds;").iterator();
+		// Loop over other tlds:
 		while( rows.hasNext() ) {
-			tlds.add(rows.next().getString("tld"));
+			String tld = rows.next().getString("tld");
+			tlds.add(tld);
 		}
-		List<String> tld_list = new ArrayList<String>();
-		tld_list.addAll(tlds);
-		return tld_list;
+		return tlds;
 	}
 	
 	@Override
 	public long countForTopLevelDomain(String tld) {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.known_hosts WHERE tld='"+tld+"';");
-		return results.one().getLong("count");
+		ResultSet results = session.execute("SELECT crawled_urls FROM crawl_uris.known_tlds WHERE tld='"+tld+"';");
+		return results.one().getLong("crawled_urls");
 	}
 	
 }

@@ -14,6 +14,8 @@ import com.datastax.driver.core.Session;
 
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLog;
 import uk.bl.monitrix.heritrix.LogFileEntry;
+import uk.bl.monitrix.model.CrawlLog;
+import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
  * An extended version of {@link CassandraCrawlLog} that adds insert capability.
@@ -24,6 +26,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 	private PreparedStatement statement = null;
 	private PreparedStatement statementUri = null;
 	private PreparedStatement statementCrawls = null;
+	private PreparedStatement statementAnno = null;
 	
 	public CassandraCrawlLogImporter(Session db) {
 		super(db);
@@ -41,6 +44,10 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			      "INSERT INTO crawl_uris.crawls " +
 			      "(crawl_id, start_ts, end_ts, profile) " +
 			      "VALUES (?, ?, ?, ?);");
+		this.statementAnno = session.prepare(
+				"INSERT INTO crawl_uris.annotations " +
+					      "(annotation, url, log_ts, host) " +
+					      "VALUES (?, ?, ?, ?);");
 		
 		Date dtest = new Date();
 		Logger.warn("UUID 1 "+uuidForDate(dtest));
@@ -116,6 +123,18 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 				l.getHTTPCode(),
 				l.getSHA1Hash()
 				));
+		// Also stow annotations in a separate table, allowing annotation-based lookup.
+		BoundStatement boundStatementAnno = new BoundStatement(statementAnno);
+		for( String anno : l.getAnnotations().split(",") ) {
+			if( anno.startsWith(CrawlLogEntry.ANNOTATION_CAPPED_CRAWL)) {
+			session.execute(boundStatementAnno.bind(
+					anno,
+					l.getURL(),
+					l.getLogTimestamp(),
+					l.getHost()
+					));
+			}
+		}
 	}
 	
 	/**

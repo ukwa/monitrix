@@ -46,7 +46,7 @@ public class Home extends Controller {
 
         public static Result getTotals() {
            String total = ""+log.countEntries();
-	   String revisits = ""+log.searchByAnnotation("warcRevisit:digest", 1, 0).totalResults();
+	   String revisits = ""+log.countRevisits();
 	   return ok(Json.toJson(new String[] {total, revisits}));
 	}
 	  

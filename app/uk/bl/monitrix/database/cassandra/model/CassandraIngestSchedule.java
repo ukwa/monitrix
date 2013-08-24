@@ -116,8 +116,9 @@ public class CassandraIngestSchedule extends IngestSchedule {
 		}
 	}
 	
-	public void incrementIngestedLogLines(String id, long increment) {
-		session.execute("UPDATE crawl_uris.log_file_counters SET ingested_lines = ingested_lines + "+increment+" WHERE path='"+id+"'");
+	public void incrementIngestedLogLines(String id, long increment, long revist_increment) {
+		session.execute("UPDATE crawl_uris.log_file_counters SET ingested_lines = ingested_lines + "+increment
+				+", revisit_records = revisit_records + "+revist_increment+" WHERE path='"+id+"'");
 	}
 
 }

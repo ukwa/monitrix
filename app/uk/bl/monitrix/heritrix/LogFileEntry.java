@@ -119,8 +119,12 @@ public class LogFileEntry extends CrawlLogEntry {
 		double compressability = getCompressability();
 
 		// TODO find the right threshold + make configurable
-		if (compressability < 0.02)
+		if (compressability < 0.1)
 			alerts.add(new DefaultAlert(this.getLogTimestamp().getTime(), this.getHost(), AlertType.COMPRESSABILITY, getURL()));
+		
+		// If the line indicates the crawl has hit a cap, then raise and alert:
+		if( this.isCappedCrawlRecord() )
+			alerts.add(new DefaultAlert(this.getLogTimestamp().getTime(), this.getHost(), AlertType.HOST_CAPPED, getURL()));
 		
 		String[] pathSegments = getURL().split("/");
 		if ((pathSegments.length - 1) > TOO_MANY_PATH_SEGMENTS_THRESHOLD)

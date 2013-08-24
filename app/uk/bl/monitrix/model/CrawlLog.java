@@ -63,6 +63,12 @@ public abstract class CrawlLog {
 	public abstract long countEntries();
 	
 	/**
+	 * Returns the total number of revisit records.
+	 * @return the total number of revisit records.
+	 */
+	public abstract long countRevisits();	
+	
+	/**
 	 * Returns the log file IDs that occur in the DB.
 	 * @return the list of log IDs
 	 */
@@ -135,5 +141,5 @@ public abstract class CrawlLog {
 	 * @return the list of hosts
 	 */
 	public abstract List<String> extractHostsForAnnotation(String annotation);
-	
+
 }

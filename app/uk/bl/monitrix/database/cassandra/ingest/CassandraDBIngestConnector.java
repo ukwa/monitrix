@@ -85,11 +85,13 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 			List<DefaultAlert> alertBatch = new ArrayList<DefaultAlert>();
 			
 			int counter = 0; // Should be slightly faster than using list.size() to count
+			int revisits = 0;
 			long timeOfFirstLogEntryInBatch = Long.MAX_VALUE;
 			long timeOfLastLogEntryInPatch = 0;
 			while (iterator.hasNext() && (counter < CassandraProperties.BULK_INSERT_CHUNK_SIZE)) {
 				LogFileEntry next = iterator.next();
 				counter++;
+				if( next.isRevisitRecord() ) revisits++;
 				
 				// Skip bad ones:
 				if( next.getParseFailed() ) {
@@ -117,9 +119,16 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 					alertBatch.add((DefaultAlert) a);
 				}
 				
-				// Update last-seen date
-				if( counter%10 == 0 )
+				// Periodically update stats and flush the counter.
+				if( counter == 200 ) {
+					// Update last-seen date
 					crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
+				
+					// Update the total log lines counter:
+					ingestSchedule.incrementIngestedLogLines(logId, counter, revisits);
+					counter = 0;
+					revisits = 0;
+				}
 			}
 			// Update with final last-seen date
 			crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
@@ -130,8 +139,6 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 			
 			alertLogImporter.insert(alertBatch);
 			alertBatch.clear();		
-			
-			ingestSchedule.incrementIngestedLogLines(logId, counter);
 			
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}

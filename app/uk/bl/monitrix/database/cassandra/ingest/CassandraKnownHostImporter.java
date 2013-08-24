@@ -52,15 +52,17 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 */
 	public CassandraKnownHost addToList(String hostname, String domain, String subdomain, long accessTime) {	
 		BoundStatement boundStatement = new BoundStatement(statement);
+		String tld = hostname.substring(hostname.lastIndexOf('.') + 1);
 		session.execute(boundStatement.bind(
 				hostname,
-				hostname.substring(hostname.lastIndexOf('.') + 1),
+				tld,
 				domain,
 				subdomain,
 				new Date(accessTime),
 				new Date(accessTime),
 				0L
 				));
+		session.execute("UPDATE crawl_uris.known_tlds SET crawled_urls = crawled_urls + 1 WHERE tld = '"+tld+"';");
 		return (CassandraKnownHost) getKnownHost(hostname);
 	}
 	

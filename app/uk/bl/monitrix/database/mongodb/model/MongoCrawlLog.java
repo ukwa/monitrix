@@ -79,6 +79,11 @@ public class MongoCrawlLog extends CrawlLog {
 	}
 	
 	@Override
+	public long countRevisits() {
+		return searchByAnnotation("warcRevisit:digest", 1, 0).totalResults();
+	}
+	
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<String> listLogIds() {
 		return (List<String>) collection.distinct(MongoProperties.FIELD_CRAWL_LOG_LOG_ID);

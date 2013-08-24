@@ -191,12 +191,12 @@ public class CassandraDBConnector implements DBConnector {
 		"CREATE TABLE crawl_uris.log_file_counters (" +
 				"path text," +
 				"ingested_lines counter," +
+				"revisit_records counter," +
 				"PRIMARY KEY (path)" +
 		");");
 		
 		
 		// Alerts log
-		// host, alert_ts, alert_type, description
 		session.execute(
 		"CREATE TABLE crawl_uris.alerts (" +
 				"host text," +
@@ -206,6 +206,19 @@ public class CassandraDBConnector implements DBConnector {
 				"PRIMARY KEY (host, alert_ts)" +
 		");");
 		session.execute("CREATE INDEX alert_type_idx ON crawl_uris.alerts (alert_type)");
+		
+		// Annotated URLs
+		// FIXME Probably not required. Any annotations should probably be stowed as alerts or stats. 
+		// BUT changing this means API changes to strip annotations out of the higher-level API.
+		session.execute(
+		"CREATE TABLE crawl_uris.annotations (" +
+				"annotation text," +
+				"url text," +
+				"log_ts timestamp," +
+				"host text, " +
+				"PRIMARY KEY (annotation, url, log_ts)" +
+		");");
+		session.execute("CREATE INDEX annotation_host_idx ON crawl_uris.annotations (host)");
 		
 		// Virus log:
 		session.execute(
@@ -252,7 +265,15 @@ public class CassandraDBConnector implements DBConnector {
 				"PRIMARY KEY (host)" +
 		");");
 		session.execute("CREATE INDEX tld_idx ON crawl_uris.known_hosts (tld)");
+		session.execute("CREATE INDEX tld_domain_idx ON crawl_uris.known_hosts (domain)");
 		
+		// Known tlds:
+		session.execute(
+		"CREATE TABLE crawl_uris.known_tlds (" +
+				"tld text," +
+				"crawled_urls counter," +
+				"PRIMARY KEY (tld)" +
+				");");
 	}
 	
 	public void dropSchema() {

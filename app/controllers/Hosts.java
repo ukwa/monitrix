@@ -10,9 +10,7 @@ import java.util.List;
 import org.codehaus.jackson.node.ObjectNode;
 
 import scala.concurrent.duration.Duration;
-
 import controllers.mapping.TimeseriesValueMapper;
-
 import play.Logger;
 import play.cache.Cache;
 import play.libs.Akka;
@@ -23,20 +21,19 @@ import uk.bl.monitrix.analytics.HostAnalytics;
 import uk.bl.monitrix.analytics.LogAnalytics;
 import uk.bl.monitrix.analytics.TimeseriesValue;
 import uk.bl.monitrix.database.DBConnector;
+import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
 import uk.bl.monitrix.model.KnownHostList;
 
 public class Hosts extends AbstractController {
 	
-	private static final String CAPPED_CRAWL_ANNOTATION = "Q:serverMaxSuccessKb";
-		
 	private static DBConnector db = Global.getBackend();
 	
 	private static KnownHostList hosts = db.getKnownHostList();
 	
 	public static Result index() {
-		List<String> cappedHosts = db.getCrawlLog().extractHostsForAnnotation(CAPPED_CRAWL_ANNOTATION);
+		List<String> cappedHosts = db.getCrawlLog().extractHostsForAnnotation(CrawlLogEntry.ANNOTATION_CAPPED_CRAWL);
 		return ok(views.html.hosts.index.render(db.getKnownHostList(), cappedHosts));
 	}
 	

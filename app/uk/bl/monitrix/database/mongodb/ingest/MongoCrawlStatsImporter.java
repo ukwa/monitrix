@@ -36,12 +36,12 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 	 * .commit() method after your updates are done.
 	 * @param entry the log entry
 	 */
-	public void update(CrawlLogEntry entry) {
+	public void update(CrawlLogEntry entry, String crawl_id) {
 		// Step 1 - compute the timeslot
 		long timeslot = toTimeslot(entry.getLogTimestamp().getTime());
 				
 		// Step 2 - update data for this timeslot
-		MongoCrawlStatsUnit currentUnit = (MongoCrawlStatsUnit) getStatsForTimestamp(timeslot);
+		MongoCrawlStatsUnit currentUnit = (MongoCrawlStatsUnit) getStatsForTimestamp(timeslot,crawl_id);
 		if (currentUnit == null) {
 			// Step 3a - init data for this timeslot
 			currentUnit = new MongoCrawlStatsUnit(new BasicDBObject());
@@ -63,7 +63,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 			// Update host completion time
 			long lastRecordedAccess = host.getLastAccess();
 			if (lastRecordedAccess < timeslot) {
-				MongoCrawlStatsUnit unitToModify = (MongoCrawlStatsUnit) getStatsForTimestamp(toTimeslot(lastRecordedAccess));
+				MongoCrawlStatsUnit unitToModify = (MongoCrawlStatsUnit) getStatsForTimestamp(toTimeslot(lastRecordedAccess), crawl_id);
 				unitToModify.setCompletedHosts(unitToModify.countCompletedHosts() - 1);
 				currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 			}

@@ -117,7 +117,6 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	}
 	
 	public void incrementIngestedLogLines(String id, long increment) {
-		Logger.warn("INCREMENTING "+id+" "+increment);
 		session.execute("UPDATE crawl_uris.log_file_counters SET ingested_lines = ingested_lines + "+increment+" WHERE path='"+id+"'");
 	}
 

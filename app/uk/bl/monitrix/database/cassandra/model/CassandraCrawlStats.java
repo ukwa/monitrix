@@ -30,7 +30,46 @@ public class CassandraCrawlStats implements CrawlStats {
 	public CassandraCrawlStats(Session session) {
 		this.session = session;
 	}
+	
+	private String getCrawlIDs( String crawl_id ) {
+		if( crawl_id != null ) {
+			return "= '"+crawl_id+"'";
+		}
+		// Go through all the crawl IDs:
+		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.crawls;").iterator();
+		String keys = " IN (";
+		while( rows.hasNext() ) {
+			Row r = rows.next();
+			keys = keys + "'" + r.getString("crawl_id") + "'";
+			if( rows.hasNext() ) keys += ",";
+		}
+		keys += ")";
+		return keys;
+	}
 
+	@Override
+	public Iterator<CrawlStatsUnit> getCrawlStats() {
+		// Now build the query:
+		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id "+getCrawlIDs(null)+" ORDER BY stat_ts;").iterator();
+		return new Iterator<CrawlStatsUnit>() {
+			@Override
+			public boolean hasNext() {
+				return cursor.hasNext();
+			}
+
+			@Override
+			public CrawlStatsUnit next() {
+				return new CassandraCrawlStatsUnit(cursor.next());
+			}
+
+			@Override
+			public void remove() {
+				cursor.remove();	
+			}
+		};
+	}
+
+	@Override
 	public Iterator<CrawlStatsUnit> getCrawlStats( String crawl_id ) {
 		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id='"+crawl_id+"' ORDER BY stat_ts;").iterator();
 		return new Iterator<CrawlStatsUnit>() {
@@ -52,42 +91,11 @@ public class CassandraCrawlStats implements CrawlStats {
 	}
 
 	@Override
-	public Iterator<CrawlStatsUnit> getCrawlStats() {
-		// Go through all the crawl IDs:
-		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.crawls;").iterator();
-		String keys = "(";
-		while( rows.hasNext() ) {
-			Row r = rows.next();
-			keys = keys + "'" + r.getString("crawl_id") + "'";
-			if( rows.hasNext() ) keys += ",";
-		}
-		keys += ")";
-		// Now build the query:
-		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id IN "+keys+" ORDER BY stat_ts;").iterator();
-		return new Iterator<CrawlStatsUnit>() {
-			@Override
-			public boolean hasNext() {
-				return cursor.hasNext();
-			}
-
-			@Override
-			public CrawlStatsUnit next() {
-				return new CassandraCrawlStatsUnit(cursor.next());
-			}
-
-			@Override
-			public void remove() {
-				cursor.remove();	
-			}
-		};
-	}
-
-	@Override
-	public CrawlStatsUnit getStatsForTimestamp(long timestamp) {
+	public CrawlStatsUnit getStatsForTimestamp(long timestamp, String crawl_id) {
 		if (cache.containsKey(timestamp))
 			return cache.get(timestamp);
 		
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.stats WHERE stat_ts="+timestamp+" AND crawl_id='test_crawl_id' ORDER BY stat_ts;");
+		ResultSet results = session.execute("SELECT * FROM crawl_uris.stats WHERE stat_ts="+timestamp+" AND crawl_id='"+crawl_id+"' ORDER BY stat_ts;");
 		
 		if (results.isExhausted() ) {
 			return null;
@@ -100,7 +108,7 @@ public class CassandraCrawlStats implements CrawlStats {
 
 	@Override
 	public List<CrawlStatsUnit> getMostRecentStats(int n) {
-		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id='test_crawl_id' ORDER BY stat_ts LIMIT "+n+";").iterator();
+		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id"+this.getCrawlIDs(null)+" ORDER BY stat_ts LIMIT "+n+";").iterator();
 		
 		List<CrawlStatsUnit> recent = new ArrayList<CrawlStatsUnit>();
 		while(cursor.hasNext())

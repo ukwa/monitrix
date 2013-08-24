@@ -17,11 +17,20 @@ public interface CrawlStats {
 	public Iterator<CrawlStatsUnit> getCrawlStats();
 	
 	/**
+	 * Returns an iterator over the stats for a particular crawl.
+	 * 
+	 * @param crawl_id of the crawl - returns data for all crawls if NULL.
+	 * @return the crawl stats
+	 */
+	public Iterator<CrawlStatsUnit> getCrawlStats( String crawl_id );
+	
+	/**
 	 * Returns a single base-resolution unit of the aggregated crawl stats.
 	 * @param timestamp the timestamp of the unit
+	 * @param crawl_id of the crawl 
 	 * @return the crawl stats unit
 	 */
-	public CrawlStatsUnit getStatsForTimestamp(long timestamp);
+	public CrawlStatsUnit getStatsForTimestamp(long timestamp, String crawl_id);
 	
 	/**
 	 * Returns the N most recent recorded stats. 

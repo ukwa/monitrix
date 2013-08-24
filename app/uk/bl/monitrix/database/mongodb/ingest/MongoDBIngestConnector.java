@@ -118,7 +118,7 @@ public class MongoDBIngestConnector implements DBIngestConnector {
 				logEntryBatch.add(dbo);	
 								
 				// Update pre-aggregated stats
-				crawlStatsImporter.update(next);
+				crawlStatsImporter.update(next, crawlerId);
 				
 				// Host info
 				knownHostImporter.addCrawlerID(next.getHost(), crawlerId);

@@ -55,8 +55,19 @@ public class MongoCrawlStats implements CrawlStats {
 		};
 	}
 
+	/**
+	 * FIXME crawl_id ignored at present.
+	 */
 	@Override
-	public CrawlStatsUnit getStatsForTimestamp(long timestamp) {
+	public Iterator<CrawlStatsUnit> getCrawlStats(String crawl_id) {
+		return this.getCrawlStats();
+	}
+
+	/**
+	 * FIXME crawl_id ignored at present.
+	 */
+	@Override
+	public CrawlStatsUnit getStatsForTimestamp(long timestamp, String crawl_id) {
 		if (cache.containsKey(timestamp))
 			return cache.get(timestamp);
 		

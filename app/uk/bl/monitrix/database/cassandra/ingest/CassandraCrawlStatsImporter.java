@@ -40,7 +40,7 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		long timeslot = toTimeslot(entry.getLogTimestamp().getTime());
 				
 		// Step 2 - update data for this timeslot
-		CassandraCrawlStatsUnit currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot);
+		CassandraCrawlStatsUnit currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot, crawl_id);
 		session.execute("UPDATE crawl_uris.stats SET uris_crawled = uris_crawled + 1, downloaded_bytes = downloaded_bytes + " + 
 			entry.getDownloadSize() + whereClause(timeslot,crawl_id) + ";");
 		

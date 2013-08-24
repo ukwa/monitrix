@@ -2,12 +2,14 @@ package uk.bl.monitrix.database.cassandra.ingest;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
 import play.Logger;
@@ -15,7 +17,9 @@ import uk.bl.monitrix.analytics.HostAnalytics;
 import uk.bl.monitrix.database.cassandra.model.CassandraAlert;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHost;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHostList;
+import uk.bl.monitrix.heritrix.LogFileEntry;
 import uk.bl.monitrix.model.Alert.AlertType;
+import uk.bl.monitrix.model.KnownHost;
 
 /**
  * An extended version of {@link CassandraKnownHostList} that adds insert/update capability.
@@ -174,45 +178,48 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	/**
 	 * Writes the contents of the cache to the database.
 	 */
-	public void commit() {
-		Logger.info("Updating known hosts list (" + cache.size() +  " hosts)");
-		for (CassandraKnownHost knownHost : new ArrayList<CassandraKnownHost>(cache.values())) {
-			// Looks a little recursive... 
-//			knownHost.setRobotsBlockPercentage(HostAnalytics.computePercentageOfRobotsTxtBlocks(knownHost));
-//			knownHost.setRedirectPercentage(HostAnalytics.computePercentagOfRedirects(knownHost));
-//			knownHost.setTextToNoneTextRatio(HostAnalytics.computeTextToNonTextRatio(knownHost));
-//			
-//			collection.save(knownHost.getBackingDBO());
-		}
+	public void updateHostStats( LogFileEntry l ) {
+		String hostname = l.getHost();
+		KnownHost host = this.getKnownHost(hostname);
+		//Logger.info("Updating host stats");
+		
+		double d = HostAnalytics.computePercentageOfRobotsTxtBlocks(host);
+		session.execute("UPDATE crawl_uris.known_hosts SET robots_block_percentage="+d+" WHERE host='"+hostname+"';");
+
+		d = HostAnalytics.computePercentagOfRedirects(host);
+		session.execute("UPDATE crawl_uris.known_hosts SET redirect_percentage="+d+" WHERE host='"+hostname+"';");
+		
+		d = HostAnalytics.computeTextToNonTextRatio(host);
+		session.execute("UPDATE crawl_uris.known_hosts SET text_to_nontext_ratio="+d+" WHERE host='"+hostname+"';");
 		
 		// Compute host-level alerts
 		// Note: we only need to consider hosts that were added in this batch - ie. those in the cache!
-		// FIXME: Moving to the host-wise model means we've lost the alerts.
-		Logger.info("Computing host-level alerts");
-		for (CassandraKnownHost host : cache.values()) {
-			// Subdomain limit
-			int subdomains = 0;//host.getSubdomain().size();
-			if (subdomains > 100) {
-//				CassandraAlert alert = new CassandraAlert(new BasicDBObject());
-//				alert.setTimestamp(host.getLastAccess());
-//				alert.setOffendingHost(host.getHostname());
-//				alert.setAlertType(AlertType.TOO_MANY_SUBDOMAINS);
-//				alert.setAlertDescription(String.format(ALERT_MSG_TOO_MANY_SUBDOMAINS, host.getHostname(), Integer.toString(subdomains)));
-//				alertLog.insert(alert);
-			}
+		//Logger.info("Computing host-level alerts");
+		// Subdomain limit
+		Iterator<Row> rows = session.execute("SELECT COUNT(*) FROM crawl_uris.known_hosts WHERE domain='"+l.getDomain()+"';").iterator();
+		long subdomains = rows.next().getLong("count");
+		// FIXME: Hard-coded alert level.
+		if (subdomains > 100) {
+			LogFileEntry.DefaultAlert alert = new LogFileEntry.DefaultAlert(
+			host.getLastAccess(),
+			host.getHostname(),
+			AlertType.TOO_MANY_SUBDOMAINS,
+			String.format(ALERT_MSG_TOO_MANY_SUBDOMAINS, host.getHostname(), Long.toString(subdomains)
+			));
+			alertLog.insert(alert);
+		}
 
-			// Text-to-Nontext content type ratio limit
-			if (host.getTextToNoneTextRatio() > 0.9) {
-//				CassandraAlert alert = new CassandraAlert(new BasicDBObject());
-//				alert.setTimestamp(host.getLastAccess());
-//				alert.setOffendingHost(host.getHostname());
-//				alert.setAlertType(AlertType.TXT_TO_NONTEXT_RATIO);
-//				alert.setAlertDescription(String.format(ALERT_MSG_TXT_TO_NONTEXT_RATIO, host.getHostname()));
-//				alertLog.insert(alert);
-			}
+		// Text-to-Nontext content type ratio limit
+		if (host.getTextToNoneTextRatio() > 0.9) {
+			LogFileEntry.DefaultAlert alert = new LogFileEntry.DefaultAlert(
+			host.getLastAccess(),
+			host.getHostname(),
+			AlertType.TXT_TO_NONTEXT_RATIO,
+			String.format(ALERT_MSG_TXT_TO_NONTEXT_RATIO, host.getHostname()
+			));
+		alertLog.insert(alert);
 		}
 		
-		cache.clear();
 	}
 
 }

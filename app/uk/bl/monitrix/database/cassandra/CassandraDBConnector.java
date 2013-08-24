@@ -232,8 +232,8 @@ public class CassandraDBConnector implements DBConnector {
 		// Crawl stats:
 		session.execute(
 		"CREATE TABLE crawl_uris.stats (" +
-				"stat_ts timestamp," +
 				"crawl_id text," +
+				"stat_ts timestamp," +
 				"downloaded_bytes counter," +
 				"uris_crawled counter," +
 				"new_hosts counter," +
@@ -241,6 +241,8 @@ public class CassandraDBConnector implements DBConnector {
 				"PRIMARY KEY (crawl_id, stat_ts)" +
 		");");
 		//session.execute("CREATE INDEX stats_crawl_id_idx ON crawl_uris.stats (crawl_id)");
+		
+		// FIXME Add histogram table for e.g. url compressibility, by crawl? Actually, need URL.
 		
 		// Known hosts lookup:
 		session.execute(
@@ -266,6 +268,14 @@ public class CassandraDBConnector implements DBConnector {
 		");");
 		session.execute("CREATE INDEX tld_idx ON crawl_uris.known_hosts (tld)");
 		session.execute("CREATE INDEX tld_domain_idx ON crawl_uris.known_hosts (domain)");
+		
+		// FIXME Add counter columns for each host
+		// crawled_urls
+		// subdomains (?)
+		// blocked_by_robots
+		// redirects
+		// text_resources
+		// text_run_counter
 		
 		// Known tlds:
 		session.execute(

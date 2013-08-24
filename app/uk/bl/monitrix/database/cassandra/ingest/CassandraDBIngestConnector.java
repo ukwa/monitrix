@@ -114,6 +114,11 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				// Host info
 				knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
 				
+				// FIXME Check for long runs and raise alerts?
+				
+				// Update stats and check for any host-level alerts:
+				knownHostImporter.updateHostStats(next);
+				
 				// Log-entry-level alerts
 				for (Alert a : next.getAlerts()) {
 					alertBatch.add((DefaultAlert) a);
@@ -129,13 +134,13 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 					counter = 0;
 					revisits = 0;
 				}
+				
 			}
 			// Update with final last-seen date
 			crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
 			
 			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
 			bulkStart = System.currentTimeMillis();
-			
 			
 			alertLogImporter.insert(alertBatch);
 			alertBatch.clear();		

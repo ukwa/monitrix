@@ -135,6 +135,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 					));
 			}
 		}
+		// FIXME Also increment url-level counters?
 	}
 	
 	/**

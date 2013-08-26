@@ -149,6 +149,7 @@ public class CassandraDBConnector implements DBConnector {
 						"referer text," +
 						"retries int," +
 						"worker_thread text," +
+						"line text," +
 						"PRIMARY KEY (coarse_ts, log_ts, entry_uuid)" +
 				");");
 		
@@ -268,20 +269,37 @@ public class CassandraDBConnector implements DBConnector {
 		");");
 		session.execute("CREATE INDEX tld_idx ON crawl_uris.known_hosts (tld)");
 		session.execute("CREATE INDEX tld_domain_idx ON crawl_uris.known_hosts (domain)");
+		session.execute("CREATE INDEX avg_retry_rate_idx ON crawl_uris.known_hosts (avg_retry_rate)");
 		
 		// FIXME Add counter columns for each host
-		// crawled_urls
-		// subdomains (?)
-		// blocked_by_robots
-		// redirects
-		// text_resources
-		// text_run_counter
-		// OR
+		session.execute(
+		"CREATE TABLE crawl_uris.known_host_counters (" +
+				"host text," +
+				"uris counter," +
+				"retries counter," +
+				"duration counter," +
+				"successfully_fetched_uris counter," +
+				"redirects counter," +
+				"blocked_by_robots counter," +
+				"text_resources counter," +
+				"text_run counter," +
+				"subdomains counter," +
+				"PRIMARY KEY (host)" +
+		");");
+		
 		// Add histogram column.
 		// (crawl,histogram_type, range), counter.
 		// i.e., for each crawl, look up each histogram, sorted by range (x-axis lower bucket), giving totals.
 		// BUT remember, need same ranges with same quantisation as indexes on the corresponding tables
 		// (e.g. known_hosts for percentages and counts on hosts, log for compressibility of uris)
+		session.execute(
+		"CREATE TABLE crawl_uris.known_host_histograms (" +
+				"host text," +
+				"histogram_type text," +
+				"range double," +
+				"total counter," +
+				"PRIMARY KEY (host,histogram_type,range)" +
+		");");
 		
 		// Known tlds:
 		session.execute(

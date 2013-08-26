@@ -164,11 +164,13 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 				double newAvgResponseTime = (currentAvgResponseTime * successCount + fetchDuration) / (successCount + 1);
 				
 				double currentAvgRetryRate = host.getAverageRetryRate();
-				double newAvgRetryRate = (currentAvgRetryRate * successCount + retries) / (successCount + 1);
+				double newAvgRetryRate = rounder((currentAvgRetryRate * successCount + retries) / (successCount + 1));
 				
 				session.execute("UPDATE crawl_uris.known_hosts SET successfully_fetched_urls="+(successCount + 1)+" WHERE host='"+hostname+"';");
 				session.execute("UPDATE crawl_uris.known_hosts SET avg_fetch_duration="+newAvgResponseTime+" WHERE host='"+hostname+"';");
 				session.execute("UPDATE crawl_uris.known_hosts SET avg_retry_rate="+newAvgRetryRate+" WHERE host='"+hostname+"';");
+				// Update counter columns
+				session.execute("UPDATE crawl_uris.known_host_counters SET successfully_fetched_uris = successfully_fetched_uris + 1, retries = retries + "+retries+", duration = duration + "+fetchDuration+" WHERE host='"+hostname+"';");
 			} else {
 				Logger.warn("Attempt to update average response time for known host: " + hostname);
 			}

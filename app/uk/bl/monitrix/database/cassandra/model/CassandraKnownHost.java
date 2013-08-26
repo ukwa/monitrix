@@ -3,10 +3,12 @@ package uk.bl.monitrix.database.cassandra.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
 
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.KnownHost;
@@ -19,9 +21,11 @@ import uk.bl.monitrix.model.KnownHost;
 public class CassandraKnownHost extends KnownHost {
 	
 	private Row row;
+	private Session session;
 	
-	public CassandraKnownHost(Row row) {
+	public CassandraKnownHost(Session session, Row row) {
 		this.row = row;
+		this.session = session;
 	}
 	
 	@Override
@@ -79,11 +83,13 @@ public class CassandraKnownHost extends KnownHost {
 
 	@Override
 	public double getAverageRetryRate() {
-		Double retryRate = row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE);
-		if (retryRate == null)
+		Iterator<Row> rows = session.execute("SELECT * from crawl_uris.known_host_counters WHERE host='"+this.getHostname()+"';").iterator();
+		if( rows.hasNext() ) {
+			Row row = rows.next();
+			return row.getLong("retries")/(double)row.getLong("successfully_fetched_uris");
+		} else {
 			return 0;
-		else
-			return retryRate;
+		}
 	}
 	
 	@Override

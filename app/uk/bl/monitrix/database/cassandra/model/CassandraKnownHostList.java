@@ -9,11 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import play.Logger;
+
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Row;
 
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
+import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
+import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
 import uk.bl.monitrix.model.KnownHostList;
 import uk.bl.monitrix.model.SearchResult;
@@ -84,20 +88,20 @@ public class CassandraKnownHostList implements KnownHostList {
 		if (results.isExhausted())
 			return null;
 		
-		CassandraKnownHost wrapped = new CassandraKnownHost(results.one());
+		CassandraKnownHost wrapped = new CassandraKnownHost(session,results.one());
 		return wrapped;
 	}
 
 	@Override
 	public SearchResult searchHosts(String query, int limit, int offset) {		
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.known_hosts WHERE host='"+query+"';");
-		return search(query, results, limit, offset);
+		return search(query, results.iterator(), limit, offset);
 	}
 	
 	@Override
 	public SearchResult searchByTopLevelDomain(String tld, int limit, int offset) {
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.known_hosts WHERE tld='"+tld+"';");
-		return search(tld, results, limit, offset);
+		return search(tld, results.iterator(), limit, offset);
 	}
 	
 	@Override
@@ -109,11 +113,41 @@ public class CassandraKnownHostList implements KnownHostList {
 	}
 	
 	@Override
-	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset) {		
-//		DBObject query = new BasicDBObject(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE, 
-//				new BasicDBObject("$gte", min).append("$lt", max));
-//		return search(null, query, limit, offset);
-		return null;
+	public SearchResult searchByAverageRetries(final int min, final int max, int limit, int offset) {
+		// Attempting a clever inline iterator:
+		Iterator<Row> multirows = new Iterator<Row>() {
+			
+			private Iterator<Row> cursor = null;
+			double lo = rounder(min);
+			double hi = rounder(max);
+			double cur = lo - 1;
+			
+			@Override
+			public boolean hasNext() {
+				Logger.warn("hasNext...");
+				while( cursor == null || (cur < hi && !cursor.hasNext())) {
+					cur = cur + 1;
+					String cql = "SELECT * from crawl_uris.known_hosts where avg_retry_rate = "+cur+";";
+					ResultSet results  = session.execute(cql);
+					cursor = results.iterator();
+					if( cur == lo ) {
+				        Logger.info("CQL: "+cql);
+					}
+				}
+				return cursor.hasNext();
+			}
+
+			@Override
+			public Row next() {
+				return cursor.next();
+			}
+
+			@Override
+			public void remove() {
+				// No-op
+			}
+		};
+		return search(null, multirows, limit, offset);
 	}
 	
 	@Override
@@ -132,24 +166,21 @@ public class CassandraKnownHostList implements KnownHostList {
 		return null;
 	}
 	
-	private SearchResult search(String queryString, ResultSet results, int limit, int offset) {
+	private SearchResult search(String queryString, Iterator<Row> cursor, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
 		long total = 0;
 					
 		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
 		
-		if (limit > 0) {
-			Iterator<Row> cursor = results.iterator();
-			
-			// Right now the number of URLs per host are packed into the 'description field' - not ideal!
-			// TODO we need to find a better way to handle 'search result metadata' 
-			while (cursor.hasNext()) {
-				KnownHost host = new CassandraKnownHost(cursor.next());
-				hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
-			}
+		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
+		// TODO we need to find a better way to handle 'search result metadata' 
+		while (cursor.hasNext()) {
+			KnownHost host = new CassandraKnownHost(session,cursor.next());
+			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
 			// Update the total number of results.
 			total++;
 		}
+		Logger.info("Total = "+total);
 		
 		return new SearchResult(null, total, hostnames, limit, offset, System.currentTimeMillis() - startTime);
 		
@@ -188,6 +219,13 @@ public class CassandraKnownHostList implements KnownHostList {
 	public long countForTopLevelDomain(String tld) {
 		ResultSet results = session.execute("SELECT crawled_urls FROM crawl_uris.known_tlds WHERE tld='"+tld+"';");
 		return results.one().getLong("crawled_urls");
+	}
+
+	// FIXME Rounder
+	protected double rounder_res = 1000.0;
+	protected double rounder_step = 1.0 / rounder_res;
+	protected double rounder(double in) {
+		return Math.floor(rounder_res*in);
 	}
 	
 }

@@ -34,8 +34,8 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			      "INSERT INTO crawl_uris.log " +
 			      "(coarse_ts, log_ts, entry_uuid, uri, fetch_ts, host, domain, subdomain, status_code, hash, " + 
 			      "log_id, annotations, discovery_path, compressibility, content_type, download_size, " + 
-			      "fetch_duration, referer, retries, worker_thread) " +
-			      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+			      "fetch_duration, referer, retries, worker_thread, line) " +
+			      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		this.statementUri = session.prepare(
 			      "INSERT INTO crawl_uris.uris " +
 			      "(uri, log_ts, coarse_ts, fetch_ts, status_code, hash) " +
@@ -111,7 +111,8 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 				l.getFetchDuration(),
 				l.getReferrer(),
 				l.getRetries(),
-				l.getWorkerThread()
+				l.getWorkerThread(),
+				l.toString()
 				));
 		// Also insert into URI table, for look-up purposes:
 		BoundStatement boundStatementUri = new BoundStatement(statementUri);

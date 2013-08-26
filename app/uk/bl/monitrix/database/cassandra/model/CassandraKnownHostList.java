@@ -119,7 +119,7 @@ public class CassandraKnownHostList implements KnownHostList {
 			
 			private Iterator<Row> cursor = null;
 			double lo = rounder(min);
-			double hi = rounder(max);
+			double hi = rounder(max) - 1; // Emulate less-than-or-equal-to.
 			double cur = lo - 1;
 			
 			@Override
@@ -130,7 +130,7 @@ public class CassandraKnownHostList implements KnownHostList {
 					String cql = "SELECT * from crawl_uris.known_hosts where avg_retry_rate = "+cur+";";
 					ResultSet results  = session.execute(cql);
 					cursor = results.iterator();
-					if( cur == lo ) {
+					if( cursor.hasNext() ) {
 				        Logger.info("CQL: "+cql);
 					}
 				}

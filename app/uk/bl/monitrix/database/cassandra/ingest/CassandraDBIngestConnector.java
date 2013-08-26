@@ -58,7 +58,6 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		
 		// Insert one automatically, if empty:
 		/*
-		*/
 		if( this.ingestSchedule.getLogForCrawlerId("sample-crawler-id") == null ) {
 			this.ingestSchedule.addLog(
 					"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log.cp00001-20130605082749",
@@ -67,6 +66,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 					true
 					);
 		}
+		*/
 	}
 	
 	@Override
@@ -136,6 +136,9 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				}
 				
 			}
+			// Update the total log lines counter:
+			ingestSchedule.incrementIngestedLogLines(logId, counter, revisits);
+			
 			// Update with final last-seen date
 			crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
 			

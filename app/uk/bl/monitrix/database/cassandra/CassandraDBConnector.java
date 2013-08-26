@@ -276,6 +276,12 @@ public class CassandraDBConnector implements DBConnector {
 		// redirects
 		// text_resources
 		// text_run_counter
+		// OR
+		// Add histogram column.
+		// (crawl,histogram_type, range), counter.
+		// i.e., for each crawl, look up each histogram, sorted by range (x-axis lower bucket), giving totals.
+		// BUT remember, need same ranges with same quantisation as indexes on the corresponding tables
+		// (e.g. known_hosts for percentages and counts on hosts, log for compressibility of uris)
 		
 		// Known tlds:
 		session.execute(

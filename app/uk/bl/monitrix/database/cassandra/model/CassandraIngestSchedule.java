@@ -112,7 +112,7 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	public void setMonitoringEnabled(String id, boolean monitoringEnabled) {
 		CassandraIngestedLog log = (CassandraIngestedLog) getLog(id);
 		if (log != null) {
-			session.execute("UPDATE crawl_uris.log_files SET monitor = "+monitoringEnabled+" WHERE path='"+id+"'");
+			session.execute("UPDATE crawl_uris.log_files SET is_monitored = "+monitoringEnabled+" WHERE path='"+id+"'");
 		}
 	}
 	

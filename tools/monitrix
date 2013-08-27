@@ -15,5 +15,7 @@ data = {
 
 print "Sending...", data
 
-print "Got...", requests.post(url, data=data).status_code
+result = requests.post(url, data=data)
+print "Got...", result.status_code
+print "Got...", result.text
 

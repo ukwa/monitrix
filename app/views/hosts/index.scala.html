@@ -129,13 +129,13 @@
     Morris.Bar({
         element: 'hosts-barchart',
         data: [
-                @Html({hosts.getTopLevelDomains.reverse.map { tld =>
+                @Html({hosts.getTopLevelDomains.map { tld =>
                   "{ tld: '" + tld + "', count: " + hosts.countForTopLevelDomain(tld) + "}" 
                 }.mkString(", ") })
       	    ],
         xkey: 'tld',
         ykeys: ['count'],
-        labels: [ '@hosts.getTopLevelDomains.reverse.mkString("', '")' ],
+        labels: [ '@hosts.getTopLevelDomains.mkString("', '")' ],
         hideHover: 'false',
         barColors: [ '#850303' ], 
         hoverCallback: function(index, options) {
@@ -199,6 +199,9 @@
           
         });
     }
+    
+    // Auto-load this graph:
+    loadRetries();
     
     function loadDelay() {
       $('.load-button-delay').remove();

@@ -119,14 +119,14 @@ public class CassandraKnownHostList implements KnownHostList {
 			
 			private Iterator<Row> cursor = null;
 			double lo = rounder(min);
-			double hi = rounder(max) - 1; // Emulate less-than-or-equal-to.
-			double cur = lo - 1;
+			double hi = rounder(max) - rounder_step; // Emulate less-than-or-equal-to.
+			double cur = lo - rounder_step;
 			
 			@Override
 			public boolean hasNext() {
 				Logger.warn("hasNext...");
 				while( cursor == null || (cur < hi && !cursor.hasNext())) {
-					cur = cur + 1;
+					cur = cur + rounder_step;
 					String cql = "SELECT * from crawl_uris.known_hosts where avg_retry_rate = "+cur+";";
 					ResultSet results  = session.execute(cql);
 					cursor = results.iterator();
@@ -222,8 +222,8 @@ public class CassandraKnownHostList implements KnownHostList {
 	}
 
 	// FIXME Rounder
-	protected double rounder_res = 1000.0;
-	protected double rounder_step = 1.0 / rounder_res;
+	protected double rounder_res = 100.0;
+	protected double rounder_step = 1.0;
 	protected double rounder(double in) {
 		return Math.floor(rounder_res*in);
 	}

@@ -1,6 +1,5 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -8,13 +7,11 @@ import java.util.Map;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
 import play.Logger;
 import uk.bl.monitrix.analytics.HostAnalytics;
-import uk.bl.monitrix.database.cassandra.model.CassandraAlert;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHost;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHostList;
 import uk.bl.monitrix.heritrix.LogFileEntry;

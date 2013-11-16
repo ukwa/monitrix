@@ -17,5 +17,6 @@ print "Sending...", data
 
 result = requests.post(url, data=data)
 print "Got...", result.status_code
-print "Got...", result.text
+if( result.status_code != 200):
+  print "Got...", result.text
 

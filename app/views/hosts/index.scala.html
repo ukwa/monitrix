@@ -129,13 +129,13 @@
     Morris.Bar({
         element: 'hosts-barchart',
         data: [
-                @Html({hosts.getTopLevelDomains.map { tld =>
+                @Html({hosts.getTopLevelDomains.reverse.map { tld =>
                   "{ tld: '" + tld + "', count: " + hosts.countForTopLevelDomain(tld) + "}" 
                 }.mkString(", ") })
       	    ],
         xkey: 'tld',
         ykeys: ['count'],
-        labels: [ '@hosts.getTopLevelDomains.mkString("', '")' ],
+        labels: [ '@hosts.getTopLevelDomains.reverse.mkString("', '")' ],
         hideHover: 'false',
         barColors: [ '#850303' ], 
         hoverCallback: function(index, options) {

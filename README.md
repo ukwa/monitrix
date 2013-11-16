@@ -15,7 +15,7 @@ for information about:
 To __start monitrix__ in development mode, change into the project root folder and type  ``play run``.
 The application will be at [http://localhost:9000](http://localhost:9000). 
 
-To __generate an Eclipse project__, type ``play eclipsify``.
+To __generate an Eclipse project__, type ``play eclipse``.
 
 ## Getting Data into monitrix
 

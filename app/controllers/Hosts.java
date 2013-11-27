@@ -7,7 +7,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import scala.concurrent.duration.Duration;
 import controllers.mapping.TimeseriesValueMapper;
@@ -148,7 +149,7 @@ public class Hosts extends AbstractController {
 				return ok(Json.toJson(TimeseriesValueMapper.map(timeseries)));
 			}
 		}
-		
+
 		ObjectNode json = Json.newObject();
 		json.put("progress", progress.progress);
 		return ok(json);

@@ -76,7 +76,7 @@ public class IngestActor extends UntypedActor {
 				}
 			}
 
-			getSender().tell(statusList);
+			getSender().tell(statusList, null); // FIXME NULL!?!
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.SYNC_WITH_SCHEDULE)) {
 			for (IngestedLog log : db.getIngestSchedule().getLogs()) {
 				String id = log.getId();
@@ -91,7 +91,7 @@ public class IngestActor extends UntypedActor {
 			Long newInterval = (Long) msg.getPayload();
 			sleepInterval = newInterval.longValue();
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHECK_RUNNING)) {
-			getSender().tell(isRunning);
+			getSender().tell(isRunning, null); // FIXME NULL!?!
 		}
 	}
 	

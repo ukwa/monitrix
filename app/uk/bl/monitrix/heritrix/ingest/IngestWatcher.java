@@ -46,7 +46,7 @@ public class IngestWatcher {
 	 * Re-syncs the status of the IngestWatcher with the DB-backed IngestSchedule
 	 */
 	public void refresh() {
-		ingestActor.tell(new IngestControlMessage(Command.SYNC_WITH_SCHEDULE));
+		ingestActor.tell(new IngestControlMessage(Command.SYNC_WITH_SCHEDULE), null); // FIXME NULL?!?!
 	}
 	
 	/**
@@ -54,7 +54,7 @@ public class IngestWatcher {
 	 */
 	public void startWatching() {
 		Logger.info("Starting ingest watcher");
-		ingestActor.tell(new IngestControlMessage(Command.START));
+		ingestActor.tell(new IngestControlMessage(Command.START), null); // FIXME NULL?!?!
 	}
 	
 	/**
@@ -62,7 +62,7 @@ public class IngestWatcher {
 	 */
 	public void stopWatching() {
 		Logger.info("Stopping ingest watcher");
-		ingestActor.tell(new IngestControlMessage(Command.STOP));
+		ingestActor.tell(new IngestControlMessage(Command.STOP), null); // FIXME NULL?!?!
 	}
 	
 	/**

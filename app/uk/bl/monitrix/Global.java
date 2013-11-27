@@ -4,16 +4,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import play.Application;
-import play.GlobalSettings;
-import play.Logger;
+import play.*;
+import play.mvc.*;
+import play.mvc.Http.*;
 import play.libs.Akka;
-import play.mvc.Action;
-import play.mvc.Http.RequestHeader;
-import play.mvc.Result;
-import play.mvc.Http.Context;
-import play.mvc.Http.Request;
-import play.mvc.Results;
+import play.libs.F.Promise;
+import play.libs.F.*;
+import static play.mvc.Results.*;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.cassandra.CassandraDBConnector;
 import uk.bl.monitrix.database.cassandra.ingest.CassandraDBIngestConnector;
@@ -86,14 +83,16 @@ public class Global extends GlobalSettings {
 	/**
 	 * Redirect all errors (i.e. RuntimeExceptions) to a custom error page.
 	 */
-	@Override
-	public Result onError(RequestHeader request, Throwable t) {
+	
+	public Promise<SimpleResult> onError(RequestHeader request, Throwable t) {
 		t.printStackTrace();
 		while(t.getCause() != null)
 			t = t.getCause();
-			
-		return Results.ok(views.html.error.generalServerError.render(t));
-	}
+
+        return Promise.<SimpleResult>pure(internalServerError(        		
+        		views.html.error.generalServerError.render(t)
+        ));
+    }
 	
 	/**
 	 * In case the DB is not connected, montrix redirects to a specific error
@@ -107,13 +106,12 @@ public class Global extends GlobalSettings {
 			if (db == null)
 				return new Action.Simple() {
 					@Override
-					public Result call(Context arg0) throws Throwable {
-						return ok(views.html.error.dbConnectError.render());
+					public Promise<SimpleResult> call(Context arg0) throws Throwable {
+						return Promise.<SimpleResult>pure(ok(views.html.error.dbConnectError.render()));
 					}
 				};
 		}
 		
 		return super.onRequest(request, actionMethod);
 	}
-	
 }

@@ -10,8 +10,9 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       javaCore,
+      cache,
       "org.mongodb" % "mongo-java-driver" % "2.9.1",
-      "com.datastax.cassandra" % "cassandra-driver-core" % "1.0.2",
+      "com.datastax.cassandra" % "cassandra-driver-core" % "1.0.4",
       "commons-httpclient" % "commons-httpclient" % "3.1",
       "org.apache.httpcomponents" % "httpclient" % "4.2.3",
       "commons-io" % "commons-io" % "2.4",
@@ -22,10 +23,11 @@ object ApplicationBuild extends Build {
 
     // We're using the SBT BuildInfo plugin to make library version numbers available to the view
     // https://github.com/sbt/sbt-buildinfo
-    
-    val main = play.Project(appName, appVersion, appDependencies,
-      settings = Defaults.defaultSettings ++ buildInfoSettings)
-    .settings(
+
+
+    val main = play.Project(appName, appVersion, appDependencies)
+      .settings( buildInfoSettings: _* )
+      .settings(
       sourceGenerators in Compile <+= buildInfo,
       buildInfoKeys := Seq[BuildInfoKey](
           name,

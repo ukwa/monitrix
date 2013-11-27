@@ -3,7 +3,7 @@
 @import tags.{heritrixStatus, navbar, alertTag}
 
 @main("Monitrix - Host Information") {
-  @navbar("/hosts")
+  @navbar("/hosts/info")
 }{
   @defining(crawlLog.countEntriesForHost(knownHost.getHostname())) { totalURLs =>
     <h1 style="padding:0px 0px 10px 5px;">

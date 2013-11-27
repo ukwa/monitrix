@@ -3,7 +3,7 @@
 @import tags.{heritrixStatus, navbar, alertTag}
 
 @main("Monitrix - Host Information") {
-  @navbar("")
+  @navbar("/hosts")
 }{
   @defining(crawlLog.countEntriesForHost(knownHost.getHostname())) { totalURLs =>
     <h1 style="padding:0px 0px 10px 5px;">
@@ -80,12 +80,12 @@
                 <tbody>
                   @for((mime, value) <- knownHost.getContentTypeDistribution().toSeq.sortWith(_._2 > _._2)) {
                     <tr><td>@value</td><td>
-@if(mime.length > 20) {
-<abbr title="@mime">...@mime.substring(mime.length()-24)</abbr>
-} else {
-@mime
-}
-</td></tr>
+                    @if(mime.length > 20) {
+                    <abbr title="@mime">...@mime.substring(mime.length()-24)</abbr>
+                    } else {
+                    @mime
+                    }
+                    </td></tr>
                   }
                 </tbody>
               </table>
@@ -160,7 +160,7 @@
           Morris.Donut({
               data: [
                       @Html({knownHost.getContentTypeDistribution().map { case (mime, count) =>
-                         "{'label':'" + mime.replace('\'', '"') + "','value':" + count  + "}" 
+                         "{'label':'" + mime.replace("'", "\"") + "','value':" + count  + "}" 
                        }.mkString(", ") })
                     ],
               element: 'pie-mimetypes',

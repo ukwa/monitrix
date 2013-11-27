@@ -19,6 +19,7 @@ import uk.bl.monitrix.heritrix.LogFileEntry;
 import uk.bl.monitrix.heritrix.ingest.IngestStatus.Phase;
 import uk.bl.monitrix.model.IngestSchedule;
 import uk.bl.monitrix.model.IngestedLog;
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.UntypedActor;
 import scala.concurrent.Future;
@@ -76,7 +77,7 @@ public class IngestActor extends UntypedActor {
 				}
 			}
 
-			getSender().tell(statusList, null); // FIXME NULL!?!
+			getSender().tell(statusList, ActorRef.noSender());
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.SYNC_WITH_SCHEDULE)) {
 			for (IngestedLog log : db.getIngestSchedule().getLogs()) {
 				String id = log.getId();
@@ -91,7 +92,7 @@ public class IngestActor extends UntypedActor {
 			Long newInterval = (Long) msg.getPayload();
 			sleepInterval = newInterval.longValue();
 		} else if (msg.getCommand().equals(IngestControlMessage.Command.CHECK_RUNNING)) {
-			getSender().tell(isRunning, null); // FIXME NULL!?!
+			getSender().tell(isRunning, ActorRef.noSender());
 		}
 	}
 	

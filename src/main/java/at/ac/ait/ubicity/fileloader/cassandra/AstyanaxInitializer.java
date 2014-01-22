@@ -92,33 +92,12 @@ public final class AstyanaxInitializer {
         );    
     }
 
-    
-    try {
-    CF_LOGLINES =
-    ColumnFamily.newColumnFamily(
-    "CF_LOGLINES",              // Column Family Name
-    LongSerializer.get(),   // Key Serializer
-    StringSerializer.get());  // Column Serializer
+        
+    CF_LOGLINES = CassandraCrawlLogSchema.checkOrBuildMonitrixSchema( keySpace );
 
-    keySpace.createColumnFamily( CF_LOGLINES, ImmutableMap.<String, Object>builder()
-        .put("column_metadata", ImmutableMap.<String, Object>builder()
-                .put("Index1", ImmutableMap.<String, Object>builder()
-                        .put("validation_class", "UTF8Type")
-                        .put("index_name",       "Index1")
-                        .put("index_type",       "KEYS")
-                        .build())
-                .put("Index2", ImmutableMap.<String, Object>builder()
-                        .put("validation_class", "UTF8Type")
-                        .put("index_name",       "Index2")
-                        .put("index_type",       "KEYS")
-                        .build())
-                 .build())
-             .build());    
+    if( CF_LOGLINES == null )   {
+        logger.log( Level.SEVERE, "could not create Monitrix ColumnFamily ( table ) " );
     }
-    catch( BadRequestException bre )    {
-        logger.log( Level.INFO,  "column space " + CF_LOGLINES.getName() + " exists, everything OK, proceeding... " ) ;
-    }
-    
     return keySpace;
     }
 }

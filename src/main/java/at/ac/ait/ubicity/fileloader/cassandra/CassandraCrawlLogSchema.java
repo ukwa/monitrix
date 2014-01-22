@@ -1,5 +1,17 @@
 
 package at.ac.ait.ubicity.fileloader.cassandra;
+
+import static at.ac.ait.ubicity.fileloader.cassandra.AstyanaxInitializer.CF_LOGLINES;
+import static at.ac.ait.ubicity.fileloader.cassandra.AstyanaxInitializer.logger;
+import com.google.common.collect.ImmutableMap;
+import com.netflix.astyanax.Keyspace;
+import com.netflix.astyanax.connectionpool.exceptions.BadRequestException;
+import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import com.netflix.astyanax.model.ColumnFamily;
+import com.netflix.astyanax.serializers.LongSerializer;
+import com.netflix.astyanax.serializers.StringSerializer;
+import java.util.logging.Level;
+
 /**
     Copyright (C) 2013  AIT / Austrian Institute of Technology
     http://www.ait.ac.at
@@ -28,4 +40,37 @@ package at.ac.ait.ubicity.fileloader.cassandra;
  */
 public final class CassandraCrawlLogSchema {
     
+    
+    public final static ColumnFamily< Long, String > checkOrBuildMonitrixSchema( final Keyspace _keySpace)   {
+        ColumnFamily< Long, String > cf = null;
+        
+            try {
+               cf = ColumnFamily.newColumnFamily(
+               "CF_LOGLINES",              // Column Family Name
+               LongSerializer.get(),   // Key Serializer
+               StringSerializer.get());  // Column Serializer
+
+               _keySpace.createColumnFamily( CF_LOGLINES, ImmutableMap.<String, Object>builder()
+                   .put("column_metadata", ImmutableMap.<String, Object>builder()
+                           .put("Index1", ImmutableMap.<String, Object>builder()
+                                   .put("validation_class", "UTF8Type")
+                                   .put("index_name",       "Index1")
+                                   .put("index_type",       "KEYS")
+                                   .build())
+                           .put("Index2", ImmutableMap.<String, Object>builder()
+                                   .put("validation_class", "UTF8Type")
+                                   .put("index_name",       "Index2")
+                                   .put("index_type",       "KEYS")
+                                   .build())
+                            .build())
+                        .build());
+        }
+        catch( BadRequestException bre )    {
+            logger.log( Level.INFO,  "column space " + CF_LOGLINES.getName() + " exists, everything OK, proceeding... " ) ;
+        }    
+        catch( ConnectionException noCassandra )    {
+            logger.log( Level.SEVERE, noCassandra.toString() );
+        }
+        return cf;
+    }
 }

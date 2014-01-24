@@ -48,7 +48,7 @@ public final class LogFileCache implements FileCache, Serializable    {
     final static Logger logger = Logger.getLogger( LogFileCache.class.getName() );
     
     /** Is the cache enabled */
-    protected boolean cacheEnabled = false;
+    protected boolean cacheEnabled = true;
     
     /** maps a fingerprint to a jar information */
     protected Map<String, FileInformation > cacheMap = new HashMap();
@@ -63,29 +63,28 @@ public final class LogFileCache implements FileCache, Serializable    {
     
     
     @Override
-    public FileInformation getFileInformationFor( final URI uri ) {
+    public final FileInformation getFileInformationFor( final URI uri ) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void loadCache() {
-      if (!this.cacheEnabled) {
+      if ( cacheEnabled ) {
             return;
         }
         final String cacheFile = (this.cachePath == null) ? DEFAULT_CACHE_FILE : this.cachePath;
         try {
-            // lock the lockfile
             final FileInputStream fis = new FileInputStream( cacheFile );
-          final Object rval;
-          try ( ObjectInputStream ois = new ObjectInputStream( fis ) ) {
-              rval = ois.readObject();
-          }
+            final Object rval;
+            try ( ObjectInputStream ois = new ObjectInputStream( fis ) ) {
+                rval = ois.readObject();
+            }
             if (rval != null) {
-                this.cacheMap = ( Map<String, FileInformation >) rval;
+                cacheMap = ( Map<String, FileInformation >) rval;
             }
         } 
         catch (final ClassNotFoundException e) {
-            this.logger.warning("Your JSPF cache is outdated, please delete it. It will be regenerated with the next run. The next exception reflects this, so don't be afraid.");
+            logger.warning("Your  cache is outdated, please delete it. It will be regenerated with the next run. The next exception reflects this, so don't be afraid.");
         } 
         catch (final IOException e1) {
             logger.severe("caught an IOException while trying to load cache : IOException : " + e1);

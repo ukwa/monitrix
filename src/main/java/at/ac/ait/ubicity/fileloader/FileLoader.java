@@ -20,17 +20,21 @@ package at.ac.ait.ubicity.fileloader;
 
 
 import at.ac.ait.ubicity.fileloader.cassandra.AstyanaxInitializer;
+import at.ac.ait.ubicity.fileloader.util.FileCache;
+import at.ac.ait.ubicity.fileloader.util.LogFileCache;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.MutationBatch;
+
 import java.io.File;
+import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
@@ -50,6 +54,11 @@ public final class FileLoader {
     final static Logger logger = Logger.getLogger( "FileLoader" );
     
     static Keyspace keySpace;
+
+    static boolean useCache = true;
+    
+    static final long INVIGILANCE_WAITING_DELAY = 5000;
+    
     
     
     @SuppressWarnings("unchecked")
@@ -72,9 +81,6 @@ public final class FileLoader {
         disruptor.handleEventsWith( handler );
         final RingBuffer< SingleLogLineAsString > rb = disruptor.start();
         
-        
-        
- 
         int _lineCount = 0;
         long _start, _lapse;
         _start = System.nanoTime();
@@ -92,6 +98,38 @@ public final class FileLoader {
         _lapse = System.nanoTime() - _start;
 
         System.out.println( "handled " + _lineCount + " log lines in " + _lapse + " nanoseconds" );
+    }
+    
+    
+    public final void invigilate( URI _uri )  {
+        if( _uri.getScheme().equals( "file" ) ) {
+            File startingPoint = new File( _uri );
+            if( useCache )  {
+                /**
+                 * We are supposed to use a cache. This implies:
+                 * 1) go and get the cache, i.e. load it
+                 * 2) get all the files at / under the URI
+                 * 3) check if there is an entry for any file in the cache
+                 *      3a) if so, then attempt to load that file from the specified line counter on
+                 *      3b) if not, then load the entire file
+                 * 4) update the cache info ( FileCache.FileInformation ) 
+                 * 5) save the cache
+                 * 6) wait for INVIGILANCE_WAITING_DELAY milliseconds, then start the same process all over again
+                 */
+                FileCache cache = new LogFileCache();
+                cache.loadCache();
+                //investigate the URI
+            }
+            else    {
+                /**
+                 * We're on our own. This implies:
+                 * 1) we will need to inspect the url for any log file presence
+                 * 2) we'll do a one-off load()
+                 * 3) we are not supposed to store any information in a cache, so we can safely return
+                 */
+            }
+        }
+        logger.info( "URI " + _uri.toString() + " is not something FileLoader can currently handling" );
     }
     
     

@@ -22,6 +22,7 @@ package at.ac.ait.ubicity.fileloader;
 import at.ac.ait.ubicity.fileloader.cassandra.AstyanaxInitializer;
 import at.ac.ait.ubicity.fileloader.util.FileCache;
 import at.ac.ait.ubicity.fileloader.util.LogFileCache;
+import at.ac.ait.ubicity.fileloader.util.LogFileNameFilter;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -29,6 +30,7 @@ import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.MutationBatch;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -103,7 +105,16 @@ public final class FileLoader {
     
     public final void invigilate( URI _uri )  {
         if( _uri.getScheme().equals( "file" ) ) {
-            File startingPoint = new File( _uri );
+            //we don't know yet if the URI is a directory or a file
+            File _startingPoint = new File( _uri );
+            File[] _files = null;
+            if ( _startingPoint.isDirectory()) {
+                _files = _startingPoint.listFiles( new LogFileNameFilter() );
+            }
+            else    {
+                _files = new File[ 1 ];
+                _files[ 0 ] = _startingPoint;
+            }
             if( useCache )  {
                 /**
                  * We are supposed to use a cache. This implies:
@@ -116,9 +127,13 @@ public final class FileLoader {
                  * 5) save the cache
                  * 6) wait for INVIGILANCE_WAITING_DELAY milliseconds, then start the same process all over again
                  */
-                FileCache cache = new LogFileCache();
+                //1) get the cache
+                FileCache cache = LogFileCache.get();
                 cache.loadCache();
-                //investigate the URI
+                
+                for( File file: _files ) {
+                    FileCache.FileInformation _fileInfo = cache.getFileInformationFor( file.toURI() );
+                }
             }
             else    {
                 /**

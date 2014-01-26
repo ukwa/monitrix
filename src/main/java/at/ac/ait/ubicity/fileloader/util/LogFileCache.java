@@ -46,6 +46,7 @@ public final class LogFileCache implements FileCache, Serializable    {
     
     
     final static Logger logger = Logger.getLogger( LogFileCache.class.getName() );
+
     
     /** Is the cache enabled */
     protected boolean cacheEnabled = true;
@@ -57,8 +58,18 @@ public final class LogFileCache implements FileCache, Serializable    {
     
     protected String cachePath;
 
+
     
+    //here for the singleton pattern
+    private LogFileCache()  {
+        
+    }
     
+
+    public static final FileCache get() {
+        return new LogFileCache();
+    }
+
  
     
     

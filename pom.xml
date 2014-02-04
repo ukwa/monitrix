@@ -33,7 +33,7 @@
         </executions>
         <configuration>
           <mainClass>at.ac.ait.ubicity.fileloader.FileLoader</mainClass>
-          <commandlineArgs>crawl_1M.log logkeyspace2 localhost 10000</commandlineArgs>
+          <commandlineArgs>/data/bl/ logkeyspace2 localhost 10000 1 minute</commandlineArgs>
           <systemProperties>
             <systemProperty>
               <key>-Xms</key>

@@ -3,6 +3,7 @@ package at.ac.ait.ubicity.fileloader.util;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Date;
 
 /**
     Copyright (C) 2013  AIT / Austrian Institute of Technology
@@ -29,7 +30,6 @@ import java.net.URI;
 public interface FileCache {
    /**
      * @param uri
-     * @return .
      */
     FileInformation getFileInformationFor(final URI uri);
 
@@ -39,6 +39,18 @@ public interface FileCache {
     @SuppressWarnings(value = "unchecked")
     void loadCache();
 
+    
+    
+    /**
+     * Update the cache with the latest info available for a File ( by URI )
+     * 
+     * @param _uri
+     * @param _info
+     * @return 
+     */
+    public FileCache updateCacheFor( URI _uri, FileInformation _info );
+    
+    
     /**
      * Saves the cache. 
      * It is left to implementing classes to have an own mechanism for saving: 
@@ -60,7 +72,7 @@ public interface FileCache {
     /**
      * is the cache enabled ? 
      *
-     * @param u
+     * @param u - whether the cache should be enabled or not
      */
     void setEnabled(final boolean u);
 
@@ -76,13 +88,80 @@ public interface FileCache {
     
     public static class FileInformation  implements Serializable {
 
-        public long lastAccess = System.currentTimeMillis();
+        private long lastAccess = System.currentTimeMillis();
         
-        public int usageCount = 0;    
+        private int usageCount = 0;    
         
         //the last detected / observed line count
-        public int lineCount = 0;
+        private int lineCount = 0;
+
+        private URI uri; 
         
-    }
+        public final static String fieldSeparator = " :: ";
+        
+        
+        public FileInformation( URI _uri, long _lastAccess, int _usageCount, int _lineCount ) {
+            uri = _uri;
+            setLastAccess( _lastAccess );
+            setUsageCount( _usageCount );
+            setLineCount( _lineCount );
+        }
+        
+        
+        
+        public final URI getURI()   {
+            return uri;
+        }
+        
+        /**
+         * @return the lastAccess
+         */
+        public long getLastAccess() {
+            return lastAccess;
+        }
+
+        /**
+         * @param lastAccess the lastAccess to set
+         */
+        public final void  setLastAccess(long lastAccess) {
+            this.lastAccess = lastAccess;
+        }
+
+        /**
+         * @return the usageCount
+         */
+        public int getUsageCount() {
+            return usageCount;
+        }
+
+        /**
+         * @param usageCount the usageCount to set
+         */
+        public final void setUsageCount(int usageCount) {
+            this.usageCount = usageCount;
+        }
+
+        /**
+         * @return the lineCount
+         */
+        public int getLineCount() {
+            return lineCount;
+        }
+
+        /**
+         * @param lineCount the lineCount to set
+         */
+        public final  void setLineCount(int lineCount) {
+            this.lineCount = lineCount;
+        }
+        
+        
+        @Override
+        public final String toString()  {
+            return uri.toASCIIString() + fieldSeparator + " last accessed :" + new Date( getLastAccess() )+  fieldSeparator + " usage count :" + getUsageCount() + fieldSeparator + " line count :" + getLineCount() ;
+        }
+        
+        
+    } 
         
 }

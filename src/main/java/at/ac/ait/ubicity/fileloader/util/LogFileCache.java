@@ -2,6 +2,7 @@
 
 package at.ac.ait.ubicity.fileloader.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -51,49 +53,64 @@ public final class LogFileCache implements FileCache, Serializable    {
     /** Is the cache enabled */
     protected boolean cacheEnabled = true;
     
-    /** maps a fingerprint to a jar information */
-    protected Map<String, FileInformation > cacheMap = new HashMap();
+    /** maps a URI to a FileInformation object */
+    protected Map< URI, FileInformation > cacheMap;
     
     protected boolean weakMode = false;
     
-    protected String cachePath;
+    protected String cachePath = DEFAULT_CACHE_FILE;
 
 
     
     //here for the singleton pattern
     private LogFileCache()  {
+        cacheMap = new HashMap();
         
     }
     
 
     public static final FileCache get() {
+        logger.setLevel( Level.FINEST );
         return new LogFileCache();
     }
 
- 
+    
+    @Override
+    public final FileCache updateCacheFor( URI _uri, FileInformation _info ) {
+        logger.fine("updating cache for uri " + _uri.toASCIIString() );
+        cacheMap.put(_uri, _info );
+        return this;
+    }
     
     
     @Override
     public final FileInformation getFileInformationFor( final URI uri ) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        logger.finer("cache request for uri: " + uri.toASCIIString() );
+        return cacheMap.get( uri );
     }
+    
+    
 
     @Override
     public void loadCache() {
-      if ( cacheEnabled ) {
+      if ( ! cacheEnabled ) {
             return;
         }
         final String cacheFile = (this.cachePath == null) ? DEFAULT_CACHE_FILE : this.cachePath;
         try {
             final FileInputStream fis = new FileInputStream( cacheFile );
             final Object rval;
-            try ( ObjectInputStream ois = new ObjectInputStream( fis ) ) {
-                rval = ois.readObject();
-            }
+            ObjectInputStream ois = new ObjectInputStream( fis );
+            rval = ois.readObject();
+            
             if (rval != null) {
-                cacheMap = ( Map<String, FileInformation >) rval;
+                cacheMap = ( Map< URI, FileInformation >) rval;
             }
         } 
+        catch( final NullPointerException | FileNotFoundException npe )   {
+            logger.info( "no cache file was found at " + ( (this.cachePath == null) ? DEFAULT_CACHE_FILE : this.cachePath ) + "; starting with a fresh, empty cache" );
+            
+        }
         catch (final ClassNotFoundException e) {
             logger.warning("Your  cache is outdated, please delete it. It will be regenerated with the next run. The next exception reflects this, so don't be afraid.");
         } 
@@ -116,7 +133,7 @@ public final class LogFileCache implements FileCache, Serializable    {
             cacheFile = DEFAULT_CACHE_FILE;
         }
         try {
-            // lock the lockfile
+            
             fos = new FileOutputStream(cacheFile);
             oos = new ObjectOutputStream(fos);
             oos.writeObject(this.cacheMap);
@@ -139,6 +156,7 @@ public final class LogFileCache implements FileCache, Serializable    {
             finally {
                 oos = null;
                 fos = null;
+                logger.info( "persisted the cache to " + ( new File( cacheFile ) ).toURI()  );
             }
         }        
     }

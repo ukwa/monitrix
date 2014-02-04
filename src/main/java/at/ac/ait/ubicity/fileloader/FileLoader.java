@@ -20,7 +20,9 @@ package at.ac.ait.ubicity.fileloader;
 
 
 import at.ac.ait.ubicity.fileloader.cassandra.AstyanaxInitializer;
+import at.ac.ait.ubicity.fileloader.util.Delay;
 import at.ac.ait.ubicity.fileloader.util.FileCache;
+import at.ac.ait.ubicity.fileloader.util.FileCache.FileInformation;
 import at.ac.ait.ubicity.fileloader.util.LogFileCache;
 import at.ac.ait.ubicity.fileloader.util.LogFileNameFilter;
 import com.lmax.disruptor.EventHandler;
@@ -32,6 +34,7 @@ import com.netflix.astyanax.MutationBatch;
 import java.io.File;
 import java.io.FileFilter;
 import java.net.URI;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -59,19 +62,22 @@ public final class FileLoader {
 
     static boolean useCache = true;
     
+    //delay, in milliseconds, for which to check our invigilance directory or file for new updates
     static final long INVIGILANCE_WAITING_DELAY = 5000;
     
-    
+    static  {
+        logger.setLevel( Level.ALL );
+    }
     
     @SuppressWarnings("unchecked")
-    public final static void load( final File _file, final String _keySpace, final String _host, final int _batchSize ) throws Exception {
+    public final static void load( final FileInformation _fileInfo, final String _keySpace, final String _host, final int _batchSize ) throws Exception {
 
         keySpace = AstyanaxInitializer.doInit( "Test Cluster", _host, _keySpace );
         final MutationBatch batch = keySpace.prepareMutationBatch();
         
-        System.out.println( "got keyspace " + keySpace.getKeyspaceName() + " from Astyanax initializer" );
+        logger.info( "got keyspace " + keySpace.getKeyspaceName() + " from Astyanax initializer" );
         
-        final LineIterator onLines = FileUtils.lineIterator( _file );
+        final LineIterator onLines = FileUtils.lineIterator( new File( _fileInfo.getURI() ) );
         
         final ExecutorService exec = Executors.newFixedThreadPool( Runtime.getRuntime().availableProcessors() * 2 );        
         final Disruptor< SingleLogLineAsString > disruptor = new Disruptor( SingleLogLineAsString.EVENT_FACTORY, ( int ) Math.pow( TWO, 20 ), exec );
@@ -87,7 +93,18 @@ public final class FileLoader {
         long _start, _lapse;
         _start = System.nanoTime();
         
+        
+        int _linesAlreadyProcessed = _fileInfo.getLineCount();
+        
+        //cycle through the lines already processed
+        while( _lineCount < _linesAlreadyProcessed ) {
+            onLines.nextLine();
+            _lineCount++;
+        }
+        
+        //now get down to the work we actually must do
         while( onLines.hasNext() ){
+            logger.info( "begin proccessing of file " + _fileInfo.getURI() + " @line #" + _lineCount );
             final long _seq = rb.next();
             final SingleLogLineAsString event = rb.get( _seq );
             event.setValue( onLines.nextLine() );
@@ -99,11 +116,20 @@ public final class FileLoader {
         disruptor.shutdown();
         _lapse = System.nanoTime() - _start;
 
-        System.out.println( "handled " + _lineCount + " log lines in " + _lapse + " nanoseconds" );
+        //update the file info, this will  land in the cache
+        _fileInfo.setLineCount( _lineCount );
+        _fileInfo.setLastAccess( System.currentTimeMillis() );
+        int _usageCount = _fileInfo.getUsageCount();
+        _fileInfo.setUsageCount( _usageCount++ );
+        
+        
+        
+        logger.info( "handled " + ( _lineCount - _linesAlreadyProcessed )  + " log lines in " + _lapse + " nanoseconds" );
     }
     
     
-    public final void invigilate( URI _uri )  {
+    public final static void invigilate( URI _uri, String keySpace, String host, int batchSize )  {
+        logger.info( "invigilating URI: " + _uri );
         if( _uri.getScheme().equals( "file" ) ) {
             //we don't know yet if the URI is a directory or a file
             File _startingPoint = new File( _uri );
@@ -114,6 +140,9 @@ public final class FileLoader {
             else    {
                 _files = new File[ 1 ];
                 _files[ 0 ] = _startingPoint;
+            }
+            for( File f: _files )   {
+                logger.info( "found file under / at URI: " + f.getName() );
             }
             if( useCache )  {
                 /**
@@ -132,8 +161,14 @@ public final class FileLoader {
                 cache.loadCache();
                 
                 for( File file: _files ) {
-                    FileCache.FileInformation _fileInfo = cache.getFileInformationFor( file.toURI() );
+                    FileInformation _fileInfo = cache.getFileInformationFor( file.toURI() );
+                    if( _fileInfo == null ) {
+                        _fileInfo = new FileInformation( file.toURI(), System.currentTimeMillis(), 1, 0 );
+                        cache.updateCacheFor( file.toURI(), _fileInfo );
+                    }
+                    logger.info(_fileInfo.toString()  );
                 }
+                cache.saveCache();
             }
             else    {
                 /**
@@ -143,8 +178,9 @@ public final class FileLoader {
                  * 3) we are not supposed to store any information in a cache, so we can safely return
                  */
             }
+            return;
         }
-        logger.info( "URI " + _uri.toString() + " is not something FileLoader can currently handling" );
+        logger.info( "URI " + _uri.toString() + " is not something FileLoader can currently handle" );
     }
     
     
@@ -158,23 +194,54 @@ public final class FileLoader {
      * ( For now, tacitly assume we are on the default Cassandra 9160 port ). Clustering is not yet supported.
      */
     public final static void main( String[] args )  {
-        if( ! ( args.length == 4 ) ) {
+        if(  ! ( args.length == 6 )  )  {
             usage();
             System.exit( 1 );
         }
         try {
             final File _f = new File( args[ 0 ] );
+            
+            URI uri = _f.toURI();
+            String keySpaceName = args[ 1 ];
+            final String host = args[ 2 ];
             final int batchSize = Integer.parseInt( args[ 3 ] );
-            load(_f, args[ 1 ], args[ 2 ], batchSize );
-            System.exit( 0 );
+            final int timeUnitCount = Integer.parseInt( args[ 4 ] );
+            Delay timeUnit = timeUnitsFromCmdLine( args[ 5 ].toUpperCase()  );
+            if( timeUnit == null ) timeUnit = Delay.SECOND;
+            long millisToWait = timeUnitCount * timeUnit.getMilliSeconds();
+            while( true )   {
+                try {
+                    invigilate( uri, keySpaceName, host, batchSize );
+                    Thread.sleep( millisToWait );
+                }
+                catch( InterruptedException | Error any  )  {
+                    Thread.interrupted();
+                }
+                finally {
+                    
+                }
+            }
+            //load(_f, args[ 1 ], args[ 2 ], batchSize );
+            //System.exit( 0 );
         }
         catch( Exception e )    {
             logger.log(Level.SEVERE, e.toString() );
         }   
     }
 
+    private static Delay timeUnitsFromCmdLine( String _arg )    {
+        Iterator< Delay > onKnownDelayOptions = Delay.knownOptions.iterator();
+        while( onKnownDelayOptions.hasNext() )  {
+            Delay _d = onKnownDelayOptions.next();
+            if( _d.name().equals(_arg ) )   {
+                return _d;
+            }
+        }
+        return null;
+    }
     
     private static void usage() {
-    System.out.println( "usage: FileLoader { file | keyspace | server | batch_size }" );
+    System.out.println( "usage: FileLoader file URL | keyspace | server | batch_size {  number | seconds }" );
+    System.out.println( "example: FileLoader /data/bl/ mykeyspace  localhost 10000 10 minutes" );
     }
 }

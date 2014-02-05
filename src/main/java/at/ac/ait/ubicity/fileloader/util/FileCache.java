@@ -37,7 +37,7 @@ public interface FileCache {
      * Load cache
      */
     @SuppressWarnings(value = "unchecked")
-    void loadCache();
+    public FileCache loadCache();
 
     
     
@@ -56,7 +56,7 @@ public interface FileCache {
      * It is left to implementing classes to have an own mechanism for saving: 
      * local file system, network, database. Wherever.
      */
-    void saveCache();
+    public FileCache saveCache();
 
     /**
      * @param cachePath - may be a file name only, or a fully qualified name. 

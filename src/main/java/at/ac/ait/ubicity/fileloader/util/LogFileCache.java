@@ -50,17 +50,32 @@ public final class LogFileCache implements FileCache, Serializable    {
     final static Logger logger = Logger.getLogger( LogFileCache.class.getName() );
 
     
-    /** Is the cache enabled */
+    /** Is the cache enabled ? */
     protected boolean cacheEnabled = true;
     
     /** maps a URI to a FileInformation object */
     protected Map< URI, FileInformation > cacheMap;
     
+    
     protected boolean weakMode = false;
     
+    /* an alternative place for the cache file */
     protected String cachePath = DEFAULT_CACHE_FILE;
 
 
+    /* a singleton; in principle,we only ever need one instance */
+    private final static FileCache singleton;
+    
+    
+    /**
+     * make sure the singleton is always there
+     */
+    static  {
+        logger.setLevel( Level.FINEST );
+        singleton = new LogFileCache();
+    
+    }
+    
     
     //here for the singleton pattern
     private LogFileCache()  {
@@ -68,13 +83,25 @@ public final class LogFileCache implements FileCache, Serializable    {
         
     }
     
+    
+    
 
+    /**
+     * 
+     * @return FileCache - our singleton
+     */
     public static final FileCache get() {
-        logger.setLevel( Level.FINEST );
-        return new LogFileCache();
+        return singleton;
     }
 
     
+    
+    /**
+     * 
+     * @param _uri The key: a URI ( of a file or directory ) we wish to save / cache information for
+     * @param _info The value: a FileInformation object we cache with this URI key
+     * @return this same FileCache ( "convention over configuration"-like stuff )
+     */
     @Override
     public final FileCache updateCacheFor( URI _uri, FileInformation _info ) {
         logger.fine("updating cache for uri " + _uri.toASCIIString() );
@@ -90,11 +117,15 @@ public final class LogFileCache implements FileCache, Serializable    {
     }
     
     
-
+    /**
+    * 
+    * @return this FileCache; if enabled, its cache map will have been filled; 
+    * an empty cache map is carried otherwise.
+    */
     @Override
-    public void loadCache() {
+    public FileCache loadCache() {
       if ( ! cacheEnabled ) {
-            return;
+            return this;
         }
         final String cacheFile = (this.cachePath == null) ? DEFAULT_CACHE_FILE : this.cachePath;
         try {
@@ -117,13 +148,22 @@ public final class LogFileCache implements FileCache, Serializable    {
         catch (final IOException e1) {
             logger.severe("caught an IOException while trying to load cache : IOException : " + e1);
         }
+        finally {
+            return this;
+        }
     }
 
+    
+    
+    /**
+     * 
+     * @return this FileCache, which has undergone no state changes.
+     */
     @Override
-    public void saveCache() {
+    public FileCache saveCache() {
 
       if (!this.cacheEnabled) {
-            return;
+            return this;
         }
         String cacheFile = this.cachePath;
         FileOutputStream fos = null;
@@ -157,10 +197,13 @@ public final class LogFileCache implements FileCache, Serializable    {
                 oos = null;
                 fos = null;
                 logger.info( "persisted the cache to " + ( new File( cacheFile ) ).toURI()  );
+                return this;
             }
         }        
     }
 
+    
+    
     @Override
     public void setCachePath( final String _cachePath ) {
         cachePath = _cachePath;
@@ -171,6 +214,11 @@ public final class LogFileCache implements FileCache, Serializable    {
         cacheEnabled = u;
     }
 
+    /**
+     * 
+     * @param w -- boolean: should we function in weak mode or not ? 
+     * NOTE: this functionality is currently not implemented / used. 
+     */
     @Override
     public void setWeakMode( final boolean w ) {
         weakMode = w;

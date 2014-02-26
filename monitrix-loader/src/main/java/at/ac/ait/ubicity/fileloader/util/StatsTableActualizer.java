@@ -53,7 +53,7 @@ try {
             noCassandra.printStackTrace();
             return false;
         }
-        System.out.println( "!!!! rows == null ? " + ( rows == null ) );
+        System.out.println( "!!!! cols == null ? " + ( cl == null ) );
         Iterator<Column< Long>> onCols = cl.iterator();
         int i = 0;
         System.out.println( "------------------------------------ > executed ** crawls ** query ::: " );

@@ -72,6 +72,14 @@ public final class StatsTableActualizer {
         return true;
      }
 
+     
+     /**
+      * Do an actual write for a log file load in the crawls table
+      * @param _key
+      * @param start_ts
+      * @param end_ts
+      * @throws Exception 
+      */
     private static void doUpdate(String _key, Long start_ts, Long end_ts) throws Exception {
         MutationBatch mb = keySpace.prepareMutationBatch();
         mb.withRow( crawls, _key ).putColumn( "start_ts", Long.toString( start_ts) ).putColumn( "end_ts", Long.toString( end_ts ) );

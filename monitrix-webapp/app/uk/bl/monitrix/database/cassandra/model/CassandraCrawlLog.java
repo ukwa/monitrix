@@ -45,6 +45,9 @@ public class CassandraCrawlLog extends CrawlLog {
 			if( start_ts < crawlStartTime ) crawlStartTime = start_ts;
 		}
 		if( crawlStartTime == 0 ) return -1;
+		
+		Logger.info("crawl start time: " + crawlStartTime);
+		
 		return crawlStartTime;
 	}
 
@@ -57,6 +60,9 @@ public class CassandraCrawlLog extends CrawlLog {
 			long end_ts = r.getDate("end_ts").getTime();
 			if( end_ts > lastCrawlActivity ) lastCrawlActivity = end_ts;
 		}
+		
+		Logger.info("last crawl activity: " + lastCrawlActivity);
+		
 		if( lastCrawlActivity == 0 ) return -1;
 		return lastCrawlActivity;
 	}

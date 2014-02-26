@@ -20,7 +20,7 @@ public class CassandraProperties {
 	/** Database collection names **/
 	public static final String COLLECTION_INGEST_SCHEDULE = "ingest_schedule";
 	public static final String COLLECTION_ALERT_LOG = "alert_log";
-	public static final String COLLECTION_CRAWL_LOG = "crawl_log";
+	public static final String COLLECTION_CRAWL_LOG = "CF_LOGLINES";
 	public static final String COLLECTION_CRAWL_STATS = "crawl_stats";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
 	public static final String COLLECTION_VIRUS_LOG = "virus_log";

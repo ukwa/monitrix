@@ -82,8 +82,8 @@ public class CassandraDBConnector implements DBConnector {
 		session = cluster.connect();
 		
 		// Add schema if needed:
-		this.dropSchema();
-		if( ! this.isSchemaThere() ) this.createSchema();
+		// this.dropSchema();
+		// if( ! this.isSchemaThere() ) this.createSchema();
 		
 		this.ingestSchedule = new CassandraIngestSchedule(session);
 		this.crawlLog = new CassandraCrawlLog(session);

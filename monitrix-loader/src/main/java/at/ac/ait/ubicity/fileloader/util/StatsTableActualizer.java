@@ -74,7 +74,7 @@ public final class StatsTableActualizer {
 
     private static void doUpdate(String _key, Long start_ts, Long end_ts) throws Exception {
         MutationBatch mb = keySpace.prepareMutationBatch();
-        mb.withRow( crawls, _key ).putColumn( "start_ts", start_ts ).putColumn("end_ts", end_ts );
+        mb.withRow( crawls, _key ).putColumn( "start_ts", Long.toString( start_ts) ).putColumn( "end_ts", Long.toString( end_ts ) );
         mb.execute();
     }
 }

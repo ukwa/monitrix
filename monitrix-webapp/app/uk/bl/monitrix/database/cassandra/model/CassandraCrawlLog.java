@@ -41,7 +41,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.crawls;").iterator();
 		while( rows.hasNext() ) {
 			Row r = rows.next();
-			long start_ts = r.getDate("start_ts").getTime();
+			long start_ts = Long.parseLong(r.getString("start_ts"));
 			if( start_ts < crawlStartTime ) crawlStartTime = start_ts;
 		}
 		if( crawlStartTime == 0 ) return -1;
@@ -57,7 +57,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.crawls;").iterator();
 		while( rows.hasNext() ) {
 			Row r = rows.next();
-			long end_ts = r.getDate("end_ts").getTime();
+			long end_ts = Long.parseLong(r.getString("end_ts"));
 			if( end_ts > lastCrawlActivity ) lastCrawlActivity = end_ts;
 		}
 		

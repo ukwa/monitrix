@@ -1,0 +1,105 @@
+
+
+package at.ac.ait.ubicity.fileloader.cassandra;
+/**
+    Copyright (C) 2013  AIT / Austrian Institute of Technology
+    http://www.ait.ac.at
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/agpl-3.0.html
+ */
+import com.google.common.collect.ImmutableMap;
+
+import com.netflix.astyanax.AstyanaxContext;
+import com.netflix.astyanax.Keyspace;
+import com.netflix.astyanax.connectionpool.NodeDiscoveryType;
+import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl;
+import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor;
+import com.netflix.astyanax.impl.AstyanaxConfigurationImpl;
+import com.netflix.astyanax.model.ColumnFamily;
+import com.netflix.astyanax.thrift.ThriftFamilyFactory;
+import com.netflix.astyanax.connectionpool.exceptions.BadRequestException;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
+/**
+ *
+ * @author jan van oort
+ */
+public final class AstyanaxInitializer {
+
+
+    public static ColumnFamily< String, String > log;
+    
+    
+    final static Logger logger = Logger.getLogger( "AstyanaxInitializer" );
+    
+    /**
+     * 
+     * @param _clusterName
+     * @param _server
+     * @param _keySpaceName
+     * @return KeySpace - the Cassandra KeySpace we are going to work in, and that we give back to the caller
+     * ( if everything goes well ). 
+     * @throws java.lang.Exception 
+     */
+    public final static Keyspace doInit( final String _clusterName, final String _server, final String _keySpaceName ) throws Exception   {
+        AstyanaxContext<Keyspace> context = new AstyanaxContext.Builder()
+        .forCluster( _clusterName )
+        .forKeyspace( _keySpaceName )
+        .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()      
+        .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE )
+        .setCqlVersion("3.0.0")
+        .setTargetCassandraVersion("2.0.4")
+        
+    )
+    .withConnectionPoolConfiguration(new ConnectionPoolConfigurationImpl( "ubicity file loading pool")
+        .setPort( 9160 )
+        .setMaxConnsPerHost( 16 )
+        .setSeeds( _server + ":9160" )
+        .setMaxOperationsPerConnection( 10000000 )
+        .setConnectTimeout( 10000 )
+    )
+    .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
+    .buildKeyspace(ThriftFamilyFactory.getInstance());
+
+    context.start();
+
+    Keyspace keySpace = context.getClient();
+    
+    try {
+        keySpace.describeKeyspace();
+        logger.log( Level.INFO, "keyspace " + keySpace.getKeyspaceName() + " does exist" );
+    }
+    catch( BadRequestException bre )    {
+        logger.log( Level.INFO, "keyspace " + keySpace.getKeyspaceName() + " does NOT exist, creating it" );
+        keySpace.createKeyspace( ImmutableMap.<String, Object>builder()
+        .put("strategy_options", ImmutableMap.<String, Object>builder()
+        .put("replication_factor", "1")
+        .build())
+        .put("strategy_class",     "SimpleStrategy")
+        .build()
+        );    
+    }
+
+        
+    log = CassandraCrawlLogSchema.checkOrBuildMonitrixSchema( keySpace );
+
+    if( log == null )   {
+        logger.log( Level.SEVERE, "could not create Monitrix ColumnFamily ( table ) " );
+    }
+    return keySpace;
+    }
+}

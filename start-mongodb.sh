@@ -1,0 +1,1 @@
+sudo mongod --dbpath /var/lib/mongodb --rest

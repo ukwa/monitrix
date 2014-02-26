@@ -74,14 +74,14 @@ public final class CassandraCrawlLogSchema {
         return cf;
     }
 
-    static ColumnFamily<String, Long> checkOrBuildCrawlsTable(Keyspace keySpace) {
-        ColumnFamily< String, Long > cf = null;
+    static ColumnFamily<String, String> checkOrBuildCrawlsTable(Keyspace keySpace) {
+        ColumnFamily< String, String  > cf = null;
         
             try {
                cf = ColumnFamily.newColumnFamily(
                "crawls",              // Column Family Name
                StringSerializer.get(),   // Key Serializer
-               LongSerializer.get());  // Column Serializer
+               StringSerializer.get());  // Column Serializer
 
                keySpace.createColumnFamily( cf, ImmutableMap.<String, Object>builder()
                    .put("column_metadata", ImmutableMap.<String, Object>builder()

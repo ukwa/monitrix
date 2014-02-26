@@ -4,6 +4,7 @@ package at.ac.ait.ubicity.fileloader.util;
 import at.ac.ait.ubicity.fileloader.cassandra.AstyanaxInitializer;
 import com.netflix.astyanax.ExceptionCallback;
 import com.netflix.astyanax.Keyspace;
+import com.netflix.astyanax.MutationBatch;
 import com.netflix.astyanax.connectionpool.exceptions.BadRequestException;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.Column;
@@ -24,21 +25,27 @@ public final class StatsTableActualizer {
 
      static Logger logger = Logger.getLogger( CheckDB.class.getName() );
      
+    static Keyspace keySpace;
+    static ColumnFamily< String, String > crawls = AstyanaxInitializer.crawls;
+     
      static {
         logger.setLevel(Level.ALL);
+        try {
+        keySpace = AstyanaxInitializer.doInit( "Test Cluster", "localhost", "crawl_uris" );        
+        }
+        catch( Exception e )    {
+            logger.severe( e.toString() );
+        }
      }
      
      
      
      
      public final static boolean update( String _key, Long start_ts, Long end_ts ) throws Exception  {
-        Rows< String, Long > rows = null;
-        ColumnList<  Long > cl = null;
-        Keyspace keySpace = AstyanaxInitializer.doInit( "Test Cluster", "localhost", "crawl_uris" );
-        ColumnFamily< String, Long > crawls = AstyanaxInitializer.crawls;
-//       
+
+        ColumnList<  String > cl = null;
         
-try {
+    try {
             
 
             cl = keySpace.prepareQuery( crawls ).getKey( "_key").execute().getResult();
@@ -54,12 +61,20 @@ try {
             return false;
         }
         System.out.println( "!!!! cols == null ? " + ( cl == null ) );
-        Iterator<Column< Long>> onCols = cl.iterator();
+        Iterator<Column< String>> onCols = cl.iterator();
         int i = 0;
         System.out.println( "------------------------------------ > executed ** crawls ** query ::: " );
         while( onCols.hasNext() )   {        
             System.out.println( "-------------> col:: " + onCols.next().getStringValue() );
         }
+        //simple case: simply write into the table what we have, and leave
+        doUpdate( _key, start_ts, end_ts );
         return true;
      }
+
+    private static void doUpdate(String _key, Long start_ts, Long end_ts) throws Exception {
+        MutationBatch mb = keySpace.prepareMutationBatch();
+        mb.withRow( crawls, _key ).putColumn( "start_ts", start_ts ).putColumn("end_ts", end_ts );
+        mb.execute();
+    }
 }

@@ -73,4 +73,37 @@ public final class CassandraCrawlLogSchema {
         }
         return cf;
     }
+
+    static ColumnFamily<String, Long> checkOrBuildCrawlsTable(Keyspace keySpace) {
+        ColumnFamily< String, Long > cf = null;
+        
+            try {
+               cf = ColumnFamily.newColumnFamily(
+               "crawls",              // Column Family Name
+               StringSerializer.get(),   // Key Serializer
+               LongSerializer.get());  // Column Serializer
+
+               keySpace.createColumnFamily( cf, ImmutableMap.<String, Object>builder()
+                   .put("column_metadata", ImmutableMap.<String, Object>builder()
+                           .put("Index1", ImmutableMap.<String, Object>builder()
+                                   .put("validation_class", "UTF8Type")
+                                   .put("index_name",       "Index1")
+                                   .put("index_type",       "KEYS")
+                                   .build())
+                           .put("Index2", ImmutableMap.<String, Object>builder()
+                                   .put("validation_class", "UTF8Type")
+                                   .put("index_name",       "Index2")
+                                   .put("index_type",       "KEYS")
+                                   .build())
+                            .build())
+                        .build());
+        }
+        catch( BadRequestException bre )    {
+            logger.log( Level.INFO,  "column family " + cf.getName() + " exists, everything OK, proceeding... " ) ;
+        }    
+        catch( ConnectionException noCassandra )    {
+            logger.log( Level.SEVERE, noCassandra.toString() );
+        }
+        return cf;        
+    }
 }

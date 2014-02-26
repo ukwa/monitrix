@@ -43,6 +43,7 @@ public final class AstyanaxInitializer {
 
     public static ColumnFamily< String, String > log;
     
+    public static ColumnFamily< String, Long > crawls;
     
     final static Logger logger = Logger.getLogger( "AstyanaxInitializer" );
     
@@ -96,7 +97,8 @@ public final class AstyanaxInitializer {
 
         
     log = CassandraCrawlLogSchema.checkOrBuildMonitrixSchema( keySpace );
-
+    crawls = CassandraCrawlLogSchema.checkOrBuildCrawlsTable( keySpace );
+    
     if( log == null )   {
         logger.log( Level.SEVERE, "could not create Monitrix ColumnFamily ( table ) " );
     }

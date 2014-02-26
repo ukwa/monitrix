@@ -26,6 +26,7 @@ import at.ac.ait.ubicity.fileloader.util.FileCache;
 import at.ac.ait.ubicity.fileloader.util.FileCache.FileInformation;
 import at.ac.ait.ubicity.fileloader.util.LogFileCache;
 import at.ac.ait.ubicity.fileloader.util.LogFileNameFilter;
+import at.ac.ait.ubicity.fileloader.util.StatsTableActualizer;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -174,6 +175,7 @@ public final class FileLoader {
         logger.info( "**** min TimeStamp = " + _minTs );
         logger.info( "**** max TimeStamp = " + _maxTs );
         
+        StatsTableActualizer.update( _fileInfo.getURI().toString(), _minTs, _maxTs );
         
         
 //        AggregationJob aggJob = new AggregationJob( keySpace, _host, _batchSize );

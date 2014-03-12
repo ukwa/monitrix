@@ -19,6 +19,8 @@ package at.ac.ait.ubicity.fileloader;
  */
 
 
+import at.ac.ait.ubicity.fileloader.aggregation.AggregationJob;
+import at.ac.ait.ubicity.fileloader.aggregation.Aggregator;
 import static at.ac.ait.ubicity.fileloader.cassandra.AstyanaxInitializer.log;
 import at.ac.ait.ubicity.fileloader.cassandra.LogLineColumn;
 
@@ -65,6 +67,10 @@ final class SingleLogLineAsStringEventHandler implements EventHandler<SingleLogL
     
     static LongTimeStampSorter tsSorter;
     
+    static AggregationJob aggregationJob;
+    
+    
+    
     /**
      * No-arg constructor, necessary by contract with LMAX Disruptor 
      */
@@ -109,7 +115,7 @@ final class SingleLogLineAsStringEventHandler implements EventHandler<SingleLogL
         __tokens[ 14 ] = Long.toString(  _longTimeStamp );
         tsSorter.timeStamps.add( _longTimeStamp );
         
-        
+        aggregationJob.offer( __tokens );
 
         
         LogLineColumn _col = LogLineColumn.ID;

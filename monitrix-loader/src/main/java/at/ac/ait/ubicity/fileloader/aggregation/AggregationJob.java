@@ -3,6 +3,8 @@ package at.ac.ait.ubicity.fileloader.aggregation;
 
 
 import static at.ac.ait.ubicity.fileloader.FileLoader.TWO;
+import at.ac.ait.ubicity.fileloader.SingleLogLineAsString;
+import at.ac.ait.ubicity.fileloader.TokenizedLogLine;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
@@ -10,11 +12,14 @@ import com.lmax.disruptor.dsl.Disruptor;
 
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.MutationBatch;
+import com.netflix.astyanax.model.ColumnFamily;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+
 
 /**
  *
@@ -26,21 +31,22 @@ public final class AggregationJob implements Runnable    {
     
     private final static Logger logger = Logger.getLogger( AggregationJob.class.getName() );
     
+
     
-    private final String host;
-    private final int batchSize;
-    private final Keyspace keySpace;
+    private ColumnFamily crawl_stats;
     
+    private Keyspace keySpace;
     
-    public AggregationJob( final Keyspace _keySpace, final String _host, final int _batchSize )  {
+    private static RingBuffer< TokenizedLogLine > rb; 
+    
+    public AggregationJob( final Keyspace _keySpace, final ColumnFamily _crawl_stats )  {
         keySpace = _keySpace;
-        host = _host;
-        batchSize = _batchSize;
+        crawl_stats = _crawl_stats;
     }
     
     
     
-    public final void doRun( final Keyspace keySpace, final String _host, final int _batchSize ) throws Exception {
+    public final void doRun( final Keyspace keySpace ) throws Exception {
         
     
         final MutationBatch batch = keySpace.prepareMutationBatch();
@@ -50,27 +56,11 @@ public final class AggregationJob implements Runnable    {
         
         final ExecutorService exec = Executors.newFixedThreadPool( Runtime.getRuntime().availableProcessors() * 2 );        
         
-        final Disruptor< AggregateDelta > downloadVoldisruptor = new Disruptor( AggregateDelta.EVENT_FACTORY, ( int ) Math.pow( TWO, 10 ), exec );
-        final EventHandler< AggregateDelta > downloadVolumehandler = new Aggregator( new DownloadVolume() );
-        downloadVoldisruptor.handleEventsWith( downloadVolumehandler );
+        final Disruptor< TokenizedLogLine > disruptor = new Disruptor( TokenizedLogLine.EVENT_FACTORY, ( int ) Math.pow( TWO, 10 ), exec );
+        final EventHandler< TokenizedLogLine > handler = new Aggregator();
+        disruptor.handleEventsWith( handler );
         
-        final Disruptor< AggregateDelta > completedHostsdisruptor = new Disruptor( AggregateDelta.EVENT_FACTORY, ( int ) Math.pow( TWO, 10 ), exec );
-        final EventHandler< AggregateDelta > completedHostsHandler = new Aggregator( new CompletedHosts() );
-        completedHostsdisruptor.handleEventsWith( completedHostsHandler );
-        
-        final Disruptor< AggregateDelta > numNewHostsCrawleddisruptor = new Disruptor( AggregateDelta.EVENT_FACTORY, ( int ) Math.pow( TWO, 10 ), exec );
-        final EventHandler< AggregateDelta > numberOfNewHostsCrawledHandler = new Aggregator( new NumberOfNewHostsCrawled() );
-        numNewHostsCrawleddisruptor.handleEventsWith( numberOfNewHostsCrawledHandler );
-        
-        final Disruptor< AggregateDelta > numURLsCrawleddisruptor = new Disruptor( AggregateDelta.EVENT_FACTORY, ( int ) Math.pow( TWO, 10 ), exec );
-        final EventHandler< AggregateDelta > numberOfURLsCrawledHandler = new Aggregator( new NumberOfURLsCrawled() );
-        numURLsCrawleddisruptor.handleEventsWith( numberOfURLsCrawledHandler );
-        
-        
-        RingBuffer downloadVolRB = downloadVoldisruptor.start();
-        RingBuffer completedHostsRB = completedHostsdisruptor.start();
-        RingBuffer numNewHostsRB = numNewHostsCrawleddisruptor.start();
-        RingBuffer numURLsCrawledRB = numURLsCrawleddisruptor.start();
+        rb = disruptor.start();
         
         logger.info( "[AGGREGATOR] started RingBuffers, beginning aggregate job" );
         
@@ -83,20 +73,19 @@ public final class AggregationJob implements Runnable    {
     }
     
     
-    
-    
-    public final static void main( String... args ) {
-        
+    public final void offer( String[] _tokenizedLogLine )   {
+        long _sequence  = rb.next();
+        TokenizedLogLine _tokenizedLine = rb.get( _sequence );
+        _tokenizedLine.tokens = _tokenizedLogLine;   
+        rb.publish( _sequence );
     }
-
-    
     
     
     
     @Override
     public void run() {
         try {
-            doRun( keySpace, host, batchSize );
+            doRun( keySpace );
         }
         catch( Exception e )    {
             logger.severe( "[AGGREGATOR] encountered a problem while aggregating : " + e.toString() );

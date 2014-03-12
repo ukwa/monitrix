@@ -20,6 +20,7 @@ package at.ac.ait.ubicity.fileloader;
 
 
 import at.ac.ait.ubicity.fileloader.aggregation.AggregationJob;
+import at.ac.ait.ubicity.fileloader.aggregation.Aggregator;
 import at.ac.ait.ubicity.fileloader.cassandra.AstyanaxInitializer;
 import at.ac.ait.ubicity.fileloader.util.Delay;
 import at.ac.ait.ubicity.fileloader.util.FileCache;
@@ -32,6 +33,7 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.MutationBatch;
+import com.netflix.astyanax.model.ColumnFamily;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -110,20 +112,40 @@ public final class FileLoader {
         
         final ExecutorService exec = Executors.newFixedThreadPool( Runtime.getRuntime().availableProcessors() * 2 );  
         
+        ColumnFamily crawl_stats = null;
+        
+        AggregationJob aggregationJob = new AggregationJob( keySpace, crawl_stats );
+        Thread tAggJob = new Thread( aggregationJob );
+        tAggJob.setName( "Monitrix loader / aggregation job " );
+        tAggJob.setPriority( Thread.MIN_PRIORITY + 1);
+        tAggJob.start();
+        logger.info( "[FILELOADER] started aggregation job, ring buffer running");
+               
+        
         final Disruptor< SingleLogLineAsString > disruptor = new Disruptor( SingleLogLineAsString.EVENT_FACTORY, ( int ) Math.pow( TWO, 17 ), exec );
         SingleLogLineAsStringEventHandler.batch = batch;
         SingleLogLineAsStringEventHandler.keySpace = keySpace;
         SingleLogLineAsStringEventHandler.batchSize = _batchSize;
         SingleLogLineAsStringEventHandler.LOG_ID = log_id;
         SingleLogLineAsStringEventHandler.tsSorter = tsSorter;
+        SingleLogLineAsStringEventHandler.aggregationJob = aggregationJob;
         
         //The EventHandler contains the actual logic for ingesting
         final EventHandler< SingleLogLineAsString > handler = new SingleLogLineAsStringEventHandler(  );
         
         disruptor.handleEventsWith( handler );
         
+        //get our Aggregate job in place
+        
+        
         //we are almost ready to start
         final RingBuffer< SingleLogLineAsString > rb = disruptor.start();
+        
+        
+        
+        
+        
+        
         
         int _lineCount = 0;
         long _start, _lapse;

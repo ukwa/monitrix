@@ -27,7 +27,7 @@ public class Global extends GlobalSettings {
 
 	private static DBConnector db = null;
 	
-	private static IngestWatcher ingestWatcher = null;
+	// private static IngestWatcher ingestWatcher = null;
 	
 	// TODO persist registered API endpoints in DB!
 	private static List<HeritrixAPI> crawlers = new ArrayList<HeritrixAPI>();
@@ -60,10 +60,11 @@ public class Global extends GlobalSettings {
 	/**
 	 * Returns the ingest watcher, which is in charge of conducting periodic log-to-database syncs.
 	 * @return the ingest watcher
-	 */
+	 *
 	public static IngestWatcher getIngestWatcher() {
 		return ingestWatcher;
 	}
+	*/
 	
 	/**
 	 * Returns the configured Heritrix crawler APIs, in the form of a map {:endpointURL API}. 
@@ -75,7 +76,7 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public void onStop(Application app) {
-		ingestWatcher.stopWatching();
+		// ingestWatcher.stopWatching();
 		if (db != null) {
 			db.close();
 			Logger.info("Database disconnected");

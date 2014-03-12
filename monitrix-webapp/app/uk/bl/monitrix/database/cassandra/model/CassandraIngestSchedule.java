@@ -28,10 +28,14 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	
 	public CassandraIngestSchedule(Session session) {
 		this.session = session;
-		this.statement = session.prepare(
+		/*
+		 * this.statement = session.prepare(
+		 
 			      "INSERT INTO crawl_uris.log_files " +
 					      "(path, crawler_id, is_monitored) " +
 					      "VALUES (?, ?, ?);");
+					     
+					      */
 	}
 
 	@Override

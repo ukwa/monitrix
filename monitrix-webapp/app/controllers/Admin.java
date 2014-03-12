@@ -17,15 +17,16 @@ public class Admin extends AbstractController{
 	private static final String PATH = "path";
 	private static final String CRAWLER_ID = "crawler_id";
 
-	private static IngestSchedule ingestSchedule = Global.getBackend().getIngestSchedule(); 
+	// private static IngestSchedule ingestSchedule = Global.getBackend().getIngestSchedule(); 
 		
-	private static IngestWatcher ingestWatcher = Global.getIngestWatcher();
+	// private static IngestWatcher ingestWatcher = Global.getIngestWatcher();
 	
 	public static Result index() {
 		return ok(views.html.admin.index.render());
 	}
 	
 	public static Result addLog() {
+		/*
 		String crawlerId = getFormParam(CRAWLER_ID);
 		if (crawlerId.isEmpty()) {
 			flash("error", "Crawler ID may not be empty");
@@ -45,7 +46,7 @@ public class Admin extends AbstractController{
 			return redirect(routes.Admin.index());
 		}
 		
-		// Check if the crawledId is already in use:
+		/ Check if the crawledId is already in use:
 		if( ingestSchedule.getLogForCrawlerId(crawlerId) != null ) {
 			Logger.info("Attempt to add an already added crawler ID: " + crawlerId);
 			flash("error", "The crawler ID '" + crawlerId + "' has already been registered");
@@ -61,20 +62,21 @@ public class Admin extends AbstractController{
 		
 		ingestSchedule.addLog(path, crawlerId, true);
 		ingestWatcher.refresh();
+		*/
 		return redirect(routes.Admin.index());
 	}
 	
 	public static Result getLogTrackerStatus() {
-		if (ingestWatcher == null)
-			return ok();
+		// if (ingestWatcher == null)
+		// 	return ok();
 		
-		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus(), ingestSchedule)));
+		return ok(Json.toJson("")); // IngestStatusMapper.map(ingestWatcher.getStatus(), ingestSchedule)));
 	}
 	
 	public static Result toggleWatch() {
-		String logId = getQueryParam(ID);
-		if (!logId.isEmpty())
-			ingestSchedule.setMonitoringEnabled(logId, !ingestSchedule.isMonitoringEnabled(logId));
+		// String logId = getQueryParam(ID);
+		// if (!logId.isEmpty())
+		//	ingestSchedule.setMonitoringEnabled(logId, !ingestSchedule.isMonitoringEnabled(logId));
 
 		return redirect(routes.Admin.index());
 	}

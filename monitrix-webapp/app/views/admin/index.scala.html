@@ -61,7 +61,7 @@
       }
     </p>
     
-    @defining(uk.bl.monitrix.Global.getIngestWatcher) { watcher =>
+    @* defining(uk.bl.monitrix.Global.getIngestWatcher) { watcher =>
       <p>
         Ingest Watcher Health
         @if(watcher.isAlive) {
@@ -79,7 +79,7 @@
           <span class="circle-large" style="background-color:#d00;"></span>
         }     
       </p>
-    }
+    } *@
   </div> 
   
   <h2 style="clear:both">Monitored Heritrix Logs</h2>

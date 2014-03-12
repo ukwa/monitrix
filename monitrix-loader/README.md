@@ -1,6 +1,6 @@
 # Monitrix Loader
 
-A backend-loader for Cassandra, to be used by with the Monitrix Webapp, based on Apache commons-io and the LMAX RingBuffer/Disruptor pattern. 
+A backend-loader for Cassandra, to be used with the Monitrix Webapp, based on Apache commons-io and the LMAX RingBuffer/Disruptor pattern. 
 
 # Installation and Configuration
 
@@ -10,19 +10,24 @@ Before you first launch the loader, you need to create the schema in Cassandra. 
 
 # Developer Information
 
-Make sure you have a running Cassandra instance available (current version of time of writing is 2.0.6). Tip: run ``{cassandra-dir}/bin/cassandra -f``
-to start Cassandra in the foreground). A sample log file for testing is included in this project at ``src/test/resources/crawl_100k.log``.
+* Make sure you have a running Cassandra instance available (current version at time of writing is 2.0.6). 
+  Tip: run ``{cassandra-dir}/bin/cassandra -f`` to start Cassandra in the foreground). 
+* Create the schema as instructed above.
+* The loader is a Maven project and comes with a launch configuration (Maven exec plugin) for convenience. 
+  Configure the command line arguments in the ``pom.xml`` before starting the loader (a sample log file is
+  included in this project at ``src/test/resources/crawl_100k.log``).
 
-The loader is a Maven project, and comes with a launch configuration (Maven exec plugin) for convenience. Configure the command line arguments in 
-the ``pom.xml`` before starting the loader:
-
-     <commandlineArgs>src/test/resources/crawl_100k.log crawl_uris localhost 10000 2 minute</commandlineArgs>
+```
+<commandlineArgs>src/test/resources/crawl_100k.log crawl_uris localhost 10000 2 minute</commandlineArgs>
     
-* 1st arg: path to the Heritrix crawl log file
-* 2nd arg: ???
-* 3rd arg: Cassandra host
-* 4th arg: ingest batch size (?)
-* 5th arg: log file revisit interval (time unit can by 'second', 'minute', 'hour', 'day') (?)
+# 1st arg: path to the Heritrix crawl log file
+# 2nd arg: ???
+# 3rd arg: Cassandra host
+# 4th arg: ingest batch size (?)
+# 5th arg: log file revisit interval (time unit can by 'second', 'minute', 'hour', 'day') (?)
+```
+
+* Once the loader is running, you are ready to launch the Monitrix Webapp.
 
 # Troubleshooting
 

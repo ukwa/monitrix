@@ -9,13 +9,10 @@ import play.mvc.*;
 import play.mvc.Http.*;
 import play.libs.Akka;
 import play.libs.F.Promise;
-import play.libs.F.*;
 import static play.mvc.Results.*;
 import uk.bl.monitrix.database.DBConnector;
 import uk.bl.monitrix.database.cassandra.CassandraDBConnector;
 import uk.bl.monitrix.database.cassandra.ingest.CassandraDBIngestConnector;
-import uk.bl.monitrix.database.mongodb.MongoDBConnector;
-import uk.bl.monitrix.database.mongodb.ingest.MongoDBIngestConnector;
 import uk.bl.monitrix.heritrix.api.HeritrixAPI;
 import uk.bl.monitrix.heritrix.ingest.IngestWatcher;
 
@@ -27,7 +24,7 @@ public class Global extends GlobalSettings {
 
 	private static DBConnector db = null;
 	
-	// private static IngestWatcher ingestWatcher = null;
+	private static IngestWatcher ingestWatcher = null;
 	
 	// TODO persist registered API endpoints in DB!
 	private static List<HeritrixAPI> crawlers = new ArrayList<HeritrixAPI>();
@@ -36,10 +33,9 @@ public class Global extends GlobalSettings {
 		try {
 			db = new CassandraDBConnector();
 			
-			/*
-			ingestWatcher = new IngestWatcher(new CassandraDBIngestConnector(db), Akka.system());
-			ingestWatcher.startWatching();
-			*/
+
+			// ingestWatcher = new IngestWatcher(new CassandraDBIngestConnector(db), Akka.system());
+			// ingestWatcher.startWatching();
 			
 			Logger.info("Database connected");
 		} catch (Exception e) {
@@ -60,11 +56,10 @@ public class Global extends GlobalSettings {
 	/**
 	 * Returns the ingest watcher, which is in charge of conducting periodic log-to-database syncs.
 	 * @return the ingest watcher
-	 *
+	 */
 	public static IngestWatcher getIngestWatcher() {
 		return ingestWatcher;
 	}
-	*/
 	
 	/**
 	 * Returns the configured Heritrix crawler APIs, in the form of a map {:endpointURL API}. 
@@ -76,7 +71,7 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public void onStop(Application app) {
-		// ingestWatcher.stopWatching();
+		ingestWatcher.stopWatching();
 		if (db != null) {
 			db.close();
 			Logger.info("Database disconnected");

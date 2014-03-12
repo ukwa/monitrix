@@ -14,7 +14,6 @@ import com.datastax.driver.core.Session;
 
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLog;
 import uk.bl.monitrix.heritrix.LogFileEntry;
-import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
@@ -32,10 +31,10 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		super(db);
 		this.statement = session.prepare(
 			      "INSERT INTO crawl_uris.log " +
-			      "(coarse_ts, log_ts, entry_uuid, uri, fetch_ts, host, domain, subdomain, status_code, hash, " + 
+			      "(coarse_ts, log_ts, uri, fetch_ts, host, domain, subdomain, status_code, hash, " + 
 			      "log_id, annotations, discovery_path, compressibility, content_type, download_size, " + 
 			      "fetch_duration, referer, retries, worker_thread, line) " +
-			      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+			      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		this.statementUri = session.prepare(
 			      "INSERT INTO crawl_uris.uris " +
 			      "(uri, log_ts, coarse_ts, fetch_ts, status_code, hash) " +

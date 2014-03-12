@@ -35,7 +35,8 @@ public class CassandraCrawlStats implements CrawlStats {
 	public Iterator<CrawlStatsUnit> getCrawlStats() {
 		// TODO conflate stats from different crawls
 		final Iterator<Row> cursor =
-				session.execute("SELECT * FROM " + TABLE_STATS + " ORDER BY " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";")
+				session.execute("SELECT * FROM " + TABLE_STATS + " WHERE " + CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID +
+		        " IN ('file*') ORDER BY " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";")
 				.iterator();
 		
 		return new Iterator<CrawlStatsUnit>() {

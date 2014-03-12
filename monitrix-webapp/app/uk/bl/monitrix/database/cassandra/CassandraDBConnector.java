@@ -72,18 +72,20 @@ public class CassandraDBConnector implements DBConnector {
 	}
 	
 	private void init(String hostName, String keyspace, int dbPort) throws IOException {
+		Logger.info("Initializing database connection");
 		cluster = Cluster.builder()
 				.addContactPoint(hostName).build();
 		Metadata metadata = cluster.getMetadata();
 	    Logger.info("Connected to Cassandra cluster: " + metadata.getClusterName());
+	    
 		for ( Host host : metadata.getAllHosts() ) {
-		    Logger.info("Datacenter: "+host.getDatacenter()+"; Host: "+host.getAddress()+"; Rack: "+host.getRack());
+		    Logger.info("Datacenter: " + host.getDatacenter() + "; Host: " + host.getAddress() + "; Rack: " + host.getRack());
 		}
 		session = cluster.connect();
 		
-		// Add schema if needed:
-		// this.dropSchema();
-		// if( ! this.isSchemaThere() ) this.createSchema();
+		// Add schema if needed
+		if (!schemaExists()) 
+			createSchema();
 		
 		this.ingestSchedule = new CassandraIngestSchedule(session);
 		this.crawlLog = new CassandraCrawlLog(session);
@@ -93,73 +95,93 @@ public class CassandraDBConnector implements DBConnector {
 		this.virusLog = new CassandraVirusLog(session);
 	}
 	
-	private boolean isSchemaThere() {
+	private boolean schemaExists() {
+		Logger.info("Checking if schema exists...");
 		ResultSet rows = session.execute("select * from system.schema_keyspaces;");
-		for( Row r : rows ) {
-			if( "crawl_uris".equals(r.getString("keyspace_name"))) return true;
+		for (Row r : rows ) {
+			if (r.getString("keyspace_name").equals(CassandraProperties.KEYSPACE))
+				return true;
 		}
+		Logger.info("No schema defined");
 		return false;
 	}
 	
 	private void createSchema() {
-		session.execute("CREATE KEYSPACE crawl_uris WITH replication " + 
+		Logger.info("Creating schema...");
+		
+		session.execute("CREATE KEYSPACE " + CassandraProperties.KEYSPACE + " WITH replication " + 
 				"= {'class':'SimpleStrategy', 'replication_factor':1};");
 
 		// This is a fairly denormalised model, with URL-based lookup for frontier management
-		// and de-duplication, and time-wise lookups 
-		session.execute(
-				"CREATE TABLE crawl_uris.uris (" +
-						"uri text," +
-						"log_ts timestamp," +
-						"coarse_ts timestamp," +
-						"fetch_ts timestamp," +
-						"status_code int," +
-						"hash text," +
-						"PRIMARY KEY (uri, log_ts)" +
-				");");
+		// and de-duplication, and time-wise lookups
 		
-		// Could manage wide-rows by hand, but not much point now CQL3 handles composite keys:
-		// http://www.datastax.com/docs/1.1/ddl/column_family		
-//		session.execute(
-//				"CREATE TABLE crawl_uris.log_index (" +
-//						"coarse_ts timestamp," +
-//						"PRIMARY KEY (coarse_ts)" +
-//				");");
-		
-		// Composite keys and clustering allow us to do this instead:
 		session.execute(
-				"CREATE TABLE crawl_uris.log (" +
-						"coarse_ts timestamp," +
-						"log_ts timestamp," +
-						"entry_uuid uuid," +
-						"uri text," +
-						"fetch_ts timestamp," +
-						"host text," +
-						"domain text, " + 
-						"subdomain text, " + 
-						"status_code int," +
-						"hash text," +
-						"log_id text," +
-						"annotations text," +
-						"discovery_path text," +
-						"compressibility double," +
-						"content_type text," +
-						"download_size bigint," +
-						"fetch_duration int," +
-						"referer text," +
-						"retries int," +
-						"worker_thread text," +
-						"line text," +
-						"PRIMARY KEY (coarse_ts, log_ts, entry_uuid)" +
-				");");
+				"CREATE TABLE crawl_uris.log(" +
+					"log_id varchar , " + 
+					"log_ts varchar PRIMARY KEY , " +  
+					"status_code varchar, " +
+					"downloaded_bytes varchar, " + 
+					"uri varchar, " +
+					"discovery_path varchar, " + 
+					"referer varchar, " +
+					"content_type varchar, " + 
+					"worker_thread varchar, " + 
+					"fetch_ts varchar, " + 
+					"hash varchar, " + 
+					"annotations varchar, " + 
+					"ip_address varchar, " + 
+					"line varchar, " + 
+					"coarse_ts varchar, " + 
+					"long_log_ts varchar ) " + 
+				"WITH COMPACT STORAGE;");
+		
+		session.execute(
+				"CREATE TABLE crawl_uris.crawls(" + 
+					"crawl_id varchar PRIMARY KEY, " +
+					"start_ts varchar, " + 
+					"end_ts varchar, " + 
+					"ingested_lines varchar, " + 
+					"revisit_records varchar ) " + 
+				"WITH COMPACT STORAGE;");
+
+		session.execute(
+				"CREATE TABLE crawl_uris.crawl_stats(" + 
+					"crawl_id varchar, " +
+					"stat_ts bigint, " + 
+					"downloaded_bytes bigint, " + 
+					"uris_crawled bigint, " +
+					"new_hosts bigint, " +
+					"completed_hosts bigint, " +
+					"PRIMARY KEY ( crawl_id, stat_ts) );"); 
+		
+		session.execute(
+				"CREATE TABLE crawl_uris.alert_log(" +
+					"timestamp bigint PRIMARY KEY, " +
+					"offending_host varchar, " +
+					"alert_type varchar, " +
+					"alert_description varchar)" +
+				"WITH COMPACT STORAGE;");
 		
 		// Create some indexes to help with the time-wise lookups and filtering.
+		
+		// Crawl log indexes
+		session.execute("CREATE INDEX log_id on crawl_uris.log(log_id);");
+		session.execute("CREATE INDEX coarse_ts on crawl_uris.log(coarse_ts);");
+		session.execute("CREATE INDEX annotations on crawl_uris.log(annotations);");
+		session.execute("CREATE INDEX uri on crawl_uris.log(uri);");
+		session.execute("CREATE INDEX long_log_ts on crawl_uris.log(long_log_ts);");
+		
+		// Crawl stats indexes
+		// session.execute("CREATE INDEX stat_ts on crawl_uris.crawl_stats(stat_ts)");
+
+		/*
 		session.execute("CREATE INDEX host_idx ON crawl_uris.log (host)");
 		session.execute("CREATE INDEX domain_idx ON crawl_uris.log (domain)");
 		session.execute("CREATE INDEX status_code_idx ON crawl_uris.log (status_code)");
 		session.execute("CREATE INDEX log_id_idx ON crawl_uris.log (log_id)");
-
-		// Also allow pure hash-based lookups:
+		*/
+		
+		/* Also allow pure hash-based lookups:
 		session.execute(
 		"CREATE TABLE crawl_uris.hashes (" +
 				"hash text," +
@@ -308,11 +330,12 @@ public class CassandraDBConnector implements DBConnector {
 				"crawled_urls counter," +
 				"PRIMARY KEY (tld)" +
 				");");
+		*/
 	}
 	
 	public void dropSchema() {
-		if( this.isSchemaThere() )
-			session.execute("DROP KEYSPACE crawl_uris");
+		if (schemaExists() )
+			session.execute("DROP KEYSPACE " + CassandraProperties.KEYSPACE);
 	}
 	
 	public Session getSession() {

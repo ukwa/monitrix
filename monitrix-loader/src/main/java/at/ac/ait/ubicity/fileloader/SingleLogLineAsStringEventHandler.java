@@ -126,6 +126,7 @@ final class SingleLogLineAsStringEventHandler implements EventHandler<SingleLogL
         try {
             if( sequence % batchSize == 0 ) {
                 batch.executeAsync().get();
+                System.out.print( "batch performed on " + log.getName()  );
                 System.out.print( sequence + " " );
             }
         }

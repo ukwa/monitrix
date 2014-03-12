@@ -22,8 +22,22 @@ WITH COMPACT STORAGE;
 create table crawls(
 crawl_id varchar PRIMARY KEY,
 start_ts varchar, 
-end_ts varchar ) 
+end_ts varchar, 
+ingested_lines varchar, 
+revisit_records varchar  ) 
 WITH COMPACT STORAGE;
+
+
+create table crawl_stats(
+stat_ts bigint PRIMARY KEY, 
+downloaded_bytes bigint,
+uris_crawled bigint, 
+new_hosts bigint,
+completed_hosts bigint, 
+)
+WITH COMPACT STORAGE;
+
+
 
 create index log_id on log( log_id ) ;
 create INDEX coarse_ts on log ( coarse_ts) ;

@@ -42,7 +42,8 @@ public class CassandraAlertLog implements AlertLog {
 	
 	@Override
 	public List<Alert> getMostRecent(int n) {
-		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_ALERTS + " ORDER BY " + CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP +
+		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_ALERTS + " WHERE " + CassandraProperties.FIELD_ALERT_LOG_CRAWL_ID + 
+				" IN ('file*') ORDER BY " + CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP +
 				" LIMIT " + n + ";").iterator();
 		
 		List<Alert> recent = new ArrayList<Alert>();

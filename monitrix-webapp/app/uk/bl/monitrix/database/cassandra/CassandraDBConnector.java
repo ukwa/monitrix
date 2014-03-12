@@ -152,14 +152,21 @@ public class CassandraDBConnector implements DBConnector {
 					"uris_crawled bigint, " +
 					"new_hosts bigint, " +
 					"completed_hosts bigint, " +
-					"PRIMARY KEY ( crawl_id, stat_ts) );"); 
+					"PRIMARY KEY (crawl_id, stat_ts) );"); 
 		
 		session.execute(
 				"CREATE TABLE crawl_uris.alert_log(" +
-					"timestamp bigint PRIMARY KEY, " +
+					"timestamp bigint, " +
+					"crawl_id varchar, " +
 					"offending_host varchar, " +
 					"alert_type varchar, " +
-					"alert_description varchar)" +
+					"alert_description varchar, " +
+					"PRIMARY KEY (crawl_id, timestamp) );");
+		
+		session.execute(
+				"CREATE TABLE crawl_uris.virus_log(" +
+					"virus_name varchar PRIMARY KEY, " +
+					"occurences bigint )" +
 				"WITH COMPACT STORAGE;");
 		
 		// Create some indexes to help with the time-wise lookups and filtering.

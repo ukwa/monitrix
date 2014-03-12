@@ -1,6 +1,5 @@
 package uk.bl.monitrix.database.cassandra.model;
 
-import play.Logger;
 
 import com.datastax.driver.core.Row;
 

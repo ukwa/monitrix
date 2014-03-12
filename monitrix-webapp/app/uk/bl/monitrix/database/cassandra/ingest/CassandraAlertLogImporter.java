@@ -6,7 +6,7 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 
-import uk.bl.monitrix.database.cassandra.model.CassandraAlert;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraAlertLog;
 import uk.bl.monitrix.heritrix.LogFileEntry.DefaultAlert;
 
@@ -21,9 +21,12 @@ class CassandraAlertLogImporter extends CassandraAlertLog {
 	public CassandraAlertLogImporter(Session db) {
 		super(db);
 		this.statement = session.prepare(
-			      "INSERT INTO crawl_uris.alerts " +
-					      "(host, alert_ts, alert_type, description) " +
-					      "VALUES (?, ?, ?, ?);");
+				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_ALERT_LOG + " (" +
+			    CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + ", " +
+				CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP + ", " +
+			    CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + ", " + 
+				CassandraProperties.FIELD_ALERT_LOG_DESCRIPTION + ") " +
+				"VALUES (?, ?, ?, ?);");
 	}
 	
 	public void insert(DefaultAlert alert) {

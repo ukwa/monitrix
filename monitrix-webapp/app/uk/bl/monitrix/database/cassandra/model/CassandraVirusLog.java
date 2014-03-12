@@ -12,6 +12,8 @@ import uk.bl.monitrix.model.VirusRecord;
 
 public class CassandraVirusLog implements VirusLog {
 	
+	private final String TABLE_VIRUS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_VIRUS_LOG;
+	
 	protected Session session;
 	
 	public CassandraVirusLog(Session session) {
@@ -20,7 +22,9 @@ public class CassandraVirusLog implements VirusLog {
 	
 	@Override
 	public VirusRecord getRecordForVirus(String virusName) {
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.virus_log WHERE virus_name='"+virusName+"';");
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_VIRUS + " WHERE " + CassandraProperties.FIELD_VIRUS_LOG_NAME + 
+				"='" + virusName + "';");
+		
 		if (results.isExhausted())
 			return null;
 		
@@ -29,7 +33,7 @@ public class CassandraVirusLog implements VirusLog {
 
 	@Override
 	public Iterator<VirusRecord> getVirusRecords() {
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.virus_log;");
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_VIRUS + ";");
 		final Iterator<Row> cursor = results.iterator();
 		return new Iterator<VirusRecord>() {
 			@Override

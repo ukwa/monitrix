@@ -1,12 +1,6 @@
 package uk.bl.monitrix.database.cassandra.model;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import com.datastax.driver.core.Row;
 

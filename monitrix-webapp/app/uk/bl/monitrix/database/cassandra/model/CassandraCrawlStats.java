@@ -6,21 +6,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import play.Logger;
-
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 
-import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.CrawlStats;
 import uk.bl.monitrix.model.CrawlStatsUnit;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 
 /**
  * A CassandraDB-backed implementation of {@link CrawlStats}.
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CassandraCrawlStats implements CrawlStats {
+	
+	private final String TABLE_STATS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS;
 	
 	protected Session session; 
 	
@@ -31,26 +31,13 @@ public class CassandraCrawlStats implements CrawlStats {
 		this.session = session;
 	}
 	
-	private String getCrawlIDs( String crawl_id ) {
-		if( crawl_id != null ) {
-			return "= '"+crawl_id+"'";
-		}
-		// Go through all the crawl IDs:
-		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.crawls;").iterator();
-		String keys = " IN (";
-		while( rows.hasNext() ) {
-			Row r = rows.next();
-			keys = keys + "'" + r.getString("crawl_id") + "'";
-			if( rows.hasNext() ) keys += ",";
-		}
-		keys += ")";
-		return keys;
-	}
-
 	@Override
 	public Iterator<CrawlStatsUnit> getCrawlStats() {
-		// Now build the query:
-		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id "+getCrawlIDs(null)+" ORDER BY stat_ts;").iterator();
+		// TODO conflate stats from different crawls
+		final Iterator<Row> cursor =
+				session.execute("SELECT * FROM " + TABLE_STATS + " ORDER BY " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";")
+				.iterator();
+		
 		return new Iterator<CrawlStatsUnit>() {
 			@Override
 			public boolean hasNext() {
@@ -70,8 +57,12 @@ public class CassandraCrawlStats implements CrawlStats {
 	}
 
 	@Override
-	public Iterator<CrawlStatsUnit> getCrawlStats( String crawl_id ) {
-		final Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id='"+crawl_id+"' ORDER BY stat_ts;").iterator();
+	public Iterator<CrawlStatsUnit> getCrawlStats(String crawl_id) {
+		final Iterator<Row> cursor =
+				session.execute("SELECT * FROM " + TABLE_STATS + " WHERE " + CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID + "='" +
+		        crawl_id + "' ORDER BY " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";")
+				.iterator();
+		
 		return new Iterator<CrawlStatsUnit>() {
 			@Override
 			public boolean hasNext() {
@@ -92,10 +83,13 @@ public class CassandraCrawlStats implements CrawlStats {
 
 	@Override
 	public CrawlStatsUnit getStatsForTimestamp(long timestamp, String crawl_id) {
+		// TODO conflate stats from different crawls
 		if (cache.containsKey(timestamp))
 			return cache.get(timestamp);
 		
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.stats WHERE stat_ts="+timestamp+" AND crawl_id='"+crawl_id+"' ORDER BY stat_ts;");
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_STATS + " WHERE " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP +
+				"=" + timestamp + " AND " + CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID + "='" + crawl_id + "' ORDER BY " + 
+				CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";");
 		
 		if (results.isExhausted() ) {
 			return null;
@@ -108,7 +102,10 @@ public class CassandraCrawlStats implements CrawlStats {
 
 	@Override
 	public List<CrawlStatsUnit> getMostRecentStats(int n) {
-		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.stats WHERE crawl_id"+this.getCrawlIDs(null)+" ORDER BY stat_ts LIMIT "+n+";").iterator();
+		// TODO conflate stats from different crawls
+		Iterator<Row> cursor = 
+				session.execute("SELECT * FROM " + TABLE_STATS + " ORDER BY " + 
+		        CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + " LIMIT " + n +";").iterator();
 		
 		List<CrawlStatsUnit> recent = new ArrayList<CrawlStatsUnit>();
 		while(cursor.hasNext())

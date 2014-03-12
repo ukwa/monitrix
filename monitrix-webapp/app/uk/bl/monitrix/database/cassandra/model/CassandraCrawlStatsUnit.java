@@ -1,7 +1,6 @@
 package uk.bl.monitrix.database.cassandra.model;
 
 import com.datastax.driver.core.Row;
-import com.mongodb.DBObject;
 
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.CrawlStatsUnit;

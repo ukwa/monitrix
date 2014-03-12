@@ -22,7 +22,7 @@ public interface CrawlStats {
 	 * @param crawl_id of the crawl - returns data for all crawls if NULL.
 	 * @return the crawl stats
 	 */
-	public Iterator<CrawlStatsUnit> getCrawlStats( String crawl_id );
+	public Iterator<CrawlStatsUnit> getCrawlStats(String crawl_id);
 	
 	/**
 	 * Returns a single base-resolution unit of the aggregated crawl stats.

@@ -1,7 +1,5 @@
 package uk.bl.monitrix.database.cassandra.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;

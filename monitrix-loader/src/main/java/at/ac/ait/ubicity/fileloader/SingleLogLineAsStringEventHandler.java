@@ -26,6 +26,7 @@ import com.lmax.disruptor.EventHandler;
 
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.MutationBatch;
+import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.connectionpool.exceptions.OperationTimeoutException;
 import java.text.SimpleDateFormat;
@@ -125,9 +126,10 @@ final class SingleLogLineAsStringEventHandler implements EventHandler<SingleLogL
 
         try {
             if( sequence % batchSize == 0 ) {
-                batch.executeAsync().get();
+                OperationResult r = batch.executeAsync().get();
                 System.out.print( "batch performed on " + log.getName()  );
-                System.out.print( sequence + " " );
+                System.out.print( " " + sequence + " " );
+                System.out.println( "operation result was " + r.getResult() );
             }
         }
         catch( ExecutionException | OperationTimeoutException  opTimedOut )  {

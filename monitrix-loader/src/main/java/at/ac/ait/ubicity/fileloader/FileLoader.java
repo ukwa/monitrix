@@ -175,7 +175,7 @@ public final class FileLoader {
         logger.info( "**** min TimeStamp = " + _minTs );
         logger.info( "**** max TimeStamp = " + _maxTs );
         
-        StatsTableActualizer.update( _fileInfo.getURI().toString(), _minTs, _maxTs );
+        StatsTableActualizer.update( _fileInfo.getURI().toString(), _minTs, _maxTs, _lineCount );
         
         
 //        AggregationJob aggJob = new AggregationJob( keySpace, _host, _batchSize );

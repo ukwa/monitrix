@@ -33,9 +33,8 @@ public class Global extends GlobalSettings {
 		try {
 			db = new CassandraDBConnector();
 			
-
-			// ingestWatcher = new IngestWatcher(new CassandraDBIngestConnector(db), Akka.system());
-			// ingestWatcher.startWatching();
+			ingestWatcher = new IngestWatcher(new CassandraDBIngestConnector(db), Akka.system());
+			ingestWatcher.startWatching();
 			
 			Logger.info("Database connected");
 		} catch (Exception e) {

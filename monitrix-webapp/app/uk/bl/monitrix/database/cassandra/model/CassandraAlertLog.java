@@ -1,13 +1,10 @@
 package uk.bl.monitrix.database.cassandra.model;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.poi.hssf.record.formula.functions.Rows;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -24,6 +21,8 @@ import uk.bl.monitrix.model.AlertLog;
  */
 public class CassandraAlertLog implements AlertLog {
 	
+	private final String TABLE_ALERTS = CassandraProperties.KEYSPACE  + "." + CassandraProperties.COLLECTION_ALERT_LOG;
+	
 	protected Session session;
 	
 	public CassandraAlertLog(Session session) {
@@ -32,18 +31,19 @@ public class CassandraAlertLog implements AlertLog {
 
 	@Override
 	public long countAll() {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.alerts;");
+		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + ";");
 		return results.one().getLong("count");
 	}
 
 	@Override
 	public Iterator<Alert> listAll() {
-		return map(session.execute("SELECT * FROM crawl_uris.alerts;").iterator());
+		return map(session.execute("SELECT * FROM " + TABLE_ALERTS + ";").iterator());
 	}
 	
 	@Override
 	public List<Alert> getMostRecent(int n) {
-		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.alerts LIMIT "+n+";").iterator();
+		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_ALERTS + " ORDER BY " + CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP +
+				" LIMIT " + n + ";").iterator();
 		
 		List<Alert> recent = new ArrayList<Alert>();
 		while(rows.hasNext())
@@ -54,9 +54,11 @@ public class CassandraAlertLog implements AlertLog {
 
 	@Override
 	public List<String> getOffendingHosts() {
-		Iterator<Row> rows = session.execute("SELECT host FROM crawl_uris.alerts;").iterator();
+		Iterator<Row> rows = session.execute("SELECT " + CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + " FROM " + 
+				TABLE_ALERTS +";").iterator();
+		
 		Set<String> hosts = new HashSet<String>();
-		while(rows.hasNext()) {
+		while (rows.hasNext()) {
 			hosts.add( rows.next().getString("host"));
 		}
 		List<String> hostList = new ArrayList<String>();
@@ -66,32 +68,39 @@ public class CassandraAlertLog implements AlertLog {
 
 	@Override
 	public long countAlertsForHost(String hostname) {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.alerts WHERE host='"+hostname+"';");
+		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + " WHERE " + 
+				CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "';");
 		return results.one().getLong("count");
 	}
 	
 	@Override
 	public long countAlertsForHost(String hostname, AlertType type) {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.alerts WHERE host='"+hostname+"' AND alert_type='"+type+"';");
+		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + " WHERE " + 
+				CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "' AND " + 
+				CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + "='" + type.name() + "';");
+		
 		return results.one().getLong("count");
 	}
 	
 	@Override
 	public List<AlertType> getAlertTypesForHost(String hostname) {
-		Iterator<Row> rows = session.execute("SELECT alert_type FROM crawl_uris.alerts WHERE host='"+hostname+"';").iterator();
+		Iterator<Row> rows = session.execute("SELECT " + CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + " FROM " +
+				TABLE_ALERTS + " WHERE " + CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "';").iterator();
+		
 		Set<AlertType> set = new HashSet<AlertType>();
-		while(rows.hasNext()) {
-			set.add( AlertType.valueOf(rows.next().getString("alert_type")));
+		while (rows.hasNext()) {
+			set.add(AlertType.valueOf(rows.next().getString(CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE)));
 		}
+		
 		List<AlertType> list = new ArrayList<AlertType>();
 		list.addAll(set);
 		return list;
 	}
 
-
 	@Override
 	public Iterator<Alert> listAlertsForHost(String hostname) {
-		return map(session.execute("SELECT * FROM crawl_uris.alerts WHERE host='"+hostname+"';").iterator());
+		return map(session.execute("SELECT * FROM " + TABLE_ALERTS + " WHERE " + CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" +
+				hostname + "';").iterator());
 	}
 	
 	/**

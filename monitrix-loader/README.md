@@ -1,5 +1,10 @@
-A backend-loader for Cassandra, to be used by the BL Monitrix project, based upon Apache commons-io and the LMAX RingBuffer / Disruptor pattern. 
-Succinct documentation is coming soon.
+# Monitrix Loader
+
+A backend-loader for Cassandra, to be used by with the Monitrix Webapp, based on Apache commons-io and the LMAX RingBuffer/Disruptor pattern. 
+
+# Installation and Configuration
+
+TODO...
 
 # Troubleshooting
 

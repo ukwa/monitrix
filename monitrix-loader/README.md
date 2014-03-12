@@ -14,8 +14,9 @@ Before you first launch the loader, you need to create the schema in Cassandra. 
   Tip: run ``{cassandra-dir}/bin/cassandra -f`` to start Cassandra in the foreground). 
 * Create the schema as instructed above.
 * The loader is a Maven project and comes with a launch configuration (Maven exec plugin) for convenience. 
-  Configure the command line arguments in the ``pom.xml`` before starting the loader (a sample log file is
-  included in this project at ``src/test/resources/crawl_100k.log``).
+  Configure the command line arguments in the ``pom.xml`` before starting the loader. (A sample log file is
+  included in this project at ``src/test/resources/crawl_100k.tar.gz`` - you need to uncompress this file
+  before launching the loader!).
 
 ```
 <commandlineArgs>src/test/resources/crawl_100k.log crawl_uris localhost 10000 2 minute</commandlineArgs>

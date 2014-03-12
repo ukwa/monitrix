@@ -47,13 +47,6 @@ public class CassandraProperties {
 	public static final String FIELD_META_INGESTED_LINES = "ingested_lines";
 	public static final String FIELD_META_REVISIT_RECORDS = "revisit_records";
 	
-	/** Database field keys (Ingest Schedule collection) **/
-	public static final String FIELD_INGEST_SCHEDULE_ID = "_id";
-	public static final String FIELD_INGEST_SCHEDULE_PATH = "path";
-	public static final String FIELD_INGEST_SCHEDULE_CRAWLER_ID = "crawler_id";
-	public static final String FIELD_INGEST_SCHEDULE_LINES = "ingested_lines";
-	public static final String FIELD_INGEST_SCHEDULE_MONITORED = "is_monitored";
-	
 	/** Database field keys (Alert Log collection) **/
 	public static final String FIELD_ALERT_LOG_TIMESTAMP = "timestamp";
 	public static final String FIELD_ALERT_LOG_CRAWL_ID = "crawl_id";

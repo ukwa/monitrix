@@ -35,8 +35,7 @@ class CassandraAlertLogImporter extends CassandraAlertLog {
 				alert.getOffendingHost(),
 				alert.getTimestamp(),
 				alert.getAlertType(),
-				alert.getAlertDescription()
-				));
+				alert.getAlertDescription()));
 	}
 	
 	public void insert(final List<DefaultAlert> alerts) {

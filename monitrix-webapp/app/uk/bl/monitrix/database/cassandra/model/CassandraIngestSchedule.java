@@ -12,9 +12,9 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
-import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.IngestSchedule;
 import uk.bl.monitrix.model.IngestedLog;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 
 /**
  * A CassandraDB-backed implementation of {@link IngestSchedule}.
@@ -22,68 +22,63 @@ import uk.bl.monitrix.model.IngestedLog;
  */
 public class CassandraIngestSchedule extends IngestSchedule {
 	
+	private final String TABLE_CRAWLS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_META;
+	
 	protected Session session; 
 
 	private PreparedStatement statement = null;
 	
 	public CassandraIngestSchedule(Session session) {
 		this.session = session;
-		/*
-		 * this.statement = session.prepare(
-		 
-			      "INSERT INTO crawl_uris.log_files " +
-					      "(path, crawler_id, is_monitored) " +
-					      "VALUES (?, ?, ?);");
-					     
-					      */
+		this.statement = session.prepare(
+				"INSERT INTO crawl_uris.crawls " +
+				"(crawl_id, start_ts, end_ts, ingested_lines, revisit_records) " +
+				"VALUES (?, ?, ?, ?, ?);");
 	}
 
 	@Override
 	public IngestedLog addLog(String path, String crawlerId, boolean monitor) {
-		// Check if this log is already in the DB (path and crawlerID must be unique):
-		if( getLogForCrawlerId(crawlerId) != null ) return null;
-		if( getLogForPath(path) != null ) return null;
-		// Add the log:
+		Logger.info("Adding log: " + crawlerId + " - " + path);
+		
+		if (getLogForCrawlerId(crawlerId) != null || getLogForPath(path) != null) {
+			Logger.warn("Log is already in the DB!");
+			return null;
+		}
+		
 		BoundStatement boundStatement = new BoundStatement(statement);
-		session.execute(boundStatement.bind(
-				path,
-				crawlerId,
-				monitor
-				));
-		return new CassandraIngestedLog(
-				session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+path+"'").one(),
-				session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+path+"'").one()
-				);
+		session.execute(boundStatement.bind(path, 0, 0, 0, 0));
+		
+		Row r = session.execute("SELECT * FROM " + TABLE_CRAWLS + " WHERE path='" + path + "';").one();
+		return new CassandraIngestedLog(r);
 	}
 	
 	@Override
 	public List<IngestedLog> getLogs() {
-		List<IngestedLog> logs = new ArrayList<IngestedLog>();
-		Iterator<Row> cursor = session.execute("SELECT * FROM crawl_uris.log_files;").iterator();
+		Logger.info("Returing list of registered logs");
+		Iterator<Row> cursor = session.execute("SELECT * FROM " + TABLE_CRAWLS + ";").iterator();
+
+		List<IngestedLog> logs = new ArrayList<IngestedLog>();		
 		while(cursor.hasNext()) {
-			Row r = cursor.next();
-			ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+r.getString("path")+"';");
-			Row t = totals.one();
-			CassandraIngestedLog cil = new CassandraIngestedLog(r,t);
-			logs.add(cil);
+			logs.add(new CassandraIngestedLog(cursor.next()));
 		}
+		
+		Logger.info("Got " + logs.size());
 		return logs;
 	}
 	
 	@Override
 	public IngestedLog getLog(String id) {
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+id+"';");
-		if (results.isExhausted()) return null;
+		ResultSet results = 
+				session.execute("SELECT * FROM " + TABLE_CRAWLS + " WHERE " + CassandraProperties.FIELD_META_CRAWL_ID + "='" + id + "';");
+		if (results.isExhausted())
+			return null;
 		
-		Row r = results.one();
-		
-		ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+r.getString("path")+"';");		
-		
-		return new CassandraIngestedLog(r, totals.one());
+		return new CassandraIngestedLog(results.one());
 	}
 	
 	@Override
 	public IngestedLog getLogForCrawlerId(String crawlerId) {
+		/*
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_files WHERE crawler_id='"+crawlerId+"';");
 		if (results.isExhausted()) return null;
 		
@@ -91,16 +86,21 @@ public class CassandraIngestSchedule extends IngestSchedule {
 		ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+r.getString("path")+"';");
 		
 		return new CassandraIngestedLog(r, totals.one());
+		*/
+		return getLog(crawlerId);
 	}
 	
 	@Override
 	public IngestedLog getLogForPath(String path) {
+		/*
 		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+path+"';");
 		if (results.isExhausted()) return null;
 
 		ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+path+"';");
 
 		return new CassandraIngestedLog(results.one(), totals.one());
+		*/
+		return getLog(path);
 	}
 	
 	@Override
@@ -114,15 +114,19 @@ public class CassandraIngestSchedule extends IngestSchedule {
 
 	@Override
 	public void setMonitoringEnabled(String id, boolean monitoringEnabled) {
+		/*
 		CassandraIngestedLog log = (CassandraIngestedLog) getLog(id);
 		if (log != null) {
 			session.execute("UPDATE crawl_uris.log_files SET is_monitored = "+monitoringEnabled+" WHERE path='"+id+"'");
 		}
+		*/
 	}
 	
 	public void incrementIngestedLogLines(String id, long increment, long revist_increment) {
+		/*
 		session.execute("UPDATE crawl_uris.log_file_counters SET ingested_lines = ingested_lines + "+increment
 				+", revisit_records = revisit_records + "+revist_increment+" WHERE path='"+id+"'");
+		*/
 	}
 
 }

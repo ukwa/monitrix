@@ -41,7 +41,7 @@ public final class StatsTableActualizer {
      
      
      
-     public final static boolean update( String _key, Long start_ts, Long end_ts ) throws Exception  {
+     public final static boolean update( String _key, Long start_ts, Long end_ts, long _lineCount ) throws Exception  {
 
         ColumnList<  String > cl = null;
         
@@ -68,7 +68,7 @@ public final class StatsTableActualizer {
             System.out.println( "-------------> col:: " + onCols.next().getStringValue() );
         }
         //simple case: simply write into the table what we have, and leave
-        doUpdate( _key, start_ts, end_ts );
+        doUpdate( _key, start_ts, end_ts, _lineCount );
         return true;
      }
 
@@ -80,9 +80,9 @@ public final class StatsTableActualizer {
       * @param end_ts
       * @throws Exception 
       */
-    private static void doUpdate(String _key, Long start_ts, Long end_ts) throws Exception {
+    private static void doUpdate(String _key, Long start_ts, Long end_ts, long _lineCount ) throws Exception {
         MutationBatch mb = keySpace.prepareMutationBatch();
-        mb.withRow( crawls, _key ).putColumn( "start_ts", Long.toString( start_ts) ).putColumn( "end_ts", Long.toString( end_ts ) );
+        mb.withRow( crawls, _key ).putColumn( "start_ts", Long.toString( start_ts) ).putColumn( "end_ts", Long.toString( end_ts ) ).putColumn( "ingested_lines", Long.toString( _lineCount ) ) ;
         mb.execute();
     }
 }

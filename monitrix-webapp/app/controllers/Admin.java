@@ -66,10 +66,10 @@ public class Admin extends AbstractController{
 	}
 	
 	public static Result getLogTrackerStatus() {
-		// if (ingestWatcher == null)
-		// 	return ok();
+		if (ingestWatcher == null)
+			return ok();
 		
-		return ok(Json.toJson("")); // IngestStatusMapper.map(ingestWatcher.getStatus(), ingestSchedule)));
+		return ok(Json.toJson(IngestStatusMapper.map(ingestWatcher.getStatus(), ingestSchedule)));
 	}
 	
 	public static Result toggleWatch() {

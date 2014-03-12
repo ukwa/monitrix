@@ -138,10 +138,10 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute(
 				"CREATE TABLE crawl_uris.crawls(" + 
 					"crawl_id varchar PRIMARY KEY, " +
-					"start_ts varchar, " + 
-					"end_ts varchar, " + 
-					"ingested_lines varchar, " + 
-					"revisit_records varchar ) " + 
+					"start_ts bigint, " + 
+					"end_ts bigint, " + 
+					"ingested_lines bigint, " + 
+					"revisit_records bigint ) " + 
 				"WITH COMPACT STORAGE;");
 
 		session.execute(

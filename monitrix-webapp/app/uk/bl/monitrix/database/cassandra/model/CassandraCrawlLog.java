@@ -45,7 +45,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		
 		while (rows.hasNext()) {
 			Row r = rows.next();
-			long start_ts = Long.parseLong(r.getString(CassandraProperties.FIELD_META_START_TS));
+			long start_ts = r.getLong(CassandraProperties.FIELD_META_START_TS);
 			if (start_ts < crawlStartTime)
 				crawlStartTime = start_ts;
 		}
@@ -64,7 +64,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		
 		while (rows.hasNext()) {
 			Row r = rows.next();
-			long end_ts = Long.parseLong(r.getString(CassandraProperties.FIELD_META_END_TS));
+			long end_ts = r.getLong(CassandraProperties.FIELD_META_END_TS);
 			if (end_ts > lastCrawlActivity)
 				lastCrawlActivity = end_ts;
 		}		

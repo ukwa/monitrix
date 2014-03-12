@@ -46,7 +46,7 @@ public class CassandraIngestSchedule extends IngestSchedule {
 		}
 		
 		BoundStatement boundStatement = new BoundStatement(statement);
-		session.execute(boundStatement.bind(path, 0, 0, 0, 0));
+		session.execute(boundStatement.bind(path, 0l, 0l, 0l, 0l));
 		
 		Row r = session.execute("SELECT * FROM " + TABLE_CRAWLS + " WHERE path='" + path + "';").one();
 		return new CassandraIngestedLog(r);
@@ -54,7 +54,6 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	
 	@Override
 	public List<IngestedLog> getLogs() {
-		Logger.info("Returing list of registered logs");
 		Iterator<Row> cursor = session.execute("SELECT * FROM " + TABLE_CRAWLS + ";").iterator();
 
 		List<IngestedLog> logs = new ArrayList<IngestedLog>();		
@@ -62,7 +61,6 @@ public class CassandraIngestSchedule extends IngestSchedule {
 			logs.add(new CassandraIngestedLog(cursor.next()));
 		}
 		
-		Logger.info("Got " + logs.size());
 		return logs;
 	}
 	

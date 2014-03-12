@@ -2,9 +2,10 @@
 package at.ac.ait.ubicity.fileloader.aggregation;
 
 import at.ac.ait.ubicity.fileloader.TokenizedLogLine;
-import at.ac.ait.ubicity.fileloader.SingleLogLineAsString;
+
 import com.lmax.disruptor.EventHandler;
-import java.util.logging.Logger;
+import com.netflix.astyanax.MutationBatch;
+
 
 
 
@@ -17,7 +18,17 @@ import java.util.logging.Logger;
 public final class Aggregator implements EventHandler< TokenizedLogLine > {
 
     
+    static MutationBatch mutationBatch;
     
+    static CrawlStatsEntry currentEntry;
+    
+    private static boolean firstTimeStampSynced = false;
+    
+    public final static long FIVE_MINUTES = 300000;
+    
+    static  {
+        
+    }
     
     
     public Aggregator(  ) {
@@ -29,6 +40,8 @@ public final class Aggregator implements EventHandler< TokenizedLogLine > {
 
     @Override
     public void onEvent( TokenizedLogLine event, long sequence, boolean endOfBatch) throws Exception {
-        System.out.println( "-------> event in Aggregator :: "  + event.tokens[ 0 ] );
+        long __ts = Long.parseLong( event.tokens[ 14 ] ) ;
+        long _fiveMinsBlockBegin = ( __ts / FIVE_MINUTES ) * FIVE_MINUTES ;
+        System.out.println( " ------- > > > " +  _fiveMinsBlockBegin );
     }
 }

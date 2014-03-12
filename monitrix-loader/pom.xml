@@ -35,7 +35,7 @@
           <mainClass>at.ac.ait.ubicity.fileloader.FileLoader</mainClass>
             <!--mainClass>at.ac.ait.ubicity.fileloader.util.CheckDB</mainClass-->
             <!--mainClass>at.ac.ait.ubicity.fileloader.util.CleanUp</mainClass-->
-          <commandlineArgs>/data/bl/crawl_100k.log crawl_uris localhost 10000 2 minute</commandlineArgs>
+          <commandlineArgs>src/test/resources/crawl_100k.log crawl_uris localhost 10000 2 minute</commandlineArgs>
           <systemProperties>
             <systemProperty>
               <key>-Xms</key>

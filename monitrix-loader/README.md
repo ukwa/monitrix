@@ -28,6 +28,8 @@ Before you first launch the loader, you need to create the schema in Cassandra. 
 # 5th arg: log file revisit interval (time unit can by 'second', 'minute', 'hour', 'day') (?)
 ```
 
+* Start the loader using ``mvn exec:java``
+
 * Once the loader is running, you are ready to launch the Monitrix Webapp.
 
 # Troubleshooting

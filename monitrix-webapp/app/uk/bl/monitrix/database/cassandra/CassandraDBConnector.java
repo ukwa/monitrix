@@ -203,6 +203,9 @@ public class CassandraDBConnector implements DBConnector {
 		
 		// Ingest schedule indexes
 		session.execute("CREATE INDEX log_path on crawl_uris.ingest_schedule(log_path);");
+		
+		// Alert log indexes
+		session.execute("CREATE INDEX offending_host on crawl_uris.alert_log(offending_host);");
 	}
 	
 	public void dropSchema() {

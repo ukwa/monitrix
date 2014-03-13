@@ -205,7 +205,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			AlertType.TOO_MANY_SUBDOMAINS,
 			String.format(ALERT_MSG_TOO_MANY_SUBDOMAINS, host.getHostname(), Long.toString(subdomains)
 			));
-			alertLog.insert(alert);
+			alertLog.insert(null, alert);
 		}
 
 		// Text-to-Nontext content type ratio limit
@@ -216,7 +216,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			AlertType.TXT_TO_NONTEXT_RATIO,
 			String.format(ALERT_MSG_TXT_TO_NONTEXT_RATIO, host.getHostname()
 			));
-		alertLog.insert(alert);
+		alertLog.insert(null, alert);
 		}
 		
 	}

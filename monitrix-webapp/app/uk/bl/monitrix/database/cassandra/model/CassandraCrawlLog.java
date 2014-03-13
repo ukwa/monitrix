@@ -41,7 +41,7 @@ public class CassandraCrawlLog extends CrawlLog {
 	@Override
 	public long getCrawlStartTime() {
 		long crawlStartTime = Long.MAX_VALUE;
-		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + ";").iterator();
+		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
 		
 		while (rows.hasNext()) {
 			Row r = rows.next();

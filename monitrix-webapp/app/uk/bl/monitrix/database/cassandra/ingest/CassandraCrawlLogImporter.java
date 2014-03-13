@@ -8,6 +8,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLog;
 import uk.bl.monitrix.heritrix.LogFileEntry;
 
@@ -16,11 +17,11 @@ import uk.bl.monitrix.heritrix.LogFileEntry;
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 class CassandraCrawlLogImporter extends CassandraCrawlLog {
+	
+	private static final String TABLE_INGEST_SCHEDULE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
 
 	private PreparedStatement crawlLogStatement = null;
-	// private PreparedStatement statementUri = null;
 	private PreparedStatement ingestScheduleStatement = null;
-	// private PreparedStatement statementAnno = null;
 	
 	public CassandraCrawlLogImporter(Session db) {
 		super(db);
@@ -38,31 +39,23 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 				"VALUES (?, ?, ?, ?, ?, ?, ?);");		
 	}
 	
-	private void addCrawlInfo(String crawl_id, long start_ts, long end_ts ) {
-		// Otherwise, insert:
-		BoundStatement boundStatement = new BoundStatement(ingestScheduleStatement);
-		session.execute(boundStatement.bind(
-				crawl_id,
-				new Date(start_ts),
-				new Date(end_ts),
-				"no-profile"
-				));		
-	}
-	
 	public void updateCrawlInfo(String crawl_id, long timeOfFirstLogEntryInPatch, long timeOfLastLogEntryInPatch ) {
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.crawls WHERE crawl_id='"+crawl_id+"';");
-		// Don't do it if that crawl-id is already known:
-		if( results.isExhausted() ) {
-			this.addCrawlInfo(crawl_id, timeOfFirstLogEntryInPatch, timeOfLastLogEntryInPatch);
-			return;
-		}
+		ResultSet results = 
+				session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + crawl_id + "';");
+		
 		Row r = results.one();
-		long start_ts = r.getDate("start_ts").getTime();
-		if( timeOfFirstLogEntryInPatch < start_ts ) start_ts = timeOfFirstLogEntryInPatch;
-		long end_ts = r.getDate("end_ts").getTime();
-		if( timeOfLastLogEntryInPatch > end_ts ) end_ts = timeOfLastLogEntryInPatch;
-		// Update the timestamps, as required:
-		session.execute("UPDATE crawl_uris.crawls SET start_ts='"+start_ts+"', end_ts='"+end_ts+"' WHERE crawl_id='"+crawl_id+"';");
+		
+		long startTs = r.getLong(CassandraProperties.FIELD_INGEST_START_TS);
+		long endTs = r.getLong(CassandraProperties.FIELD_INGEST_END_TS);
+		
+		if (startTs == 0 || timeOfFirstLogEntryInPatch < startTs)
+			startTs = timeOfFirstLogEntryInPatch;
+		
+		if (timeOfLastLogEntryInPatch > endTs )
+			endTs = timeOfLastLogEntryInPatch;
+		
+		session.execute("UPDATE " + TABLE_INGEST_SCHEDULE + " SET " + CassandraProperties.FIELD_INGEST_START_TS + "=" + startTs +
+			", " + CassandraProperties.FIELD_INGEST_END_TS + "=" + endTs + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + crawl_id + "';");			
 	}
 	
 	public void insert(LogFileEntry l) {

@@ -60,7 +60,7 @@ public class CassandraAlertLog implements AlertLog {
 		
 		Set<String> hosts = new HashSet<String>();
 		while (rows.hasNext()) {
-			hosts.add( rows.next().getString("host"));
+			hosts.add(rows.next().getString(CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST));
 		}
 		List<String> hostList = new ArrayList<String>();
 		hostList.addAll(hosts);
@@ -78,7 +78,7 @@ public class CassandraAlertLog implements AlertLog {
 	public long countAlertsForHost(String hostname, AlertType type) {
 		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + " WHERE " + 
 				CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "' AND " + 
-				CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + "='" + type.name() + "';");
+				CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + "='" + type.name() + "' ALLOW FILTERING;");
 		
 		return results.one().getLong("count");
 	}

@@ -18,13 +18,13 @@ import uk.bl.monitrix.model.KnownHost;
  */
 class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 	
-	private CassandraKnownHostImporter knownHosts;
+	private static final String TABLE_KNOWN_HOSTS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS;
 	
+	private CassandraKnownHostImporter knownHosts;
 	private CassandraVirusLogImporter virusLog;
 	
 	public CassandraCrawlStatsImporter(Session db, CassandraKnownHostImporter knownHosts, CassandraVirusLogImporter virusLog) {
-		super(db);
-		
+		super(db);	
 		this.knownHosts = knownHosts;
 		this.virusLog = virusLog;
 	}
@@ -41,7 +41,7 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 				
 		// Step 2 - update data for this timeslot
 		CassandraCrawlStatsUnit currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot, crawl_id);
-		session.execute("UPDATE crawl_uris.stats SET uris_crawled = uris_crawled + 1, downloaded_bytes = downloaded_bytes + " + 
+		session.execute("UPDATE " + TABLE_KNOWN_HOSTS + " SET uris_crawled = uris_crawled + 1, downloaded_bytes = downloaded_bytes + " + 
 			entry.getDownloadSize() + whereClause(timeslot,crawl_id) + ";");
 		
 		// Step 4 - update hosts info

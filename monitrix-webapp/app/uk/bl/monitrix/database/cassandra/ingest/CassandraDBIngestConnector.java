@@ -55,18 +55,6 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		this.alertLogImporter = new CassandraAlertLogImporter(db.getSession());
 		this.knownHostImporter = new CassandraKnownHostImporter(db.getSession(), this.alertLogImporter);
 		this.crawlStatsImporter = new CassandraCrawlStatsImporter(db.getSession(), knownHostImporter, new CassandraVirusLogImporter(db.getSession()));
-		
-		// Insert one automatically, if empty:
-		/*
-		if( this.ingestSchedule.getLogForCrawlerId("sample-crawler-id") == null ) {
-			this.ingestSchedule.addLog(
-					"/Users/andy/Documents/workspace/bl-crawler-tests/heritrix-3.1.2-SNAPSHOT/jobs/bl-test-crawl/heritrix/output/logs/bl-test-crawl/crawl.log.cp00001-20130605082749",
-					//"/Users/andy/Documents/workspace/monitrix/test/sample-log-1E3.txt",
-					"sample-crawler-id", 
-					true
-					);
-		}
-		*/
 	}
 	
 	@Override
@@ -91,7 +79,8 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 			while (iterator.hasNext() && (counter < CassandraProperties.BULK_INSERT_CHUNK_SIZE)) {
 				LogFileEntry next = iterator.next();
 				counter++;
-				if( next.isRevisitRecord() ) revisits++;
+				if (next.isRevisitRecord())
+					revisits++;
 				
 				// Skip bad ones:
 				if( next.getParseFailed() ) {
@@ -109,33 +98,34 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				crawlLogImporter.insert(next);
 
 				// Update pre-aggregated stats
-				crawlStatsImporter.update(next, crawlerId);
+				// crawlStatsImporter.update(next, crawlerId);
 				
 				// Host info
-				knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
+				// knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
 				
 				// FIXME Check for long runs and raise alerts?
 				
 				// Update stats and check for any host-level alerts:
-				knownHostImporter.updateHostStats(next);
+				// knownHostImporter.updateHostStats(next);
 				
 				// Log-entry-level alerts
 				for (Alert a : next.getAlerts()) {
 					alertBatch.add((DefaultAlert) a);
 				}
 				
-				// Periodically update stats and flush the counter.
-				if( counter == 200 ) {
+				/* Periodically update stats and flush the counter.
+				if (counter == CassandraProperties.BULK_INSERT_CHUNK_SIZE) {
 					// Update last-seen date
-					crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
+					crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch);
 				
 					// Update the total log lines counter:
 					ingestSchedule.incrementIngestedLogLines(logId, counter, revisits);
 					counter = 0;
 					revisits = 0;
 				}
-				
+				*/
 			}
+			
 			// Update the total log lines counter:
 			ingestSchedule.incrementIngestedLogLines(logId, counter, revisits);
 			
@@ -145,7 +135,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
 			bulkStart = System.currentTimeMillis();
 			
-			alertLogImporter.insert(alertBatch);
+			alertLogImporter.insert(logId, alertBatch);
 			alertBatch.clear();		
 			
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			

@@ -21,8 +21,8 @@ public class CassandraProperties {
 	public static final String COLLECTION_ALERT_LOG = "alert_log";
 	public static final String COLLECTION_CRAWL_LOG = "crawl_log";
 	public static final String COLLECTION_INGEST_SCHEDULE = "ingest_schedule";
-	public static final String COLLECTION_CRAWL_STATS = "crawl_stats";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
+	public static final String COLLECTION_CRAWL_STATS = "crawl_stats";
 	public static final String COLLECTION_VIRUS_LOG = "virus_log";
 	
 	/** Database field keys (Alert log) **/
@@ -35,19 +35,26 @@ public class CassandraProperties {
 	/** Database field keys (Crawl log) **/
 	public static final String FIELD_CRAWL_LOG_LOG_ID = "log_id";
 	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "timestamp";
+	public static final String FIELD_CRAWL_LOG_LONG_TIMESTAMP = "long_timestamp";
+	public static final String FIELD_CRAWL_LOG_COARSE_TIMESTAMP = "coarse_timestamp";
+	public static final String FIELD_CRAWL_LOG_STATUS_CODE = "status_code";
+	public static final String FIELD_CRAWL_LOG_DOWNLOADED_BYTES = "downloaded_bytes";
 	public static final String FIELD_CRAWL_LOG_URL = "uri";
 	public static final String FIELD_CRAWL_LOG_HOST = "host";
 	public static final String FIELD_CRAWL_LOG_DOMAIN = "domain";
 	public static final String FIELD_CRAWL_LOG_SUBDOMAIN = "subdomain";
+	public static final String FIELD_CRAWL_LOG_DISCOVERY_PATH = "discovery_path";
+	public static final String FIELD_CRAWL_LOG_REFERER = "referer";
+	public static final String FIELD_CRAWL_LOG_CONTENT_TYPE = "content_type";
 	public static final String FIELD_CRAWL_LOG_CRAWLER_ID = "worker_thread";
-	public static final String FIELD_CRAWL_LOG_HTTP_CODE = "status_code";
+	public static final String FIELD_CRAWL_LOG_FETCH_TS = "fetch_ts";
+	public static final String FIELD_CRAWL_LOG_HASH = "hash";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS = "annotations";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED = "annotations_tokenized";
-	public static final String FIELD_CRAWL_LOG_RETRIES = "retries";
-	public static final String FIELD_CRAWL_LOG_COMPRESSABILITY = "compressability";
+	public static final String FIELD_CRAWL_LOG_IP = "ip_address";
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	
-    /** Database field keys (crawl metadata) **/
+    /** Database field keys (Ingest schedule) **/
 	public static final String FIELD_INGEST_CRAWLER_PATH = "log_path";
 	public static final String FIELD_INGEST_CRAWL_ID = "crawl_id";
 	public static final String FIELD_INGEST_START_TS = "start_ts";
@@ -56,14 +63,6 @@ public class CassandraProperties {
 	public static final String FIELD_INGEST_REVISIT_RECORDS = "revisit_records";
 	public static final String FIELD_INGEST_IS_MONITORED = "is_monitored";
 
-	/** Database field keys (Crawl Stats collection) **/
-	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "stat_ts";
-	public static final String FIELD_CRAWL_STATS_CRAWL_ID = "crawl_id";
-	public static final String FIELD_CRAWL_STATS_DOWNLOAD_VOLUME = "downloaded_bytes";
-	public static final String FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED = "uris_crawled";
-	public static final String FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED = "new_hosts";
-	public static final String FIELD_CRAWL_STATS_COMPLETED_HOSTS = "completed_hosts";
-	
 	/** Database field keys (Known Hosts collection) **/
 	public static final String FIELD_KNOWN_HOSTS_HOSTNAME = "host";
 	public static final String FIELD_KNOWN_HOSTS_TLD = "tld";
@@ -82,6 +81,14 @@ public class CassandraProperties {
 	public static final String FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE = "redirect_percentage";
 	public static final String FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE = "robots_block_percentage";
 	public static final String FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO = "text_to_nontext_ratio";
+	
+	/** Database field keys (Crawl Stats collection) **/
+	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "stat_ts";
+	public static final String FIELD_CRAWL_STATS_CRAWL_ID = "crawl_id";
+	public static final String FIELD_CRAWL_STATS_DOWNLOAD_VOLUME = "downloaded_bytes";
+	public static final String FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED = "uris_crawled";
+	public static final String FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED = "new_hosts";
+	public static final String FIELD_CRAWL_STATS_COMPLETED_HOSTS = "completed_hosts";
 	
 	/** Database field keys (Virus Log collection **/
 	public static final String FIELD_VIRUS_LOG_NAME = "virus_name";

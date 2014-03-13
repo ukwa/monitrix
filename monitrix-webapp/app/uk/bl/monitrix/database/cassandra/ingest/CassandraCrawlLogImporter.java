@@ -1,8 +1,6 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
@@ -12,7 +10,6 @@ import com.datastax.driver.core.Session;
 
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLog;
 import uk.bl.monitrix.heritrix.LogFileEntry;
-import uk.bl.monitrix.model.CrawlLogEntry;
 
 /**
  * An extended version of {@link CassandraCrawlLog} that adds insert capability.
@@ -21,9 +18,9 @@ import uk.bl.monitrix.model.CrawlLogEntry;
 class CassandraCrawlLogImporter extends CassandraCrawlLog {
 
 	private PreparedStatement crawlLogStatement = null;
-	private PreparedStatement statementUri = null;
+	// private PreparedStatement statementUri = null;
 	private PreparedStatement ingestScheduleStatement = null;
-	private PreparedStatement statementAnno = null;
+	// private PreparedStatement statementAnno = null;
 	
 	public CassandraCrawlLogImporter(Session db) {
 		super(db);
@@ -72,36 +69,31 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		// Check timestamp - should be the discovery/queue timestamp:
 		Date log_ts = l.getLogTimestamp();
 		Date fetch_ts = l.getFetchTimestamp();
-		if( fetch_ts == null ) {
+		if (fetch_ts == null)
 			fetch_ts = log_ts;
-		}
-		Date coarse_ts = this.getCoarseTimestamp(log_ts);
+
+		Date coarse_ts = getCoarseTimestamp(log_ts);
 		
 		BoundStatement boundStatement = new BoundStatement(crawlLogStatement);
 		session.execute(boundStatement.bind(
-				coarse_ts,
-				log_ts,
-				UUID.randomUUID(),
-				l.getURL(),
-				fetch_ts,
-				l.getHost(),
-				l.getDomain(),
-				l.getSubdomain(),
-				l.getHTTPCode(),
-				l.getSHA1Hash(),
-				l.getLogId(),
-				l.getAnnotations(),
-				l.getBreadcrumbCodes(),
-				l.getCompressability(),
-				l.getContentType(),
-				l.getDownloadSize(),
-				l.getFetchDuration(),
-				l.getReferrer(),
-				l.getRetries(),
-				l.getWorkerThread(),
-				l.toString()
-				));
-		// Also insert into URI table, for look-up purposes:
+			l.getLogId(),
+			log_ts.toString(),
+			log_ts.getTime(),
+			coarse_ts.getTime(),
+			l.getHTTPCode(),
+			l.getDownloadSize(),
+			l.getURL(),
+			l.getBreadcrumbCodes(),
+			l.getReferrer(),
+			l.getContentType(),
+			l.getWorkerThread(),
+			fetch_ts.getTime(),
+			l.getSHA1Hash(),
+			l.getAnnotations(),
+			"192.0.0.1",
+			l.toString()));
+		
+		/* Also insert into URI table, for look-up purposes:
 		BoundStatement boundStatementUri = new BoundStatement(statementUri);
 		session.execute(boundStatementUri.bind(
 				l.getURL(),
@@ -110,8 +102,9 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 				fetch_ts,
 				l.getHTTPCode(),
 				l.getSHA1Hash()
-				));
-		// Also stow annotations in a separate table, allowing annotation-based lookup.
+				)); */
+		
+		/* Also stow annotations in a separate table, allowing annotation-based lookup.
 		BoundStatement boundStatementAnno = new BoundStatement(statementAnno);
 		for( String anno : l.getAnnotations().split(",") ) {
 			if( anno.startsWith(CrawlLogEntry.ANNOTATION_CAPPED_CRAWL)) {
@@ -122,7 +115,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 					l.getHost()
 					));
 			}
-		}
+		} */
 		// FIXME Also increment url-level counters?
 	}
 	
@@ -133,13 +126,11 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 	 * 
 	 * @param d
 	 * @return
-	 */
-	public static java.util.UUID uuidForDate(Date d)
-    {
-/*
-Magic number obtained from #cassandra's thobbs, who
-claims to have stolen it from a Python library.
-*/
+	 *
+	public static java.util.UUID uuidForDate(Date d) {
+		// Magic number obtained from #cassandra's thobbs, who
+		// claims to have stolen it from a Python library.
+
         final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
 
         long origTime = d.getTime();
@@ -156,5 +147,6 @@ claims to have stolen it from a Python library.
 			this.insert(log_entry);
 		}
 	}
+	*/
 	
 }

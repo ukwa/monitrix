@@ -121,14 +121,17 @@ public class CassandraDBConnector implements DBConnector {
 					"timestamp varchar, " +  
 					"long_timestamp bigint, " +
 					"coarse_timestamp bigint, " +
-					"status_code varchar, " +
-					"downloaded_bytes varchar, " + 
+					"status_code int, " +
+					"downloaded_bytes bigint, " + 
 					"uri varchar, " +
+					"host varchar, " +
+					"domain varchar, " +
+					"subdomain varchar, " +
 					"discovery_path varchar, " + 
 					"referer varchar, " +
 					"content_type varchar, " + 
 					"worker_thread varchar, " + 
-					"fetch_ts varchar, " + 
+					"fetch_ts bigint, " + 
 					"hash varchar, " + 
 					"annotations varchar, " + 
 					"ip_address varchar, " + 
@@ -143,8 +146,28 @@ public class CassandraDBConnector implements DBConnector {
 					"end_ts bigint, " + 
 					"ingested_lines bigint, " + 
 					"revisit_records bigint, "+
-					"is_monitored boolean,) " + 
+					"is_monitored boolean) " + 
 				"WITH COMPACT STORAGE;");
+		
+		session.execute(
+				"CREATE TABLE crawl_uris.known_hosts(" +
+					"host varchar PRIMARY KEY, " +
+					"tld varchar, " +
+					"domain varchar, " +
+					"subdomain varchar, " +
+					"first_access bigint, " +
+					"last_access bigint, " +
+					"crawlers varchar, " +
+					"crawled_urls bigint, " +
+					"successfully_fetched_urls bigint, " +
+					"avg_fetch_duration double, " +
+					"avg_retry_rate double, " +	
+					"fetch_status_codes varchar, " +
+					"content_types varchar, " +
+					"virus_stats varchar, " +
+					"redirect_percentage double, " + 
+					"robots_block_percentage double, " +
+					"text_to_nontext_ratio double);");
 
 		session.execute(
 				"CREATE TABLE crawl_uris.crawl_stats(" + 
@@ -177,6 +200,9 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute("CREATE INDEX coarse_ts on crawl_uris.crawl_log(coarse_timestamp);");
 		session.execute("CREATE INDEX uri on crawl_uris.crawl_log(uri);");
 		session.execute("CREATE INDEX annotations on crawl_uris.crawl_log(annotations);");
+		
+		// Ingest schedule indexes
+		session.execute("CREATE INDEX log_path on crawl_uris.ingest_schedule(log_path);");
 	}
 	
 	public void dropSchema() {

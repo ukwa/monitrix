@@ -76,55 +76,46 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	
 	@Override
 	public IngestedLog getLogForCrawlerId(String crawlerId) {
-		/*
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_files WHERE crawler_id='"+crawlerId+"';");
-		if (results.isExhausted()) return null;
-		
-		Row r = results.one();
-		ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+r.getString("path")+"';");
-		
-		return new CassandraIngestedLog(r, totals.one());
-		*/
 		return getLog(crawlerId);
 	}
 	
 	@Override
 	public IngestedLog getLogForPath(String path) {
-		/*
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.log_files WHERE path='"+path+"';");
-		if (results.isExhausted()) return null;
+		ResultSet results = 
+				session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWLER_PATH  + "='" + path + "';");
+		if (results.isExhausted())
+			return null;
 
-		ResultSet totals = session.execute("SELECT * FROM crawl_uris.log_file_counters WHERE path='"+path+"';");
-
-		return new CassandraIngestedLog(results.one(), totals.one());
-		*/
-		return getLog(path);
+		return new CassandraIngestedLog(results.one());
 	}
 	
 	@Override
 	public boolean isMonitoringEnabled(String id) {
 		IngestedLog log = getLog(id);
-		if (log == null)
+		if (log == null) {
 			return false;
+		}
 		
 		return log.isMonitored();
 	}
 
 	@Override
 	public void setMonitoringEnabled(String id, boolean monitoringEnabled) {
-		/*
-		CassandraIngestedLog log = (CassandraIngestedLog) getLog(id);
-		if (log != null) {
-			session.execute("UPDATE crawl_uris.log_files SET is_monitored = "+monitoringEnabled+" WHERE path='"+id+"'");
-		}
-		*/
+		Logger.info("Setting monitoring to " + monitoringEnabled + " for log " + id);
+		IngestedLog log = getLog(id);
+		if (log != null)
+			session.execute("UPDATE " + TABLE_INGEST_SCHEDULE + " SET " + CassandraProperties.FIELD_INGEST_IS_MONITORED + "=" + 
+					monitoringEnabled + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + id + "';");
 	}
 	
 	public void incrementIngestedLogLines(String id, long increment, long revist_increment) {
-		/*
-		session.execute("UPDATE crawl_uris.log_file_counters SET ingested_lines = ingested_lines + "+increment
-				+", revisit_records = revisit_records + "+revist_increment+" WHERE path='"+id+"'");
-		*/
+		IngestedLog log = getLog(id);
+		if (log != null) {
+			long ingestedLines = log.getIngestedLines() + increment;
+			Logger.info("Setting ingested lines to " + ingestedLines+ " for log " + id);
+			session.execute("UPDATE " + TABLE_INGEST_SCHEDULE + " SET " + CassandraProperties.FIELD_INGEST_INGESTED_LINES + "=" + 
+					ingestedLines + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + id +"';");
+		}
 	}
 
 }

@@ -85,7 +85,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		
 		// Search based on KEY, and range (TODO?)
 		Iterator<Row> cursor =
-				session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE coarse_ts='" + coarse_ts.getTime() + "';")
+				session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_COARSE_TIMESTAMP + "=" + coarse_ts.getTime() + ";")
 			    .iterator();
 		
 		List<CrawlLogEntry> recent = new ArrayList<CrawlLogEntry>();
@@ -186,16 +186,18 @@ public class CassandraCrawlLog extends CrawlLog {
 		        "WHERE uri = '"+query+"' LIMIT "+off_limit+";");
 		
 		List<CrawlLogEntry> entries = new ArrayList<CrawlLogEntry>();
-		int i = 0;
+		// int i = 0;
 		Iterator<Row> rows = results.iterator();
 		while( rows.hasNext() ) {
-			Row r = rows.next();
+			/* Row r = */ rows.next();
+			/*
 			if( i >= offset ) {
-				// entries.add( this.getLogEntryForUriResult(query,r) );
+				entries.add( this.getLogEntryForUriResult(query,r) );
 			}
 			if( i == off_limit ) 
 				break;
 			i++;
+			*/
 		}
 		
 		ResultSet totalResults = session.execute("SELECT COUNT(*) FROM crawl_uris.uris " +
@@ -284,6 +286,8 @@ public class CassandraCrawlLog extends CrawlLog {
 
 	@Override
 	public List<String> extractHostsForAnnotation(String annotation) {
+		// TODO
+		/*
 		List<String> hosts = new ArrayList<String>();
 		Iterator<Row> rows = session.execute("SELECT host FROM crawl_uris.annotations WHERE annotation='"+annotation+"' LIMIT 1;").iterator();
 		String host = null;
@@ -293,6 +297,8 @@ public class CassandraCrawlLog extends CrawlLog {
 			rows = session.execute("SELECT host FROM crawl_uris.annotations WHERE annotation='"+annotation+"' AND host > '"+host+"' LIMIT 1;").iterator();
 		}
 		return hosts;
+		*/ 
+		return new ArrayList<String>();
 	}
 
 }

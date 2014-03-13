@@ -163,8 +163,7 @@ public class IngestActor extends UntypedActor {
 		Futures.future(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-				Logger.info("Starting log synchronization loop, "+keepRunning+", "+newLogs.size());
-				
+				Logger.info("Starting log synchronization loop, " + keepRunning + ", " + newLogs.size());
 				IngestSchedule schedule = db.getIngestSchedule();
 				
 				while (keepRunning) {

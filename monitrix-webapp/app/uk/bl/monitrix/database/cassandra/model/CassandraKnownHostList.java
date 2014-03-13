@@ -1,13 +1,10 @@
 package uk.bl.monitrix.database.cassandra.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import play.Logger;
 
@@ -15,9 +12,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Row;
 
-import uk.bl.monitrix.database.cassandra.CassandraProperties;
-import uk.bl.monitrix.database.mongodb.model.MongoCrawlLogEntry;
-import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
 import uk.bl.monitrix.model.KnownHostList;
 import uk.bl.monitrix.model.SearchResult;
@@ -200,18 +194,20 @@ public class CassandraKnownHostList implements KnownHostList {
 //			hostnames.add(new CassandraKnownHost(cursor.next()));
 //		
 //		return hostnames;
-		return null;
+		return new ArrayList<KnownHost>();
 	}
 
 	@Override
 	public List<String> getTopLevelDomains() {
 		List<String> tlds = new ArrayList<String>();
+		/*
 		Iterator<Row> rows = session.execute("SELECT tld from crawl_uris.known_tlds;").iterator();
+		
 		// Loop over other tlds:
 		while( rows.hasNext() ) {
 			String tld = rows.next().getString("tld");
 			tlds.add(tld);
-		}
+		}*/
 		return tlds;
 	}
 	

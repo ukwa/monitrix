@@ -31,7 +31,7 @@ public class CassandraCrawlLogEntry extends CrawlLogEntry {
 
 	@Override
 	public int getHTTPCode() {
-		return row.getInt(CassandraProperties.FIELD_CRAWL_LOG_HTTP_CODE);
+		return row.getInt(CassandraProperties.FIELD_CRAWL_LOG_STATUS_CODE);
 	}
 	
 	@Override
@@ -105,12 +105,16 @@ public class CassandraCrawlLogEntry extends CrawlLogEntry {
 	
 	@Override
 	public int getRetries() {
-		return row.getInt(CassandraProperties.FIELD_CRAWL_LOG_RETRIES);
+		// TODO
+		// return row.getInt(CassandraProperties.FIELD_CRAWL_LOG_RETRIES);
+		return 0;
 	}
 
 	@Override
 	public double getCompressability() {
-		return row.getDouble(CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY);
+		// TODO 
+		// return row.getDouble(CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY);
+		return 0;
 	}
 
 	@Override

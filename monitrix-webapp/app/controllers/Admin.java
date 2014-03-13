@@ -14,8 +14,8 @@ import uk.bl.monitrix.model.IngestSchedule;
 public class Admin extends AbstractController{
 	
 	private static final String ID = "id";
-	private static final String PATH = "path";
 	private static final String CRAWLER_ID = "crawler_id";
+	private static final String PATH = "path";
 
 	private static IngestSchedule ingestSchedule = Global.getBackend().getIngestSchedule(); 
 		
@@ -73,9 +73,9 @@ public class Admin extends AbstractController{
 	}
 	
 	public static Result toggleWatch() {
-		// String logId = getQueryParam(ID);
-		// if (!logId.isEmpty())
-		//	ingestSchedule.setMonitoringEnabled(logId, !ingestSchedule.isMonitoringEnabled(logId));
+		String logId = getQueryParam(ID);
+		if (!logId.isEmpty())
+			ingestSchedule.setMonitoringEnabled(logId, !ingestSchedule.isMonitoringEnabled(logId));
 
 		return redirect(routes.Admin.index());
 	}

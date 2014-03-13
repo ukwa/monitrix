@@ -43,6 +43,7 @@ public abstract class IngestSchedule {
 	 * @return the {@link IngestedLog}
 	 */
 	public abstract IngestedLog getLogForCrawlerId(String crawlerId);
+	
 	/**
 	 * Tests if monitoring is enabled for a specified log ID.
 	 * @param id the log ID

@@ -38,7 +38,7 @@ public class Global extends GlobalSettings {
 			
 			Logger.info("Database connected");
 		} catch (Exception e) {
-			Logger.error("FATAL - could not connect to database "+e);
+			Logger.error("FATAL - could not connect to database " + e);
 			e.printStackTrace();
 		}
 	}

@@ -22,7 +22,7 @@ import uk.bl.monitrix.database.cassandra.CassandraProperties;
  */
 public class CassandraIngestSchedule extends IngestSchedule {
 	
-	private final String TABLE_CRAWLS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
+	private final String TABLE_INGEST_SCHEDULE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
 	
 	protected Session session; 
 
@@ -31,9 +31,9 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	public CassandraIngestSchedule(Session session) {
 		this.session = session;
 		this.statement = session.prepare(
-				"INSERT INTO crawl_uris.crawls " +
-				"(crawl_id, start_ts, end_ts, ingested_lines, revisit_records) " +
-				"VALUES (?, ?, ?, ?, ?);");
+				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE + " " +
+				"(crawl_id, log_path, start_ts, end_ts, ingested_lines, revisit_records, is_monitored) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?);");
 	}
 
 	@Override
@@ -46,15 +46,15 @@ public class CassandraIngestSchedule extends IngestSchedule {
 		}
 		
 		BoundStatement boundStatement = new BoundStatement(statement);
-		session.execute(boundStatement.bind(path, 0l, 0l, 0l, 0l));
+		session.execute(boundStatement.bind(crawlerId, path, 0l, 0l, 0l, 0l, false));
 		
-		Row r = session.execute("SELECT * FROM " + TABLE_CRAWLS + " WHERE path='" + path + "';").one();
+		Row r = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + crawlerId + "';").one();
 		return new CassandraIngestedLog(r);
 	}
 	
 	@Override
 	public List<IngestedLog> getLogs() {
-		Iterator<Row> cursor = session.execute("SELECT * FROM " + TABLE_CRAWLS + ";").iterator();
+		Iterator<Row> cursor = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
 
 		List<IngestedLog> logs = new ArrayList<IngestedLog>();		
 		while(cursor.hasNext()) {
@@ -67,7 +67,7 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	@Override
 	public IngestedLog getLog(String id) {
 		ResultSet results = 
-				session.execute("SELECT * FROM " + TABLE_CRAWLS + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWLER_ID + "='" + id + "';");
+				session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + id + "';");
 		if (results.isExhausted())
 			return null;
 		

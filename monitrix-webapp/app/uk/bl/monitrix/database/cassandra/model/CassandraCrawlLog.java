@@ -123,7 +123,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		List<String> collection = new ArrayList<String>();
 		Iterator<Row> rows = results.iterator();
 		while (rows.hasNext()) {
-			collection.add(rows.next().getString(CassandraProperties.FIELD_INGEST_CRAWLER_ID));
+			collection.add(rows.next().getString(CassandraProperties.FIELD_INGEST_CRAWL_ID));
 		}
 		return collection;
 	}
@@ -131,7 +131,7 @@ public class CassandraCrawlLog extends CrawlLog {
 	@Override
 	public long countEntriesForLog(String logId) {
 		ResultSet results =
-				session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWLER_ID + "='" + logId + "';");
+				session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + logId + "';");
 		return results.one().getLong(CassandraProperties.FIELD_INGEST_INGESTED_LINES);
 	}
 	

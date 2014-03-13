@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import play.Logger;
-
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
@@ -22,40 +20,30 @@ import uk.bl.monitrix.model.CrawlLogEntry;
  */
 class CassandraCrawlLogImporter extends CassandraCrawlLog {
 
-	private PreparedStatement statement = null;
+	private PreparedStatement crawlLogStatement = null;
 	private PreparedStatement statementUri = null;
-	private PreparedStatement statementCrawls = null;
+	private PreparedStatement ingestScheduleStatement = null;
 	private PreparedStatement statementAnno = null;
 	
 	public CassandraCrawlLogImporter(Session db) {
 		super(db);
-		this.statement = session.prepare(
-			      "INSERT INTO crawl_uris.log " +
-			      "(coarse_ts, log_ts, uri, fetch_ts, host, domain, subdomain, status_code, hash, " + 
-			      "log_id, annotations, discovery_path, compressibility, content_type, download_size, " + 
-			      "fetch_duration, referer, retries, worker_thread, line) " +
-			      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-		this.statementUri = session.prepare(
-			      "INSERT INTO crawl_uris.uris " +
-			      "(uri, log_ts, coarse_ts, fetch_ts, status_code, hash) " +
-			      "VALUES (?, ?, ?, ?, ?, ?);");
-		this.statementCrawls = session.prepare(
-			      "INSERT INTO crawl_uris.crawls " +
-			      "(crawl_id, start_ts, end_ts, profile) " +
-			      "VALUES (?, ?, ?, ?);");
-		this.statementAnno = session.prepare(
-				"INSERT INTO crawl_uris.annotations " +
-					      "(annotation, url, log_ts, host) " +
-					      "VALUES (?, ?, ?, ?);");
 		
-		Date dtest = new Date();
-		Logger.warn("UUID 1 "+uuidForDate(dtest));
-		Logger.warn("UUID 2 "+uuidForDate(dtest));
+		this.crawlLogStatement = session.prepare(
+				"INSERT INTO crawl_uris.crawl_log (" +
+			    "log_id, timestamp, long_timestamp, coarse_timestamp, status_code, downloaded_bytes, uri, " + 
+			    "discovery_path, referer, content_type, worker_thread, fetch_ts, hash, annotations, ip_address, " + 
+			    "line) " +
+			    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+		
+		this.ingestScheduleStatement = session.prepare(
+			    "INSERT INTO crawl_uris.ingest_schedule " +
+			    "(crawl_id, log_path, start_ts, end_ts, ingested_lines, revisit_records, is_monitored) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?);");		
 	}
 	
 	private void addCrawlInfo(String crawl_id, long start_ts, long end_ts ) {
 		// Otherwise, insert:
-		BoundStatement boundStatement = new BoundStatement(statementCrawls);
+		BoundStatement boundStatement = new BoundStatement(ingestScheduleStatement);
 		session.execute(boundStatement.bind(
 				crawl_id,
 				new Date(start_ts),
@@ -89,7 +77,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		}
 		Date coarse_ts = this.getCoarseTimestamp(log_ts);
 		
-		BoundStatement boundStatement = new BoundStatement(statement);
+		BoundStatement boundStatement = new BoundStatement(crawlLogStatement);
 		session.execute(boundStatement.bind(
 				coarse_ts,
 				log_ts,

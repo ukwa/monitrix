@@ -48,8 +48,8 @@ public class CassandraProperties {
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	
     /** Database field keys (crawl metadata) **/
-	public static final String FIELD_INGEST_CRAWLER_PATH = "path";
-	public static final String FIELD_INGEST_CRAWLER_ID = "crawl_id";
+	public static final String FIELD_INGEST_CRAWLER_PATH = "log_path";
+	public static final String FIELD_INGEST_CRAWL_ID = "crawl_id";
 	public static final String FIELD_INGEST_START_TS = "start_ts";
 	public static final String FIELD_INGEST_END_TS = "end_ts";
 	public static final String FIELD_INGEST_INGESTED_LINES = "ingested_lines";

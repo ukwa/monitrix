@@ -16,7 +16,7 @@ public class CassandraIngestedLog implements IngestedLog {
 	
 	@Override
 	public String getId() {
-		return row.getString(CassandraProperties.FIELD_INGEST_CRAWLER_ID);
+		return row.getString(CassandraProperties.FIELD_INGEST_CRAWL_ID);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class CassandraIngestedLog implements IngestedLog {
 	
 	@Override
 	public String getCrawlerId() {
-		return row.getString(CassandraProperties.FIELD_INGEST_CRAWLER_ID);
+		return row.getString(CassandraProperties.FIELD_INGEST_CRAWL_ID);
 	}
 	
 	@Override

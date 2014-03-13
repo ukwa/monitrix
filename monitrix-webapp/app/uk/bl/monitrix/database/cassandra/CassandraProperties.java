@@ -19,15 +19,22 @@ public class CassandraProperties {
 	
 	/** Database collection names **/
 	public static final String COLLECTION_ALERT_LOG = "alert_log";
-	public static final String COLLECTION_CRAWL_LOG = "log";
-	public static final String COLLECTION_CRAWL_META = "crawls";
+	public static final String COLLECTION_CRAWL_LOG = "crawl_log";
+	public static final String COLLECTION_INGEST_SCHEDULE = "ingest_schedule";
 	public static final String COLLECTION_CRAWL_STATS = "crawl_stats";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
 	public static final String COLLECTION_VIRUS_LOG = "virus_log";
 	
-	/** Database field keys (Crawl Log collection) **/
+	/** Database field keys (Alert log) **/
+	public static final String FIELD_ALERT_LOG_TIMESTAMP = "timestamp";
+	public static final String FIELD_ALERT_LOG_CRAWL_ID = "crawl_id";
+	public static final String FIELD_ALERT_LOG_OFFENDING_HOST = "offending_host";
+	public static final String FIELD_ALERT_LOG_ALERT_TYPE = "alert_type";
+	public static final String FIELD_ALERT_LOG_DESCRIPTION = "alert_description";
+	
+	/** Database field keys (Crawl log) **/
 	public static final String FIELD_CRAWL_LOG_LOG_ID = "log_id";
-	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "log_ts";
+	public static final String FIELD_CRAWL_LOG_TIMESTAMP = "timestamp";
 	public static final String FIELD_CRAWL_LOG_URL = "uri";
 	public static final String FIELD_CRAWL_LOG_HOST = "host";
 	public static final String FIELD_CRAWL_LOG_DOMAIN = "domain";
@@ -41,18 +48,13 @@ public class CassandraProperties {
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	
     /** Database field keys (crawl metadata) **/
-	public static final String FIELD_META_CRAWL_ID = "crawl_id";
-	public static final String FIELD_META_START_TS = "start_ts";
-	public static final String FIELD_META_END_TS = "end_ts";
-	public static final String FIELD_META_INGESTED_LINES = "ingested_lines";
-	public static final String FIELD_META_REVISIT_RECORDS = "revisit_records";
-	
-	/** Database field keys (Alert Log collection) **/
-	public static final String FIELD_ALERT_LOG_TIMESTAMP = "timestamp";
-	public static final String FIELD_ALERT_LOG_CRAWL_ID = "crawl_id";
-	public static final String FIELD_ALERT_LOG_OFFENDING_HOST = "offending_host";
-	public static final String FIELD_ALERT_LOG_ALERT_TYPE = "alert_type";
-	public static final String FIELD_ALERT_LOG_DESCRIPTION = "alert_description";
+	public static final String FIELD_INGEST_CRAWLER_PATH = "path";
+	public static final String FIELD_INGEST_CRAWLER_ID = "crawl_id";
+	public static final String FIELD_INGEST_START_TS = "start_ts";
+	public static final String FIELD_INGEST_END_TS = "end_ts";
+	public static final String FIELD_INGEST_INGESTED_LINES = "ingested_lines";
+	public static final String FIELD_INGEST_REVISIT_RECORDS = "revisit_records";
+	public static final String FIELD_INGEST_IS_MONITORED = "is_monitored";
 
 	/** Database field keys (Crawl Stats collection) **/
 	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "stat_ts";

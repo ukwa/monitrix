@@ -116,9 +116,9 @@ public class CassandraDBConnector implements DBConnector {
 		// and de-duplication, and time-wise lookups
 		
 		session.execute(
-				"CREATE TABLE crawl_uris.log(" +
+				"CREATE TABLE crawl_uris.crawl_log(" +
 					"log_id varchar , " + 
-					"log_ts varchar PRIMARY KEY , " +  
+					"timestamp varchar PRIMARY KEY , " +  
 					"status_code varchar, " +
 					"downloaded_bytes varchar, " + 
 					"uri varchar, " +
@@ -132,11 +132,11 @@ public class CassandraDBConnector implements DBConnector {
 					"ip_address varchar, " + 
 					"line varchar, " + 
 					"coarse_ts varchar, " + 
-					"long_log_ts varchar ) " + 
-				"WITH COMPACT STORAGE;");
+					"long_log_ts varchar, " +
+					"PRIMARY KEY (hash, timestamp) ); ");
 		
 		session.execute(
-				"CREATE TABLE crawl_uris.crawls(" + 
+				"CREATE TABLE crawl_uris.ingest_schedule(" + 
 					"crawl_id varchar PRIMARY KEY, " +
 					"start_ts bigint, " + 
 					"end_ts bigint, " + 

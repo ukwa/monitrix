@@ -27,8 +27,8 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	protected Session session;
 	
-	private final String TABLE_LOG = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_LOG;
-	private final String TABLE_CRAWLS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_META;
+	private final String TABLE_CRAWL_LOG = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_LOG;
+	private final String TABLE_INGEST_SCHEDULE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
 	
 	public CassandraCrawlLog(Session session) {
 		this.session = session;
@@ -41,11 +41,11 @@ public class CassandraCrawlLog extends CrawlLog {
 	@Override
 	public long getCrawlStartTime() {
 		long crawlStartTime = Long.MAX_VALUE;
-		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_CRAWLS + ";").iterator();
+		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + ";").iterator();
 		
 		while (rows.hasNext()) {
 			Row r = rows.next();
-			long start_ts = r.getLong(CassandraProperties.FIELD_META_START_TS);
+			long start_ts = r.getLong(CassandraProperties.FIELD_INGEST_START_TS);
 			if (start_ts < crawlStartTime)
 				crawlStartTime = start_ts;
 		}
@@ -60,11 +60,11 @@ public class CassandraCrawlLog extends CrawlLog {
 	@Override
 	public long getTimeOfLastCrawlActivity() {
 		long lastCrawlActivity = 0;
-		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_CRAWLS + ";").iterator();
+		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
 		
 		while (rows.hasNext()) {
 			Row r = rows.next();
-			long end_ts = r.getLong(CassandraProperties.FIELD_META_END_TS);
+			long end_ts = r.getLong(CassandraProperties.FIELD_INGEST_END_TS);
 			if (end_ts > lastCrawlActivity)
 				lastCrawlActivity = end_ts;
 		}		
@@ -85,7 +85,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		
 		// Search based on KEY, and range (TODO?)
 		Iterator<Row> cursor =
-				session.execute("SELECT * FROM " + TABLE_LOG + " WHERE coarse_ts='" + coarse_ts.getTime() + "';")
+				session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE coarse_ts='" + coarse_ts.getTime() + "';")
 			    .iterator();
 		
 		List<CrawlLogEntry> recent = new ArrayList<CrawlLogEntry>();
@@ -97,33 +97,33 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	@Override
 	public long countEntries() {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_CRAWLS + ";");
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
 		long grand_total = 0;
 		Iterator<Row> rows = results.iterator();
 		while( rows.hasNext() ) {
-			grand_total += rows.next().getLong(CassandraProperties.FIELD_META_INGESTED_LINES);
+			grand_total += rows.next().getLong(CassandraProperties.FIELD_INGEST_INGESTED_LINES);
 		}
 		return grand_total;
 	}
 	
 	@Override
 	public long countRevisits() {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_CRAWLS + ";");
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
 		long grand_total = 0;
 		Iterator<Row> rows = results.iterator();
 		while( rows.hasNext() ) {
-			grand_total += rows.next().getLong(CassandraProperties.FIELD_META_REVISIT_RECORDS);
+			grand_total += rows.next().getLong(CassandraProperties.FIELD_INGEST_REVISIT_RECORDS);
 		}
 		return grand_total;
 	}
 	
 	@Override
 	public List<String> listLogIds() {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_CRAWLS + ";");
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
 		List<String> collection = new ArrayList<String>();
 		Iterator<Row> rows = results.iterator();
 		while (rows.hasNext()) {
-			collection.add(rows.next().getString(CassandraProperties.FIELD_META_CRAWL_ID));
+			collection.add(rows.next().getString(CassandraProperties.FIELD_INGEST_CRAWLER_ID));
 		}
 		return collection;
 	}
@@ -131,15 +131,15 @@ public class CassandraCrawlLog extends CrawlLog {
 	@Override
 	public long countEntriesForLog(String logId) {
 		ResultSet results =
-				session.execute("SELECT * FROM " + TABLE_CRAWLS + " WHERE " + CassandraProperties.FIELD_META_CRAWL_ID + "='" + logId + "';");
-		return results.one().getLong(CassandraProperties.FIELD_META_INGESTED_LINES);
+				session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWLER_ID + "='" + logId + "';");
+		return results.one().getLong(CassandraProperties.FIELD_INGEST_INGESTED_LINES);
 	}
 	
 	@Override
 	public List<CrawlLogEntry> getEntriesForURL(String url) {
 		Logger.info("Looking up " + url);
 		
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_LOG +
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_CRAWL_LOG +
 		        " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_URL + " = '" + url + "';");
 		
 		Logger.info("Got " + results); 
@@ -253,14 +253,14 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	@Override
 	public long countEntriesForHost(String hostname) {
-		ResultSet totalResults = session.execute("SELECT COUNT(*) FROM " + TABLE_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_HOST + 
+		ResultSet totalResults = session.execute("SELECT COUNT(*) FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_HOST + 
 				" = '" + hostname + "';");
 		return totalResults.one().getLong("count");
 	}
 
 	@Override
 	public Iterator<CrawlLogEntry> getEntriesForHost(String hostname) {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_LOG +
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_CRAWL_LOG +
 		        " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_HOST + "='" + hostname + "';");
 
 		final Iterator<Row> cursor = results.iterator();

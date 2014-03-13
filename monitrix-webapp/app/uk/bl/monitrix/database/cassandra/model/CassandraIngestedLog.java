@@ -16,28 +16,27 @@ public class CassandraIngestedLog implements IngestedLog {
 	
 	@Override
 	public String getId() {
-		return row.getString(CassandraProperties.FIELD_META_CRAWL_ID);
+		return row.getString(CassandraProperties.FIELD_INGEST_CRAWLER_ID);
 	}
 
 	@Override
 	public String getPath() {
-		return row.getString(CassandraProperties.FIELD_META_CRAWL_ID);
+		return row.getString(CassandraProperties.FIELD_INGEST_CRAWLER_PATH);
 	}
 	
 	@Override
 	public String getCrawlerId() {
-		return row.getString(CassandraProperties.FIELD_META_CRAWL_ID);
+		return row.getString(CassandraProperties.FIELD_INGEST_CRAWLER_ID);
 	}
 	
 	@Override
 	public boolean isMonitored() {
-		// TODO
-		return true;
+		return row.getBool(CassandraProperties.FIELD_INGEST_IS_MONITORED);
 	}
 	
 	@Override
 	public long getIngestedLines() {
-		return row.getLong(CassandraProperties.FIELD_META_INGESTED_LINES);
+		return row.getLong(CassandraProperties.FIELD_INGEST_INGESTED_LINES);
 	}
 	
 }

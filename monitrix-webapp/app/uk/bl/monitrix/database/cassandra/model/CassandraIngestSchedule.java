@@ -22,7 +22,7 @@ import uk.bl.monitrix.database.cassandra.CassandraProperties;
  */
 public class CassandraIngestSchedule extends IngestSchedule {
 	
-	private final String TABLE_CRAWLS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_META;
+	private final String TABLE_CRAWLS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
 	
 	protected Session session; 
 
@@ -67,7 +67,7 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	@Override
 	public IngestedLog getLog(String id) {
 		ResultSet results = 
-				session.execute("SELECT * FROM " + TABLE_CRAWLS + " WHERE " + CassandraProperties.FIELD_META_CRAWL_ID + "='" + id + "';");
+				session.execute("SELECT * FROM " + TABLE_CRAWLS + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWLER_ID + "='" + id + "';");
 		if (results.isExhausted())
 			return null;
 		

@@ -95,10 +95,10 @@ public class CassandraProperties {
 	public static final String FIELD_VIRUS_LOG_OCCURENCES = "occurences";
 	
 	/** Bulk insert chunk size **/
-	public static final int BULK_INSERT_CHUNK_SIZE = 500000;
+	public static final int BULK_INSERT_CHUNK_SIZE = 50000;
 	
 	/** Resolution of the data pre-aggregation raster (in milliseconds) **/ 
-	public static final int PRE_AGGREGATION_RESOLUTION_MILLIS = 60 * 1000;
+	public static final int PRE_AGGREGATION_RESOLUTION_MILLIS = 10 * 60 * 1000;
 	
 	static {
 		try {

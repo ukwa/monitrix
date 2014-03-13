@@ -21,7 +21,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 	private static final String TABLE_INGEST_SCHEDULE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
 
 	private PreparedStatement crawlLogStatement = null;
-	private PreparedStatement ingestScheduleStatement = null;
+	// private PreparedStatement ingestScheduleStatement = null;
 	
 	public CassandraCrawlLogImporter(Session db) {
 		super(db);
@@ -33,10 +33,10 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			    "line) " +
 			    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		
-		this.ingestScheduleStatement = session.prepare(
-			    "INSERT INTO crawl_uris.ingest_schedule " +
-			    "(crawl_id, log_path, start_ts, end_ts, ingested_lines, revisit_records, is_monitored) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?);");		
+//		this.ingestScheduleStatement = session.prepare(
+//			    "INSERT INTO crawl_uris.ingest_schedule " +
+//			    "(crawl_id, log_path, start_ts, end_ts, ingested_lines, revisit_records, is_monitored) " +
+//				"VALUES (?, ?, ?, ?, ?, ?, ?);");		
 	}
 	
 	public void updateCrawlInfo(String crawl_id, long timeOfFirstLogEntryInPatch, long timeOfLastLogEntryInPatch ) {

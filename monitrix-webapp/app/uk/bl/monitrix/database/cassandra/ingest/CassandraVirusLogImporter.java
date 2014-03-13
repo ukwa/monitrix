@@ -32,8 +32,6 @@ public class CassandraVirusLogImporter extends CassandraVirusLog {
 				));
 	}
 
-	/**
-	 */
 	public void recordOccurence(String virusName, String hostname) {
 		// In this case we know it's a safe cast
 		VirusRecord record = (VirusRecord) getRecordForVirus(virusName);

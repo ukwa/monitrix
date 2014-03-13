@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import scala.concurrent.duration.Duration;
@@ -22,7 +21,6 @@ import uk.bl.monitrix.analytics.HostAnalytics;
 import uk.bl.monitrix.analytics.LogAnalytics;
 import uk.bl.monitrix.analytics.TimeseriesValue;
 import uk.bl.monitrix.database.DBConnector;
-import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlLogEntry;
 import uk.bl.monitrix.model.KnownHost;
 import uk.bl.monitrix.model.KnownHostList;
@@ -116,7 +114,6 @@ public class Hosts extends AbstractController {
 			Cache.set(hostname, cachedProgress);
 			
 			// Start async computation
-
 			Akka.system().scheduler().scheduleOnce(Duration.fromNanos(0), new Runnable() {
 				@Override
 				public void run() {
@@ -139,7 +136,7 @@ public class Hosts extends AbstractController {
 					List<TimeseriesValue> result = LogAnalytics.getCrawledURLsHistory(entries, maxpoints);
 					cachedProgress.result = result;
 				}
-			},Akka.system().dispatcher());
+			}, Akka.system().dispatcher());
 		
 			progress = cachedProgress;
 		} else {

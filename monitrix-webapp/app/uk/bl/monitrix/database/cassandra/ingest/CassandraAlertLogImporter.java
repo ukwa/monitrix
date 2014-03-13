@@ -12,11 +12,10 @@ import uk.bl.monitrix.heritrix.LogFileEntry.DefaultAlert;
 
 /**
  * An extended version of {@link CassandraAlertLog} that adds insert capability.
- * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 class CassandraAlertLogImporter extends CassandraAlertLog {
 
-	PreparedStatement statement = null;
+	private PreparedStatement statement = null;
 	
 	public CassandraAlertLogImporter(Session db) {
 		super(db);

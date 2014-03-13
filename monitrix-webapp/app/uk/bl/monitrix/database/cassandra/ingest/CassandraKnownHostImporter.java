@@ -193,7 +193,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		
 		// Compute host-level alerts
 		// Note: we only need to consider hosts that were added in this batch - ie. those in the cache!
-		//Logger.info("Computing host-level alerts");
+		// Logger.info("Computing host-level alerts");
 		// Subdomain limit
 		Iterator<Row> rows = session.execute("SELECT COUNT(*) FROM crawl_uris.known_hosts WHERE domain='"+l.getDomain()+"';").iterator();
 		long subdomains = rows.next().getLong("count");

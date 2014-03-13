@@ -1,16 +1,9 @@
-/**
- * 
- */
 package uk.bl.monitrix.heritrix.api;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.net.URL;
-
 import org.apache.commons.io.IOUtils;
 
 

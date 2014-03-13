@@ -76,6 +76,7 @@ public class SimpleLogfileReader  {
 			// Not supported
 			throw new UnsupportedOperationException();
 		}
+		
 	}
 	
 }

@@ -273,7 +273,6 @@ public class LogFileEntry extends CrawlLogEntry {
 		return 0;
 	}
 	
-
 	// TODO Maybe switch to Snappy: http://xerial.org/snappy-java/
 	Deflater compresser = new Deflater(Deflater.BEST_SPEED);
 	

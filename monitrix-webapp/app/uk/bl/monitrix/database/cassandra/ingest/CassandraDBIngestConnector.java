@@ -54,7 +54,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		this.crawlLogImporter = new CassandraCrawlLogImporter(db.getSession());
 		this.alertLogImporter = new CassandraAlertLogImporter(db.getSession());
 		this.knownHostImporter = new CassandraKnownHostImporter(db.getSession(), this.alertLogImporter);
-		this.crawlStatsImporter = new CassandraCrawlStatsImporter(db.getSession(), knownHostImporter, new CassandraVirusLogImporter(db.getSession()));
+		this.crawlStatsImporter = new CassandraCrawlStatsImporter(db.getSession(), ingestSchedule, knownHostImporter, new CassandraVirusLogImporter(db.getSession()));
 	}
 	
 	@Override
@@ -98,7 +98,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				crawlLogImporter.insert(next);
 
 				// Update pre-aggregated stats
-				// crawlStatsImporter.update(next, crawlerId);
+				crawlStatsImporter.update(next, crawlerId);
 				
 				// Host info
 				// knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
@@ -137,6 +137,8 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 			
 			alertLogImporter.insert(logId, alertBatch);
 			alertBatch.clear();		
+			
+			crawlStatsImporter.commit();
 			
 			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}

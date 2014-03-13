@@ -46,7 +46,7 @@ public class CassandraProperties {
 	public static final String FIELD_CRAWL_LOG_DISCOVERY_PATH = "discovery_path";
 	public static final String FIELD_CRAWL_LOG_REFERER = "referer";
 	public static final String FIELD_CRAWL_LOG_CONTENT_TYPE = "content_type";
-	public static final String FIELD_CRAWL_LOG_CRAWLER_ID = "worker_thread";
+	public static final String FIELD_CRAWL_LOG_WORKER_THREAD = "worker_thread";
 	public static final String FIELD_CRAWL_LOG_FETCH_TS = "fetch_ts";
 	public static final String FIELD_CRAWL_LOG_HASH = "hash";
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS = "annotations";

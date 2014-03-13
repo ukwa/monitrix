@@ -1,14 +1,14 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 
-import play.Logger;
-import uk.bl.monitrix.analytics.LogAnalytics;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlStats;
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlStatsUnit;
 import uk.bl.monitrix.model.CrawlLogEntry;
-import uk.bl.monitrix.model.KnownHost;
+import uk.bl.monitrix.model.IngestSchedule;
 
 /**
  * An extended version of {@link CassandraCrawlStats} that adds ingest capability.
@@ -18,15 +18,26 @@ import uk.bl.monitrix.model.KnownHost;
  */
 class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 	
-	private static final String TABLE_KNOWN_HOSTS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS;
+	private PreparedStatement statement = null;
 	
-	private CassandraKnownHostImporter knownHosts;
-	private CassandraVirusLogImporter virusLog;
+	// private CassandraKnownHostImporter knownHosts;
+	// private CassandraVirusLogImporter virusLog;
 	
-	public CassandraCrawlStatsImporter(Session db, CassandraKnownHostImporter knownHosts, CassandraVirusLogImporter virusLog) {
-		super(db);	
-		this.knownHosts = knownHosts;
-		this.virusLog = virusLog;
+	public CassandraCrawlStatsImporter(Session db, IngestSchedule schedule, CassandraKnownHostImporter knownHosts, CassandraVirusLogImporter virusLog) {
+		super(db, schedule);
+		
+		// this.knownHosts = knownHosts;
+		// this.virusLog = virusLog;
+		
+		this.statement = session.prepare(
+				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS + " (" +
+				CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID + ", " +
+				CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ", " +
+				CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME + ", " + 
+				CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED + ", " +
+				CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED + ", " + 
+				CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS + ") " +
+				"VALUES (?, ?, ?, ?, ?, ?);");		
 	}
 	
 	/**
@@ -41,10 +52,22 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 				
 		// Step 2 - update data for this timeslot
 		CassandraCrawlStatsUnit currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot, crawl_id);
-		session.execute("UPDATE " + TABLE_KNOWN_HOSTS + " SET uris_crawled = uris_crawled + 1, downloaded_bytes = downloaded_bytes + " + 
-			entry.getDownloadSize() + whereClause(timeslot,crawl_id) + ";");
+		if (currentUnit == null) {
+			BoundStatement boundStatement = new BoundStatement(statement);
+			session.execute(boundStatement.bind(
+					crawl_id,
+					timeslot,
+					entry.getDownloadSize(),
+					1l, 0l, 0l));
+			
+			// This also ensures we got the unit in the cache now
+			currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot, crawl_id);
+		} else {
+			currentUnit.setDownloadVolume(currentUnit.getDownloadVolume() + entry.getDownloadSize());
+			currentUnit.setNumberOfURLsCrawled(currentUnit.getNumberOfURLsCrawled() + 1);
+		}
 		
-		// Step 4 - update hosts info
+		/* Step 4 - update hosts info
 		String hostname = entry.getHost();
 		if (knownHosts.isKnown(hostname)) {
 			KnownHost host = knownHosts.getKnownHost(hostname);
@@ -92,18 +115,21 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 			knownHosts.incrementVirusStats(hostname, virusName);
 			virusLog.recordOccurence(virusName, hostname);
 		}
+		*/
 				
 		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable
 		cache.put(timeslot, currentUnit);
 	}
-	
-	private String whereClause(long timeslot, String crawl_id) {
-	    return " WHERE stat_ts="+timeslot+" AND crawl_id='"+crawl_id+"';";
-	}
-	
+
 	private long toTimeslot(long timestamp) {
 		 return (timestamp / CassandraProperties.PRE_AGGREGATION_RESOLUTION_MILLIS) * CassandraProperties.PRE_AGGREGATION_RESOLUTION_MILLIS;
+	}
+	
+	public void commit() {
+		for (CassandraCrawlStatsUnit csu : cache.values()) {
+			csu.save(session);
+		}
 	}
 	
 }

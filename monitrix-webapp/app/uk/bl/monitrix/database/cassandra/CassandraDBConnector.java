@@ -89,7 +89,7 @@ public class CassandraDBConnector implements DBConnector {
 		
 		this.ingestSchedule = new CassandraIngestSchedule(session);
 		this.crawlLog = new CassandraCrawlLog(session);
-		this.crawlStats = new CassandraCrawlStats(session);
+		this.crawlStats = new CassandraCrawlStats(session, this.ingestSchedule);
 		this.knownHosts = new CassandraKnownHostList(session);
 		this.alertLog = new CassandraAlertLog(session);
 		this.virusLog = new CassandraVirusLog(session);

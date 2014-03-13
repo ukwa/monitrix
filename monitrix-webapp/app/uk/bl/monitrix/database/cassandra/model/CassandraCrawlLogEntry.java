@@ -76,7 +76,7 @@ public class CassandraCrawlLogEntry extends CrawlLogEntry {
 
 	@Override
 	public String getWorkerThread() {
-		return row.getString(CassandraProperties.FIELD_CRAWL_LOG_CRAWLER_ID);
+		return row.getString(CassandraProperties.FIELD_CRAWL_LOG_WORKER_THREAD);
 	}
 	
 	@Override

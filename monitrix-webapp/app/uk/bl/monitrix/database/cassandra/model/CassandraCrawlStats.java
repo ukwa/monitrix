@@ -6,12 +6,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
+import play.Logger;
+
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 
 import uk.bl.monitrix.model.CrawlStats;
 import uk.bl.monitrix.model.CrawlStatsUnit;
+import uk.bl.monitrix.model.IngestSchedule;
+import uk.bl.monitrix.model.IngestedLog;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 
 /**
@@ -22,21 +28,32 @@ public class CassandraCrawlStats implements CrawlStats {
 	
 	private final String TABLE_STATS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS;
 	
-	protected Session session; 
+	protected Session session;
+	
+	private IngestSchedule ingestSchedule;
 	
 	// A simple in-memory buffer for quick stats lookups
 	protected Map<Long, CassandraCrawlStatsUnit> cache = new HashMap<Long, CassandraCrawlStatsUnit>();
 	
-	public CassandraCrawlStats(Session session) {
+	public CassandraCrawlStats(Session session, IngestSchedule ingestSchedule) {
 		this.session = session;
+		this.ingestSchedule = ingestSchedule;
 	}
 	
 	@Override
 	public Iterator<CrawlStatsUnit> getCrawlStats() {
+		Logger.info("Getting crawl stats");
+		
+		// This is ridiculous
+		List<String> logs = new ArrayList<String>();
+		for (IngestedLog l : ingestSchedule.getLogs()) {
+			logs.add(l.getId());
+		}
+
 		// TODO conflate stats from different crawls
 		final Iterator<Row> cursor =
 				session.execute("SELECT * FROM " + TABLE_STATS + " WHERE " + CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID +
-		        " IN ('file*') ORDER BY " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";")
+		        " IN ('" + StringUtils.join(logs, ",") + "') ORDER BY " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";")
 				.iterator();
 		
 		return new Iterator<CrawlStatsUnit>() {

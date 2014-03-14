@@ -12,6 +12,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Row;
 
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.KnownHost;
 import uk.bl.monitrix.model.KnownHostList;
 import uk.bl.monitrix.model.SearchResult;
@@ -22,6 +23,8 @@ import uk.bl.monitrix.model.SearchResultItem;
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public class CassandraKnownHostList implements KnownHostList {
+	
+	private static final String TABLE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS;
 	
 	protected Session session;
 	
@@ -67,22 +70,21 @@ public class CassandraKnownHostList implements KnownHostList {
 	public boolean isKnown(String hostname) {
 		if (cache.containsKey(hostname))
 			return true;
-
-		CassandraKnownHost wrapped = (CassandraKnownHost) getKnownHost(hostname);		
-		if (wrapped == null)
+		
+		ResultSet results = session.execute("SELECT * FROM " + TABLE + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + hostname + "';");
+		if (results.isExhausted())
 			return false;
-
-		cache.put(wrapped.getHostname(), wrapped);
+		
 		return true;
 	}
 
 	@Override
 	public KnownHost getKnownHost(String hostname) {
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.known_hosts WHERE host='"+hostname+"';");
+		ResultSet results = session.execute("SELECT * FROM " + TABLE + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + hostname + "';");
 		if (results.isExhausted())
 			return null;
 		
-		CassandraKnownHost wrapped = new CassandraKnownHost(session,results.one());
+		CassandraKnownHost wrapped = new CassandraKnownHost(session, results.one());
 		return wrapped;
 	}
 

@@ -12,6 +12,7 @@ import com.datastax.driver.core.Session;
 
 import play.Logger;
 import uk.bl.monitrix.analytics.HostAnalytics;
+import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHost;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHostList;
 import uk.bl.monitrix.heritrix.LogFileEntry;
@@ -37,13 +38,31 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 
 	public CassandraKnownHostImporter(Session db, CassandraAlertLogImporter alertLog) {
 		super(db);
+		
 		this.alertLog = alertLog;
+		
 		this.statement = session.prepare(
-			      "INSERT INTO crawl_uris.known_hosts " +
-			      "(host, tld, domain, subdomain, first_access, last_access, successfully_fetched_urls) " +
-			      "VALUES (?, ?, ?, ?, ?, ?, ?);");
+				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS + " (" +
+				CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_TLD + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_DOMAIN + ", " + 
+				CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE + ", " +
+				CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO + ") " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");	
 	}
-	
+		
 	/**
 	 * Adds a new host to the Known Hosts list. Note that this method ONLY writes to
 	 * the in-memory cache! In order to write to the database, execute the .commit() method
@@ -55,15 +74,10 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		BoundStatement boundStatement = new BoundStatement(statement);
 		String tld = hostname.substring(hostname.lastIndexOf('.') + 1);
 		session.execute(boundStatement.bind(
-				hostname,
-				tld,
-				domain,
-				subdomain,
-				new Date(accessTime),
-				new Date(accessTime),
-				0L
-				));
-		session.execute("UPDATE crawl_uris.known_tlds SET crawled_urls = crawled_urls + 1 WHERE tld = '"+tld+"';");
+				hostname, tld, domain, subdomain,
+				accessTime, accessTime,
+				"", 0l, 0l, 0, 0, "", "", "", 0, 0, 0));
+		
 		return (CassandraKnownHost) getKnownHost(hostname);
 	}
 	
@@ -80,9 +94,9 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	public void addCrawlerID(String hostname, String crawlerId) {
 		// In this case we know it's a safe cast
-		CassandraKnownHost dbo = (CassandraKnownHost) getKnownHost(hostname);
-		if (dbo != null) {
-			List<String> cids = dbo.getCrawlerIDs();
+		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
+		if (host != null) {
+			List<String> cids = host.getCrawlerIDs();
 			if( ! cids.contains(crawlerId)) {
 				session.execute("UPDATE crawl_uris.known_hosts SET crawlers = crawlers + [ '"+crawlerId+"' ] WHERE host='"+hostname+"';");
 			}
@@ -181,6 +195,9 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		String hostname = l.getHost();
 		KnownHost host = this.getKnownHost(hostname);
 		//Logger.info("Updating host stats");
+		
+		// Host info
+		// addCrawlerID(next.getHost(), crawlerId);
 		
 		double d = HostAnalytics.computePercentageOfRobotsTxtBlocks(host);
 		session.execute("UPDATE crawl_uris.known_hosts SET robots_block_percentage="+d+" WHERE host='"+hostname+"';");

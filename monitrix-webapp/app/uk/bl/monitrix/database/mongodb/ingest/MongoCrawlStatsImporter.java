@@ -55,7 +55,7 @@ class MongoCrawlStatsImporter extends MongoCrawlStats {
 			currentUnit.setDownloadVolume(currentUnit.getDownloadVolume() + entry.getDownloadSize());
 		}
 		
-		// Step 4 - update hosts info
+		// Step 3 - update hosts info
 		String hostname = entry.getHost();
 		if (knownHosts.isKnown(hostname)) {
 			KnownHost host = knownHosts.getKnownHost(hostname);

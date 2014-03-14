@@ -1,5 +1,11 @@
 package uk.bl.monitrix.database.cassandra.model;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import play.Logger;
+
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
@@ -13,71 +19,80 @@ import uk.bl.monitrix.model.CrawlStatsUnit;
 public class CassandraCrawlStatsUnit extends CrawlStatsUnit {
 
 	private static final String TABLE= CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS;
-	
-	private Row row;
-	
-	private String crawlId;
-	
-	private long timestamp;
-	
-	private long downloadVolume;
-	
-	private long numberOfURLsCrawled;
 
+	private Map<String, Object> cachedRow = new HashMap<String, Object>();
+		
 	public CassandraCrawlStatsUnit(Row row) {
-		this.row = row;
-		this.crawlId = row.getString(CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID);
-		this.timestamp = row.getLong(CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP);
-		this.downloadVolume = row.getLong(CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME);
-		this.numberOfURLsCrawled = row.getLong(CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED);
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID, row.getString(CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID));
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP, row.getLong(CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP));
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME, row.getLong(CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME));
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED, row.getLong(CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED));
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED, row.getLong(CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED));
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS, row.getLong(CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS));
 	}
-	
+
 	public String getCrawlID() {
-		return crawlId;
+		return (String) cachedRow.get(CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID);
 	}
 	
 	@Override
 	public long getTimestamp() {
-		return timestamp;
+		return (Long) cachedRow.get(CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP);
 	}
 	
 	@Override
 	public long getDownloadVolume() {
-		return downloadVolume;
+		return (Long) cachedRow.get(CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME);
 	}
 	
 	public void setDownloadVolume(long volume) {
-		this.downloadVolume = volume;
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME, volume);
 	}
 	
 	@Override
 	public long getNumberOfURLsCrawled() {
-		return numberOfURLsCrawled;
+		return (Long) cachedRow.get(CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED);
 	}
 	
 	public void setNumberOfURLsCrawled(long urls) {
-		this.numberOfURLsCrawled = urls;
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED, urls);
 	}
 	
 	@Override
 	public long getNumberOfNewHostsCrawled() {
-		return row.getLong(CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED);
+		return (Long) cachedRow.get(CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED);
+	}
+	
+	public void setNumberOfNewHostsCrawled(long crawled) {
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED, crawled);
 	}
 	
 	@Override
 	public long countCompletedHosts() {
-		Long count = row.getLong(CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS);
-		if (count == null)
-			return 0;
-		
-		return count.intValue();
+		return (Long) cachedRow.get(CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS);
+	}
+	
+	public void setCompletedHosts(long completed) {
+		cachedRow.put(CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS, completed);
 	}
 	
 	public void save(Session session) {
-		session.execute("UPDATE " + TABLE + " SET " + CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED + "=" + numberOfURLsCrawled +
-				", " + CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME + "=" + downloadVolume +
-				" WHERE " + CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID + "='" + crawlId + "' AND " + 
-				CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + "=" + timestamp + ";");
+		String cql = "UPDATE " + TABLE + " SET ";
+		for (Entry<String, Object> e : cachedRow.entrySet()) {
+			cql += e.getKey() + "=";
+			if (e.getValue() instanceof String)
+				cql += "'" + e.getValue() + "', ";
+			else
+				cql += e.getValue() + ", ";
+		}
+				
+		// Eliminate last comma
+		cql = cql.substring(0, cql.length() - 2);
+		
+		cql +=	" WHERE " + CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID + "='" + getCrawlID() + "'" +
+				" AND " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + "=" + getTimestamp() + ";";		
+		Logger.info(cql);
+		session.execute(cql);
 	}
 	
 }

@@ -81,7 +81,7 @@ public class CassandraProperties {
 	public static final String FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE = "redirect_percentage";
 	public static final String FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE = "robots_block_percentage";
 	public static final String FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO = "text_to_nontext_ratio";
-	
+		
 	/** Database field keys (Crawl Stats collection) **/
 	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "stat_ts";
 	public static final String FIELD_CRAWL_STATS_CRAWL_ID = "crawl_id";

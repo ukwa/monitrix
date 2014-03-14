@@ -100,9 +100,6 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				// Update pre-aggregated stats
 				crawlStatsImporter.update(next, crawlerId);
 				
-				// Host info
-				// knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
-				
 				// FIXME Check for long runs and raise alerts?
 				
 				// Update stats and check for any host-level alerts:

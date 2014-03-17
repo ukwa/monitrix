@@ -38,20 +38,21 @@ public class CassandraKnownHostList implements KnownHostList {
 	
 	@Override
 	public long count() {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM crawl_uris.known_hosts;");
+		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE + " ;");
 		return results.one().getLong("count");
 	}
 	
 	@Override
 	public long countSuccessful() {
-		ResultSet results = session.execute("SELECT successfully_fetched_urls FROM crawl_uris.known_hosts;");
+		ResultSet results = session.execute("SELECT " + CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS + " FROM " + TABLE + ";");
 		long total = 0;
 		Iterator<Row> rows = results.iterator();
-		while( rows.hasNext() ) {
-			long fetched = rows.next().getLong("successfully_fetched_urls");
-			if( fetched > 0 )
+		while (rows.hasNext()) {
+			long fetched = rows.next().getLong(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS);
+			if (fetched > 0)
 				total += 1;
 		}
+		
 		return total;
 	}
 	
@@ -80,12 +81,16 @@ public class CassandraKnownHostList implements KnownHostList {
 
 	@Override
 	public KnownHost getKnownHost(String hostname) {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + hostname + "';");
-		if (results.isExhausted())
-			return null;
+		CassandraKnownHost knownHost = cache.get(hostname);
+		if (knownHost == null) {
+			ResultSet results = session.execute("SELECT * FROM " + TABLE + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + hostname + "';");
+			if (!results.isExhausted()) {
+				knownHost = new CassandraKnownHost(results.one());
+				cache.put(hostname, knownHost);
+			}
+		}
 		
-		CassandraKnownHost wrapped = new CassandraKnownHost(results.one());
-		return wrapped;
+		return knownHost;
 	}
 
 	@Override

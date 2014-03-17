@@ -1,12 +1,10 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
 import play.Logger;
@@ -14,9 +12,6 @@ import uk.bl.monitrix.analytics.HostAnalytics;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHost;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHostList;
-import uk.bl.monitrix.heritrix.LogFileEntry;
-import uk.bl.monitrix.model.Alert.AlertType;
-import uk.bl.monitrix.model.KnownHost;
 
 /**
  * An extended version of {@link CassandraKnownHostList} that adds insert/update capability.
@@ -27,18 +22,18 @@ import uk.bl.monitrix.model.KnownHost;
  */
 class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
-	private static final String ALERT_MSG_TOO_MANY_SUBDOMAINS = "The host %s has a suspiciously high number of subdomains (%s)";
+	// private static final String ALERT_MSG_TOO_MANY_SUBDOMAINS = "The host %s has a suspiciously high number of subdomains (%s)";
 	
-	private static final String ALERT_MSG_TXT_TO_NONTEXT_RATIO = "The host %s serves a suspiciously high ratio of text vs. non-text resources";
+	// private static final String ALERT_MSG_TXT_TO_NONTEXT_RATIO = "The host %s serves a suspiciously high ratio of text vs. non-text resources";
 	
-	private CassandraAlertLogImporter alertLog;
+	//  private CassandraAlertLogImporter alertLog;
 
 	private PreparedStatement statement;
 
 	public CassandraKnownHostImporter(Session db, CassandraAlertLogImporter alertLog) {
 		super(db);
 		
-		this.alertLog = alertLog;
+		// this.alertLog = alertLog;
 		
 		this.statement = session.prepare(
 				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS + " (" +
@@ -129,11 +124,11 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	public void incrementCrawledURLCounter(String hostname) {
 		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
 		if (host != null) {
-			long crawledURLs = host.getCrawledURLs() + 1;
-			session.execute("UPDATE crawl_uris.known_hosts SET crawled_urls="+crawledURLs+" WHERE host='"+hostname+"';");
+			long crawledURLs = host.getCrawledURLs();
+			host.setCrawledURLs(crawledURLs + 1);
 		} else {
 			Logger.warn("Attempt to increment crawled URL counter for unknown host: " + hostname);
-		}			
+		}	
 	}
 
 	public void incrementContentTypeCounter(String hostname, String contentType) {
@@ -180,69 +175,23 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 				double currentAvgRetryRate = host.getAverageRetryRate();
 				double newAvgRetryRate = rounder((currentAvgRetryRate * successCount + retries) / (successCount + 1));
 				
-				session.execute("UPDATE crawl_uris.known_hosts SET successfully_fetched_urls="+(successCount + 1)+" WHERE host='"+hostname+"';");
-				session.execute("UPDATE crawl_uris.known_hosts SET avg_fetch_duration="+newAvgResponseTime+" WHERE host='"+hostname+"';");
-				session.execute("UPDATE crawl_uris.known_hosts SET avg_retry_rate="+newAvgRetryRate+" WHERE host='"+hostname+"';");
-				// Update counter columns
-				session.execute("UPDATE crawl_uris.known_host_counters SET successfully_fetched_uris = successfully_fetched_uris + 1, retries = retries + "+retries+", duration = duration + "+fetchDuration+" WHERE host='"+hostname+"';");
+				host.setSuccessfullyFetchedURLs(successCount + 1);
+				host.setAverageFetchDuration(newAvgResponseTime);
+				host.setAverageRetryRate(newAvgRetryRate);	
 			} else {
 				Logger.warn("Attempt to update average response time for known host: " + hostname);
 			}
 		}
 	}
 	
-	/**
-	 * Writes the contents of the cache to the database.
-	 */
-	public void updateHostStats( LogFileEntry l ) {
-		String hostname = l.getHost();
-		KnownHost host = this.getKnownHost(hostname);
-		//Logger.info("Updating host stats");
-		
-		// Host info
-		// addCrawlerID(next.getHost(), crawlerId);
-		
-		double d = HostAnalytics.computePercentageOfRobotsTxtBlocks(host);
-		session.execute("UPDATE crawl_uris.known_hosts SET robots_block_percentage="+d+" WHERE host='"+hostname+"';");
-
-		d = HostAnalytics.computePercentagOfRedirects(host);
-		session.execute("UPDATE crawl_uris.known_hosts SET redirect_percentage="+d+" WHERE host='"+hostname+"';");
-		
-		d = HostAnalytics.computeTextToNonTextRatio(host);
-		session.execute("UPDATE crawl_uris.known_hosts SET text_to_nontext_ratio="+d+" WHERE host='"+hostname+"';");
-		
-		// Compute host-level alerts
-		// Note: we only need to consider hosts that were added in this batch - ie. those in the cache!
-		// Logger.info("Computing host-level alerts");
-		// Subdomain limit
-		Iterator<Row> rows = session.execute("SELECT COUNT(*) FROM crawl_uris.known_hosts WHERE domain='"+l.getDomain()+"';").iterator();
-		long subdomains = rows.next().getLong("count");
-		// FIXME: Hard-coded alert level.
-		if (subdomains > 100) {
-			LogFileEntry.DefaultAlert alert = new LogFileEntry.DefaultAlert(
-			host.getLastAccess(),
-			host.getHostname(),
-			AlertType.TOO_MANY_SUBDOMAINS,
-			String.format(ALERT_MSG_TOO_MANY_SUBDOMAINS, host.getHostname(), Long.toString(subdomains)
-			));
-			alertLog.insert(null, alert);
-		}
-
-		// Text-to-Nontext content type ratio limit
-		if (host.getTextToNoneTextRatio() > 0.9) {
-			LogFileEntry.DefaultAlert alert = new LogFileEntry.DefaultAlert(
-			host.getLastAccess(),
-			host.getHostname(),
-			AlertType.TXT_TO_NONTEXT_RATIO,
-			String.format(ALERT_MSG_TXT_TO_NONTEXT_RATIO, host.getHostname()
-			));
-		alertLog.insert(null, alert);
-		}	
-	}
-	
 	public void commit() {
-		for (CassandraKnownHost ckh : cache.values()) {
-			ckh.save(session);
+		Logger.info("Updating known hosts list (" + cache.size() +  " hosts)");
+		for (CassandraKnownHost knownHost : cache.values()) {
+			// Looks a little recursive... 
+			// knownHost.setRobotsBlockPercentage(HostAnalytics.computePercentageOfRobotsTxtBlocks(knownHost));
+			// knownHost.setRedirectPercentage(HostAnalytics.computePercentagOfRedirects(knownHost));
+			// knownHost.setTextToNoneTextRatio(HostAnalytics.computeTextToNonTextRatio(knownHost));			
+			knownHost.save(session);
 		}
 	}
 

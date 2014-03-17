@@ -31,7 +31,13 @@ public class CassandraKnownHost extends KnownHost {
 		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN, row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN));
 		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS, row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS));
 		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS));
-		// TODO cache the rest
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS, row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS, row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE, row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE, row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE, row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO, row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO));
 	}
 	
 	@Override
@@ -74,22 +80,42 @@ public class CassandraKnownHost extends KnownHost {
 	
 	@Override
 	public long getCrawledURLs() {
-		return -1;
+		Long crawledURLs = (Long) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS);
+		if (crawledURLs == null)
+			return 0;
+		
+		return crawledURLs;
+	}
+	
+	public void setCrawledURLs(long crawledURLs) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS, crawledURLs);
 	}
 		
 	@Override
 	public long getSuccessfullyFetchedURLs() {
-		return -1;
+		return (Long) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS);
+	}
+	
+	public void setSuccessfullyFetchedURLs(long urls) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS, urls);
 	}
 	
 	@Override
 	public double getAverageFetchDuration() {
-		return -1;
+		return (Double) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION);
+	}
+	
+	public void setAverageFetchDuration(double duration) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, duration);
 	}
 
 	@Override
 	public double getAverageRetryRate() {
-		return -1;
+		return (Double) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE);
+	}
+	
+	public void setAverageRetryRate(double rate) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE, rate);
 	}
 	
 	@Override
@@ -109,17 +135,29 @@ public class CassandraKnownHost extends KnownHost {
 	
 	@Override
 	public double getRobotsBlockPercentage() {
-		return -1;
+		return (Double) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE);
+	}
+	
+	public void setRobotsBlockPercentage(double percentage) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE, percentage);
 	}
 	
 	@Override
 	public double getRedirectPercentage() {
-		return -1;
+		return (Double) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE);
+	}
+	
+	public void setRedirectPercentage(double percentage) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE, percentage);
 	}
 	
 	@Override
 	public double getTextToNoneTextRatio() {
-		return -1;
+		return (Double) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO);
+	}
+	
+	public void setTextToNoneTextRatio(double ratio) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO, ratio);
 	}
 	
 	public void save(Session session) {
@@ -137,7 +175,6 @@ public class CassandraKnownHost extends KnownHost {
 		// Eliminate last comma
 		cql = cql.substring(0, cql.length() - 2);
 		cql +=	" WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + getHostname() + "';";
-		Logger.info(cql);
 		session.execute(cql);
 	}
 	

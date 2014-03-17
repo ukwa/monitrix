@@ -68,23 +68,25 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		String crawlerId = ingestSchedule.getLog(logId).getCrawlerId();
 		
 		while (iterator.hasNext()) {
-			long bulkStart = System.currentTimeMillis();
-			
+			long bulkStart = System.currentTimeMillis();			
 			List<DefaultAlert> alertBatch = new ArrayList<DefaultAlert>();
 			
 			int counter = 0; // Should be slightly faster than using list.size() to count
 			int revisits = 0;
 			long timeOfFirstLogEntryInBatch = Long.MAX_VALUE;
 			long timeOfLastLogEntryInPatch = 0;
-			while (iterator.hasNext() && (counter < CassandraProperties.BULK_INSERT_CHUNK_SIZE)) {
+			Logger.info("Processing next batch of log entries");
+			
+			while (iterator.hasNext() && (counter < CassandraProperties.BULK_INSERT_CHUNK_SIZE)) {		
 				LogFileEntry next = iterator.next();
 				counter++;
+				
 				if (next.isRevisitRecord())
 					revisits++;
 				
 				// Skip bad ones:
-				if( next.getParseFailed() ) {
-					Logger.error("Skipping storing a line due to a parse failure. "+counter);
+				if (next.getParseFailed()) {
+					Logger.error("Skipping storing a line due to a parse failure. " + counter);
 					continue;
 				}
 				
@@ -94,50 +96,29 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 				if( timestamp > timeOfLastLogEntryInPatch)
 					timeOfLastLogEntryInPatch = timestamp;
 								
-				// Store the log entry:
 				crawlLogImporter.insert(next);
-
-				// Update pre-aggregated stats
 				crawlStatsImporter.update(next, crawlerId);
 				
 				// FIXME Check for long runs and raise alerts?
-				
-				// Update stats and check for any host-level alerts:
-				// knownHostImporter.updateHostStats(next);
 				
 				// Log-entry-level alerts
 				for (Alert a : next.getAlerts()) {
 					alertBatch.add((DefaultAlert) a);
 				}
-				
-				/* Periodically update stats and flush the counter.
-				if (counter == CassandraProperties.BULK_INSERT_CHUNK_SIZE) {
-					// Update last-seen date
-					crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch);
-				
-					// Update the total log lines counter:
-					ingestSchedule.incrementIngestedLogLines(logId, counter, revisits);
-					counter = 0;
-					revisits = 0;
-				}
-				*/
 			}
 			
-			// Update the total log lines counter:
+			Logger.info("Updating crawl info");
 			ingestSchedule.incrementIngestedLogLines(logId, counter, revisits);
-			
-			// Update with final last-seen date
 			crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
-			
-			Logger.info("Processed " + counter + " log entries (" + (System.currentTimeMillis() - bulkStart) + " ms) - writing to DB");
-			bulkStart = System.currentTimeMillis();
-			
+
+			Logger.info("Inserting alerts");
 			alertLogImporter.insert(logId, alertBatch);
-			alertBatch.clear();		
+			alertBatch.clear();
 			
+			Logger.info("Committing crawl stats");
 			crawlStatsImporter.commit();
 			
-			Logger.info("Done (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
+			Logger.info("Batch ingest complete (" + (System.currentTimeMillis() - bulkStart) + " ms)");			
 		}
 				
 		Logger.debug("Done - took " + (System.currentTimeMillis() - start) + " ms");		

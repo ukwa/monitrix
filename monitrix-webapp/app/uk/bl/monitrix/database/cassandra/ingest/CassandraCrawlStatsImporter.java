@@ -4,6 +4,7 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 
+import uk.bl.monitrix.analytics.LogAnalytics;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlStats;
 import uk.bl.monitrix.database.cassandra.model.CassandraCrawlStatsUnit;
@@ -22,13 +23,13 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 	private PreparedStatement statement = null;
 	
 	private CassandraKnownHostImporter knownHosts;
-	// private CassandraVirusLogImporter virusLog;
+	private CassandraVirusLogImporter virusLog;
 	
 	public CassandraCrawlStatsImporter(Session db, IngestSchedule schedule, CassandraKnownHostImporter knownHosts, CassandraVirusLogImporter virusLog) {
 		super(db, schedule);
 		
 		this.knownHosts = knownHosts;
-		// this.virusLog = virusLog;
+		this.virusLog = virusLog;
 		
 		this.statement = session.prepare(
 				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS + " (" +
@@ -93,8 +94,8 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		// Note: it's a little confusing that these aggregation steps are in this class
 		// TODO move into the main CassandraBatchImporter
 		// knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
-		// knownHosts.incrementCrawledURLCounter(hostname);
-		// knownHosts.updateAverageResponseTimeAndRetryRate(hostname, entry.getFetchDuration(), entry.getRetries());
+		knownHosts.incrementCrawledURLCounter(hostname);
+		knownHosts.updateAverageResponseTimeAndRetryRate(hostname, entry.getFetchDuration(), entry.getRetries());
 		
 		// Warning: there seems to be a bug in Heritrix which sometimes leaves a 'content type template' (?)
 		// in the log line: content type = '$ctype'. This causes CassandraDB to crash, because it can't use 
@@ -106,13 +107,13 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 			contentType = contentType.substring(1);
 		}
 		knownHosts.incrementContentTypeCounter(hostname, contentType);
+		*/
 		
 		String virusName = LogAnalytics.extractVirusName(entry);
 		if (virusName != null) {
-			knownHosts.incrementVirusStats(hostname, virusName);
+			// knownHosts.incrementVirusStats(hostname, virusName);
 			virusLog.recordOccurence(virusName, hostname);
 		}
-		*/
 				
 		// Step 5 - save
 		// TODO optimize caching - insert LRU elements into DB when reasonable

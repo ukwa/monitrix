@@ -112,7 +112,6 @@ public class CassandraIngestSchedule extends IngestSchedule {
 		IngestedLog log = getLog(id);
 		if (log != null) {
 			long ingestedLines = log.getIngestedLines() + increment;
-			Logger.info("Setting ingested lines to " + ingestedLines+ " for log " + id);
 			session.execute("UPDATE " + TABLE_INGEST_SCHEDULE + " SET " + CassandraProperties.FIELD_INGEST_INGESTED_LINES + "=" + 
 					ingestedLines + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + id +"';");
 		}

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import play.Logger;
-
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
@@ -120,17 +118,20 @@ public class CassandraKnownHost extends KnownHost {
 	
 	@Override
 	public Map<String, Integer> getFetchStatusDistribution() {
-		return null;
+		// FIXME
+		return new HashMap<String, Integer>();
 	}
 
 	@Override
 	public Map<String, Integer> getContentTypeDistribution() {
-		return null;
+		// FIXME
+		return new HashMap<String, Integer>();
 	}
 	
 	@Override
 	public Map<String, Integer> getVirusStats() {
-		return null;
+		// FIXME
+		return new HashMap<String, Integer>();
 	}
 	
 	@Override

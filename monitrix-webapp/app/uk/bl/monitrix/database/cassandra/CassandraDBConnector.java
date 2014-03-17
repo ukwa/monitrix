@@ -199,6 +199,7 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute("CREATE INDEX long_log_ts on crawl_uris.crawl_log(long_timestamp);");
 		session.execute("CREATE INDEX coarse_ts on crawl_uris.crawl_log(coarse_timestamp);");
 		session.execute("CREATE INDEX uri on crawl_uris.crawl_log(uri);");
+		session.execute("CREATE INDEX host on crawl_uris.crawl_log(host);");
 		session.execute("CREATE INDEX annotations on crawl_uris.crawl_log(annotations);");
 		
 		// Ingest schedule indexes

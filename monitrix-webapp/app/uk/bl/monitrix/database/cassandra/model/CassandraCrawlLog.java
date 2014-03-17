@@ -85,7 +85,7 @@ public class CassandraCrawlLog extends CrawlLog {
 		
 		// Search based on KEY, and range (TODO?)
 		Iterator<Row> cursor =
-				session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_COARSE_TIMESTAMP + "=" + coarse_ts.getTime() + ";")
+				session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_COARSE_TIMESTAMP + "=" + coarse_ts.getTime() + " LIMIT 100;")
 			    .iterator();
 		
 		List<CrawlLogEntry> recent = new ArrayList<CrawlLogEntry>();
@@ -181,9 +181,10 @@ public class CassandraCrawlLog extends CrawlLog {
 	@Override
 	public SearchResult searchByURL(String query, int limit, int offset) {
 		long startTime = System.currentTimeMillis();
-		int off_limit = offset+limit;
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.uris " +
-		        "WHERE uri = '"+query+"' LIMIT "+off_limit+";");
+		
+		int off_limit = offset + limit;
+		ResultSet results = 
+				session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_URL + " = '" + query + "' LIMIT " + off_limit + ";");
 		
 		List<CrawlLogEntry> entries = new ArrayList<CrawlLogEntry>();
 		// int i = 0;
@@ -200,8 +201,8 @@ public class CassandraCrawlLog extends CrawlLog {
 			*/
 		}
 		
-		ResultSet totalResults = session.execute("SELECT COUNT(*) FROM crawl_uris.uris " +
-		        "WHERE uri = '"+query+"';");
+		ResultSet totalResults = session.execute("SELECT COUNT(*) FROM " + TABLE_CRAWL_LOG +
+		        " WHERE uri = '" + query + "';");
 		long total = totalResults.one().getLong("count");
 		
 		List<SearchResultItem> urls = new ArrayList<SearchResultItem>();
@@ -255,8 +256,10 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	@Override
 	public long countEntriesForHost(String hostname) {
-		ResultSet totalResults = session.execute("SELECT COUNT(*) FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_HOST + 
-				" = '" + hostname + "';");
+		ResultSet totalResults = 
+			session.execute("SELECT COUNT(*) FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_HOST + 
+			" = '" + hostname + "';");
+		
 		return totalResults.one().getLong("count");
 	}
 

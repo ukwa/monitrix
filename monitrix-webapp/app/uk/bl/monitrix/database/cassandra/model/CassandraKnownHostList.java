@@ -58,10 +58,10 @@ public class CassandraKnownHostList implements KnownHostList {
 	
 	@Override
 	public long getMaxFetchDuration() {
-		Iterator<Row> rows = session.execute("SELECT * FROM crawl_uris.known_hosts;").iterator();
+		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE + ";").iterator();
 		double max = 0;
 		while( rows.hasNext() ) {
-			double fd = rows.next().getDouble("avg_fetch_duration");
+			double fd = rows.next().getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION);
 			if (fd > max ) max = fd;
 		}
 		return Math.round(max);

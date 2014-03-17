@@ -27,10 +27,10 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		
 		this.crawlLogStatement = session.prepare(
 				"INSERT INTO crawl_uris.crawl_log (" +
-			    "log_id, timestamp, long_timestamp, coarse_timestamp, status_code, downloaded_bytes, uri, " + 
+			    "log_id, timestamp, long_timestamp, coarse_timestamp, status_code, downloaded_bytes, uri, host, " + 
 			    "discovery_path, referer, content_type, worker_thread, fetch_ts, hash, annotations, ip_address, " + 
 			    "line) " +
-			    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");	
+			    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");	
 	}
 	
 	public void updateCrawlInfo(String crawl_id, long timeOfFirstLogEntryInPatch, long timeOfLastLogEntryInPatch ) {
@@ -70,6 +70,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			l.getHTTPCode(),
 			l.getDownloadSize(),
 			l.getURL(),
+			l.getHost(),
 			l.getBreadcrumbCodes(),
 			l.getReferrer(),
 			l.getContentType(),

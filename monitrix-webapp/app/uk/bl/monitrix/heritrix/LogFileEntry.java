@@ -65,7 +65,6 @@ public class LogFileEntry extends CrawlLogEntry {
 	 */
 	public LogFileEntry() {
 	}
-
 	
 	void init(String logPath, String line) {
 		this.logPath = logPath;

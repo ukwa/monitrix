@@ -1,9 +1,11 @@
 package uk.bl.monitrix.database.cassandra.model;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import play.Logger;
 
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
@@ -18,116 +20,125 @@ import uk.bl.monitrix.model.KnownHost;
  */
 public class CassandraKnownHost extends KnownHost {
 	
-	private Row row;
-	private Session session;
+	private static final String TABLE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS;
 	
-	public CassandraKnownHost(Session session, Row row) {
-		this.row = row;
-		this.session = session;
+	private Map<String, Object> cachedRow = new HashMap<String, Object>();
+		
+	public CassandraKnownHost(Row row) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME, row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_TLD, row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_TLD));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_DOMAIN, row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_DOMAIN));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN, row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS, row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS));
+		// TODO cache the rest
 	}
 	
 	@Override
 	public String getHostname() {
-		return (String) row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME);
+		return (String) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME);
 	}
 	
 	@Override
 	public String getTopLevelDomain() {
-		return (String) row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_TLD);
+		return (String) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_TLD);
 	}
 	
 	@Override
 	public String getDomain() {
-		return (String) row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_DOMAIN);
+		return (String) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_DOMAIN);
 	}
 	@Override
 	public String getSubdomain() {
-		return row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN);
+		return (String) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_SUBDOMAIN);
 	}
 	
 	@Override
 	public long getFirstAccess() {
-		return row.getDate(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS).getTime();
+		return (Long) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_FIRST_ACCESS);
 	}
 	
 	@Override
 	public long getLastAccess() {
-		return row.getDate(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS).getTime();
+		return (Long) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS);
+	}
+	
+	public void setLastAccess(long lastAccess) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_LAST_ACCESS, lastAccess);
 	}
 	
 	@Override
 	public List<String> getCrawlerIDs() {
-		return row.getList(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS, String.class);
+		return null;
 	}
 	
 	@Override
 	public long getCrawledURLs() {
-		return row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLED_URLS);
+		return -1;
 	}
 		
 	@Override
 	public long getSuccessfullyFetchedURLs() {
-		return row.getLong(CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS);
+		return -1;
 	}
 	
 	@Override
 	public double getAverageFetchDuration() {
-		Double duration = row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION);
-		if (duration == null)
-			return 0;
-		else
-			return duration;
+		return -1;
 	}
 
 	@Override
 	public double getAverageRetryRate() {
-		Iterator<Row> rows = session.execute("SELECT * from crawl_uris.known_host_counters WHERE host='"+this.getHostname()+"';").iterator();
-		if( rows.hasNext() ) {
-			Row row = rows.next();
-			return row.getLong("retries")/(double)row.getLong("successfully_fetched_uris");
-		} else {
-			return 0;
-		}
+		return -1;
 	}
 	
 	@Override
 	public Map<String, Integer> getFetchStatusDistribution() {
-		Map<String, Integer> fetchStatusCodes = row.getMap(CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES, String.class, Integer.class);
-		if (fetchStatusCodes == null)
-			return new HashMap<String, Integer>();
-		return fetchStatusCodes;
+		return null;
 	}
 
 	@Override
 	public Map<String, Integer> getContentTypeDistribution() {
-		Map<String, Integer> contentTypeDistribution = row.getMap(CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES, String.class, Integer.class);
-		if (contentTypeDistribution == null)
-			return new HashMap<String, Integer>();
-		
-		return contentTypeDistribution;
+		return null;
 	}
 	
 	@Override
 	public Map<String, Integer> getVirusStats() {
-		Map<String, Integer> virusStats = row.getMap(CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS, String.class, Integer.class);
-		if (virusStats == null)
-			return new HashMap<String, Integer>();		
-		return virusStats;
+		return null;
 	}
 	
 	@Override
 	public double getRobotsBlockPercentage() {
-		return row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE);
+		return -1;
 	}
 	
 	@Override
 	public double getRedirectPercentage() {
-		return row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE);
+		return -1;
 	}
 	
 	@Override
 	public double getTextToNoneTextRatio() {
-		return row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO);
+		return -1;
+	}
+	
+	public void save(Session session) {
+		String cql = "UPDATE " + TABLE + " SET ";
+		for (Entry<String, Object> e : cachedRow.entrySet()) {
+			if (!e.getKey().equals(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME)) {
+					cql += e.getKey() + "=";
+				if (e.getValue() instanceof String)
+					cql += "'" + e.getValue() + "', ";
+				else
+					cql += e.getValue() + ", ";
+			}
+		}
+				
+		// Eliminate last comma
+		cql = cql.substring(0, cql.length() - 2);
+		cql +=	" WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + getHostname() + "';";
+		Logger.info(cql);
+		session.execute(cql);
 	}
 	
 }

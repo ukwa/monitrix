@@ -84,7 +84,7 @@ public class CassandraKnownHostList implements KnownHostList {
 		if (results.isExhausted())
 			return null;
 		
-		CassandraKnownHost wrapped = new CassandraKnownHost(session, results.one());
+		CassandraKnownHost wrapped = new CassandraKnownHost(results.one());
 		return wrapped;
 	}
 
@@ -171,7 +171,7 @@ public class CassandraKnownHostList implements KnownHostList {
 		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
 		// TODO we need to find a better way to handle 'search result metadata' 
 		while (cursor.hasNext()) {
-			KnownHost host = new CassandraKnownHost(session,cursor.next());
+			KnownHost host = new CassandraKnownHost(cursor.next());
 			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));
 			// Update the total number of results.
 			total++;

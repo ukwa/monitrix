@@ -1,7 +1,5 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
-import play.Logger;
-
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
@@ -73,21 +71,19 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		// Step 3 - update hosts info
 		String hostname = entry.getHost();
 		if (knownHosts.isKnown(hostname)) {
-			Logger.info("Updating existing host");
 			KnownHost host = knownHosts.getKnownHost(hostname);
 			
 			// Update host completion time
 			long lastRecordedAccess = host.getLastAccess();
 			if (lastRecordedAccess < timeslot) {
-				// MongoCrawlStatsUnit unitToModify = (MongoCrawlStatsUnit) getStatsForTimestamp(toTimeslot(lastRecordedAccess), crawl_id);
-				// unitToModify.setCompletedHosts(unitToModify.countCompletedHosts() - 1);
-				// currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
+				CassandraCrawlStatsUnit unitToModify = (CassandraCrawlStatsUnit) getStatsForTimestamp(toTimeslot(lastRecordedAccess), crawl_id);
+				unitToModify.setCompletedHosts(unitToModify.countCompletedHosts() - 1);
+				currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 			}
 			
 			// Update last access time
-			// knownHosts.setLastAccess(hostname, entry.getLogTimestamp().getTime());
+			knownHosts.setLastAccess(hostname, entry.getLogTimestamp().getTime());
 		} else {
-			Logger.info("Registering new host: " + hostname);
 			long timestamp = entry.getLogTimestamp().getTime();
 			knownHosts.addToList(hostname, entry.getDomain(), entry.getSubdomain(), timestamp);
 			currentUnit.setNumberOfNewHostsCrawled(currentUnit.getNumberOfNewHostsCrawled() + 1);
@@ -131,6 +127,7 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		for (CassandraCrawlStatsUnit csu : cache.values()) {
 			csu.save(session);
 		}
+		knownHosts.commit();
 	}
 	
 }

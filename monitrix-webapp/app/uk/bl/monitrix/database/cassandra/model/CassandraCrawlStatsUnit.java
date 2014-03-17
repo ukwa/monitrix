@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import play.Logger;
-
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
@@ -18,7 +16,7 @@ import uk.bl.monitrix.model.CrawlStatsUnit;
  */
 public class CassandraCrawlStatsUnit extends CrawlStatsUnit {
 
-	private static final String TABLE= CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS;
+	private static final String TABLE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS;
 
 	private Map<String, Object> cachedRow = new HashMap<String, Object>();
 		
@@ -79,11 +77,13 @@ public class CassandraCrawlStatsUnit extends CrawlStatsUnit {
 	public void save(Session session) {
 		String cql = "UPDATE " + TABLE + " SET ";
 		for (Entry<String, Object> e : cachedRow.entrySet()) {
-			cql += e.getKey() + "=";
-			if (e.getValue() instanceof String)
-				cql += "'" + e.getValue() + "', ";
-			else
-				cql += e.getValue() + ", ";
+			if (!e.getKey().equals(CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID) && !e.getKey().equals(CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP)) {
+				cql += e.getKey() + "=";
+				if (e.getValue() instanceof String)
+					cql += "'" + e.getValue() + "', ";
+				else
+					cql += e.getValue() + ", ";
+			}
 		}
 				
 		// Eliminate last comma
@@ -91,7 +91,7 @@ public class CassandraCrawlStatsUnit extends CrawlStatsUnit {
 		
 		cql +=	" WHERE " + CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID + "='" + getCrawlID() + "'" +
 				" AND " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + "=" + getTimestamp() + ";";		
-		Logger.info(cql);
+		// Logger.info(cql);
 		session.execute(cql);
 	}
 	

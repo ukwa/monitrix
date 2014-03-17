@@ -1,6 +1,5 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		this.alertLog = alertLog;
 		
 		this.statement = session.prepare(
-				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS + " (" +
+				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS + " (" +
 				CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + ", " +
 				CassandraProperties.FIELD_KNOWN_HOSTS_TLD + ", " +
 				CassandraProperties.FIELD_KNOWN_HOSTS_DOMAIN + ", " + 
@@ -76,7 +75,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		session.execute(boundStatement.bind(
 				hostname, tld, domain, subdomain,
 				accessTime, accessTime,
-				"", 0l, 0l, 0, 0, "", "", "", 0, 0, 0));
+				"", 0l, 0l, 0.0, 0.0, "", "", "", 0.0, 0.0, 0.0));
 		
 		return (CassandraKnownHost) getKnownHost(hostname);
 	}
@@ -89,7 +88,11 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 * @param lastAccess the new last access time
 	 */
 	public void setLastAccess(String hostname, long lastAccess) {		
-		session.execute("UPDATE crawl_uris.known_hosts SET last_access="+lastAccess+" WHERE host='"+hostname+"';");
+		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
+		if (host != null)
+			host.setLastAccess(lastAccess);
+		else
+			Logger.warn("Attempt to write last access info to unknown host: " + hostname);
 	}
 	
 	public void addCrawlerID(String hostname, String crawlerId) {
@@ -234,8 +237,13 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			String.format(ALERT_MSG_TXT_TO_NONTEXT_RATIO, host.getHostname()
 			));
 		alertLog.insert(null, alert);
+		}	
+	}
+	
+	public void commit() {
+		for (CassandraKnownHost ckh : cache.values()) {
+			ckh.save(session);
 		}
-		
 	}
 
 }

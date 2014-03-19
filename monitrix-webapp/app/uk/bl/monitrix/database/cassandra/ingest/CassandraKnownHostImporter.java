@@ -7,6 +7,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 
 import play.Logger;
+import uk.bl.monitrix.analytics.HostAnalytics;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHost;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHostList;
@@ -180,10 +181,9 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	public void commit() {
 		Logger.info("Updating known hosts list (" + cache.size() +  " hosts)");
 		for (CassandraKnownHost knownHost : cache.values()) {
-			// Looks a little recursive... 
-			// knownHost.setRobotsBlockPercentage(HostAnalytics.computePercentageOfRobotsTxtBlocks(knownHost));
-			// knownHost.setRedirectPercentage(HostAnalytics.computePercentagOfRedirects(knownHost));
-			// knownHost.setTextToNoneTextRatio(HostAnalytics.computeTextToNonTextRatio(knownHost));			
+			knownHost.setRobotsBlockPercentage(HostAnalytics.computePercentageOfRobotsTxtBlocks(knownHost));
+			knownHost.setRedirectPercentage(HostAnalytics.computePercentagOfRedirects(knownHost));
+			knownHost.setTextToNoneTextRatio(HostAnalytics.computeTextToNonTextRatio(knownHost));			
 			knownHost.save(session);
 		}
 	}

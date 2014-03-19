@@ -1,6 +1,7 @@
 package uk.bl.monitrix.database.cassandra.model;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
@@ -50,6 +53,7 @@ public class CassandraKnownHost extends KnownHost {
 		Set<String> crawlerIdSet = new HashSet<String>(Arrays.asList(crawlerIds.split(";")));
 		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS, crawlerIdSet);
 		
+		// Map-type data fields
 		deserializeMap(row, CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES);
 		deserializeMap(row, CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES);
 		deserializeMap(row, CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS);
@@ -59,11 +63,13 @@ public class CassandraKnownHost extends KnownHost {
 		try {
 			// We're using JSON to (de)serialize map-like data
 			String serialized = row.getString(key);	
-			
-			@SuppressWarnings("unchecked")
-			Map<String, Integer> deserialized = new ObjectMapper().readValue(serialized, HashMap.class);
-			
-			cachedRow.put(key, deserialized);
+			if (serialized == null || serialized.isEmpty()) {
+				cachedRow.put(key, new HashMap<String, Integer>());
+			} else {
+				@SuppressWarnings("unchecked")
+				Map<String, Integer> deserialized = new ObjectMapper().readValue(serialized, HashMap.class);
+				cachedRow.put(key, deserialized);
+			}
 		} catch (JsonParseException e) {
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
@@ -210,11 +216,26 @@ public class CassandraKnownHost extends KnownHost {
 		String cql = "UPDATE " + TABLE + " SET ";
 		for (Entry<String, Object> e : cachedRow.entrySet()) {
 			if (!e.getKey().equals(CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME)) {
-					cql += e.getKey() + "=";
-				if (e.getValue() instanceof String)
-					cql += "'" + e.getValue() + "', ";
-				else
-					cql += e.getValue() + ", ";
+				if (e.getValue() instanceof String) {
+					cql += e.getKey() + "='" + e.getValue() + "', ";
+				} else if (e.getValue() instanceof Set) {
+					@SuppressWarnings("unchecked")
+					Set<String> set = (Set<String>) e.getValue();
+					cql += e.getKey() + "='" + StringUtils.join(set, ";") + "', ";
+				} else if (e.getValue() instanceof Map) {
+					try {
+						@SuppressWarnings("unchecked")
+						Map<String, Integer> map = (Map<String, Integer>) e.getValue();
+						
+						StringWriter writer = new StringWriter();
+						new ObjectMapper().writeValue(writer, map);
+						cql += e.getKey() + "='" + writer.toString() + "', ";
+					} catch (Exception exception) {
+						exception.printStackTrace();
+					}
+				} else {
+					cql += e.getKey() + "=" + e.getValue() + ", ";
+				}
 			}
 		}
 				

@@ -172,6 +172,10 @@ public class CassandraKnownHost extends KnownHost {
 	public Map<String, Integer> getFetchStatusDistribution() {
 		return (Map<String, Integer>) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES);
 	}
+	
+	public void setFetchStatusDistribution(Map<String, Integer> fetchStatusDistribution) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES, fetchStatusDistribution);
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -179,10 +183,18 @@ public class CassandraKnownHost extends KnownHost {
 		return (Map<String, Integer>) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES);
 	}
 	
+	public void setContentTypeDistribution(Map<String, Integer> contentTypeDistribution) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES, contentTypeDistribution);
+	}
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getVirusStats() {
 		return (Map<String, Integer>) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS);
+	}
+	
+	public void setVirusStats(Map<String, Integer> virusStats) {
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS, virusStats);
 	}
 	
 	@Override
@@ -229,7 +241,8 @@ public class CassandraKnownHost extends KnownHost {
 						
 						StringWriter writer = new StringWriter();
 						new ObjectMapper().writeValue(writer, map);
-						cql += e.getKey() + "='" + writer.toString() + "', ";
+						String escaped = writer.toString().replace("'", "''");
+						cql += e.getKey() + "='" + escaped + "', ";
 					} catch (Exception exception) {
 						exception.printStackTrace();
 					}
@@ -241,6 +254,7 @@ public class CassandraKnownHost extends KnownHost {
 				
 		// Eliminate last comma
 		cql = cql.substring(0, cql.length() - 2);
+		// Logger.info(cql);
 		cql +=	" WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + getHostname() + "';";
 		session.execute(cql);
 	}

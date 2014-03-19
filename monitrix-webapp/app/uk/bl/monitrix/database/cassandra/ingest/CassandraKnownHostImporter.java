@@ -106,10 +106,10 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			Map<String, Integer> fetchStatusMap = host.getFetchStatusDistribution();
 			Integer value = fetchStatusMap.get(key);
 			if (value == null)
-				value = new Integer(1);
+				fetchStatusMap.put(key, 1);
 			else
-				value = new Integer( value.intValue() + 1);
-			session.execute("UPDATE crawl_uris.known_hosts SET fetch_status_codes = fetch_status_codes + { '"+key+"': "+value+" } WHERE host='"+hostname+"';");
+				fetchStatusMap.put(key, value.intValue() + 1);
+			host.setFetchStatusDistribution(fetchStatusMap);
 		} else {
 			Logger.warn("Attempt to write fetch status info to unknown host: " + hostname);
 		}
@@ -132,13 +132,13 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			Map<String, Integer> contentTypeMap = host.getContentTypeDistribution();
 			Integer value = contentTypeMap.get(contentType);
 			if (value == null)
-				value = new Integer(1);
+				contentTypeMap.put(contentType, 1);
 			else
-				value = new Integer( value.intValue() + 1);
-			session.execute("UPDATE crawl_uris.known_hosts SET content_types = content_types + { '"+contentType+"': "+value+" } WHERE host='"+hostname+"';");
+				contentTypeMap.put(contentType, value.intValue() + 1);
+			host.setContentTypeDistribution(contentTypeMap);
 		} else {
 			Logger.warn("Attempt to write content type info to unknown host: " + hostname);
-		}		
+		}			
 	}
 	
 	public void incrementVirusStats(String hostname, String virusName) {
@@ -148,13 +148,13 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			Map<String, Integer> virusMap = host.getVirusStats();
 			Integer value = virusMap.get(virusName);
 			if (value == null)
-				value = new Integer(1);
+				virusMap.put(virusName, 1);
 			else
-				value = new Integer( value.intValue() + 1);
-			session.execute("UPDATE crawl_uris.known_hosts SET virus_stats = virus_stats + { '"+virusName+"': "+value+" } WHERE host='"+hostname+"';");
+				virusMap.put(virusName, value.intValue() + 1);
+			host.setVirusStats(virusMap);
 		} else {
 			Logger.warn("Attempt to write virus stats info to unknown host: " + hostname);
-		}			
+		}				
 	}
 	
 	public void updateAverageResponseTimeAndRetryRate(String hostname, int fetchDuration, int retries) {

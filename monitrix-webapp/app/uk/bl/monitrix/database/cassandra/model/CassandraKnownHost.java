@@ -1,5 +1,6 @@
 package uk.bl.monitrix.database.cassandra.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +12,9 @@ import java.util.Set;
 
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.KnownHost;
@@ -45,6 +49,28 @@ public class CassandraKnownHost extends KnownHost {
 		String crawlerIds = row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS);
 		Set<String> crawlerIdSet = new HashSet<String>(Arrays.asList(crawlerIds.split(";")));
 		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS, crawlerIdSet);
+		
+		deserializeMap(row, CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES);
+		deserializeMap(row, CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES);
+		deserializeMap(row, CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS);
+	}
+	
+	private void deserializeMap(Row row, String key) {
+		try {
+			// We're using JSON to (de)serialize map-like data
+			String serialized = row.getString(key);	
+			
+			@SuppressWarnings("unchecked")
+			Map<String, Integer> deserialized = new ObjectMapper().readValue(serialized, HashMap.class);
+			
+			cachedRow.put(key, deserialized);
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -136,21 +162,21 @@ public class CassandraKnownHost extends KnownHost {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getFetchStatusDistribution() {
-		// FIXME
-		return new HashMap<String, Integer>();
+		return (Map<String, Integer>) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_FETCH_STATUS_CODES);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getContentTypeDistribution() {
-		// FIXME
-		return new HashMap<String, Integer>();
+		return (Map<String, Integer>) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_CONTENT_TYPES);
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getVirusStats() {
-		// FIXME
-		return new HashMap<String, Integer>();
+		return (Map<String, Integer>) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_VIRUS_STATS);
 	}
 	
 	@Override

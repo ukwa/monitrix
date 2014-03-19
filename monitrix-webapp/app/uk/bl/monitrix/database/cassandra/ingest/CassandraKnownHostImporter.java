@@ -1,6 +1,5 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
-import java.util.List;
 import java.util.Map;
 
 import com.datastax.driver.core.BoundStatement;
@@ -92,15 +91,10 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	public void addCrawlerID(String hostname, String crawlerId) {
 		// In this case we know it's a safe cast
 		CassandraKnownHost host = (CassandraKnownHost) getKnownHost(hostname);
-		if (host != null) {
-			List<String> cids = host.getCrawlerIDs();
-			if( ! cids.contains(crawlerId)) {
-				session.execute("UPDATE crawl_uris.known_hosts SET crawlers = crawlers + [ '"+crawlerId+"' ] WHERE host='"+hostname+"';");
-			}
-		}
-		else {
+		if (host != null)
+			host.addCrawlerID(crawlerId);
+		else
 			Logger.warn("Attempt to write crawlerID info to unknown host: " + hostname);
-		}
 	}
 
 	public void incrementFetchStatusCounter(String hostname, int fetchStatus) {

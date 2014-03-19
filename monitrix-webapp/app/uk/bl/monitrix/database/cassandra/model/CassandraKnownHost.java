@@ -1,9 +1,13 @@
 package uk.bl.monitrix.database.cassandra.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
@@ -36,6 +40,11 @@ public class CassandraKnownHost extends KnownHost {
 		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE, row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE));
 		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE, row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE));
 		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO, row.getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO));
+		
+		// Crawler IDs
+		String crawlerIds = row.getString(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS);
+		Set<String> crawlerIdSet = new HashSet<String>(Arrays.asList(crawlerIds.split(";")));
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS, crawlerIdSet);
 	}
 	
 	@Override
@@ -72,8 +81,18 @@ public class CassandraKnownHost extends KnownHost {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<String> getCrawlerIDs() {
-		return null;
+		List<String> ids = new ArrayList<String>();
+		ids.addAll((Set<String>) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS));
+		return ids;
+	}
+	
+	public void addCrawlerID(String id) {
+		@SuppressWarnings("unchecked")
+		Set<String> ids = (Set<String>) cachedRow.get(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS);
+		ids.add(id);
+		cachedRow.put(CassandraProperties.FIELD_KNOWN_HOSTS_CRAWLERS, ids);
 	}
 	
 	@Override

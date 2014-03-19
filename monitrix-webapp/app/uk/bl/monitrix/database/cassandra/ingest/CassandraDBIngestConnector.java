@@ -98,6 +98,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 								
 				crawlLogImporter.insert(next);
 				crawlStatsImporter.update(next, crawlerId);
+				knownHostImporter.addCrawlerID(next.getHost(), crawlerId);
 				
 				// FIXME Check for long runs and raise alerts?
 				

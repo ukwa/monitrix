@@ -1,5 +1,7 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
+import play.Logger;
+
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
@@ -93,25 +95,23 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		
 		// Note: it's a little confusing that these aggregation steps are in this class
 		// TODO move into the main CassandraBatchImporter
-		// knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
+		knownHosts.incrementFetchStatusCounter(hostname, entry.getHTTPCode());
 		knownHosts.incrementCrawledURLCounter(hostname);
 		knownHosts.updateAverageResponseTimeAndRetryRate(hostname, entry.getFetchDuration(), entry.getRetries());
 		
 		// Warning: there seems to be a bug in Heritrix which sometimes leaves a 'content type template' (?)
 		// in the log line: content type = '$ctype'. This causes CassandraDB to crash, because it can't use 
 		// strings starting with '$' as JSON keys. Therefore, we'll cut off the '$' and log a warning.
-		/*
 		String contentType = entry.getContentType();
 		if (contentType.charAt(0) == '$') {
 			Logger.warn("Invalid content type found in log: " + contentType);
 			contentType = contentType.substring(1);
 		}
 		knownHosts.incrementContentTypeCounter(hostname, contentType);
-		*/
 		
 		String virusName = LogAnalytics.extractVirusName(entry);
 		if (virusName != null) {
-			// knownHosts.incrementVirusStats(hostname, virusName);
+			knownHosts.incrementVirusStats(hostname, virusName);
 			virusLog.recordOccurence(virusName, hostname);
 		}
 				

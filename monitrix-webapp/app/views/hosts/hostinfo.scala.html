@@ -52,7 +52,7 @@
       <tr>
         <td/>
         <td colspan="3">
-          @* <div class="monitrix-host-piechart">
+          <div class="monitrix-host-piechart">
             <strong>Fetch Status</strong>
             <div class="monitrix-host-piechart-inner" id="pie-result-codes"></div>
             <div class="monitrix-host-pielchart-legend">
@@ -90,9 +90,9 @@
                 </tbody>
               </table>
             </div>
-          </div> *@
+          </div>
         
-          @* <div class="monitrix-host-piechart">
+          <div class="monitrix-host-piechart">
             <strong>Virus Scan</strong>
             <div class="monitrix-host-piechart-inner" id="pie-viruscheck"></div>
             <div class="monitrix-host-pielchart-legend">
@@ -113,7 +113,7 @@
                 </tbody>
               </table>
             </div>
-          </div> *@
+          </div>
         </td>
       </tr>
       <tr>
@@ -122,7 +122,7 @@
             @knownHost.getDomain
           </td>
       </tr>
-      @* if( knownHost.getSubdomain != null) {
+      @if( knownHost.getSubdomain != null) {
       <tr>
           <td class="monitrix-hostinfo-label">Subdomain</td>
           <td colspan="3" class="monitrix-three-column-text">
@@ -132,22 +132,21 @@
       }
       @defining(knownHost.getCrawlerIDs().sorted) { crawlers =>
         <tr><td class="monitrix-hostinfo-label">Crawlers (@crawlers.size())</td><td colspan="3">@crawlers.mkString(", ")</td></tr>
-      }*@
-      @*<tr>
+      }
+      <tr>
         <td class="monitrix-hostinfo-label">Alerts</td>
         <td colspan="3">
           @for(alertType <- alertLog.getAlertTypesForHost(knownHost.getHostname)) {
             @alertTag(alertType)          
           }
         </td>
-      </tr>*@
+      </tr>
     </table>
   
     <script src="@routes.Assets.at("javascripts/raphael-min.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/morris.min.js")" type="text/javascript"></script>
     <script>
       window.onload = function() {
-          @*
           Morris.Donut({
                        data: [
                                @Html({knownHost.getFetchStatusDistribution().map { case (code, value) =>
@@ -157,9 +156,7 @@
                        element: 'pie-result-codes',
                        colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
     	             });
-    	  *@
           
-          @*
           Morris.Donut({
               data: [
                       @Html({knownHost.getContentTypeDistribution().map { case (mime, count) =>
@@ -169,9 +166,7 @@
               element: 'pie-mimetypes',
               colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
             });
-          *@
           
-          @*
     	  Morris.Donut({
                        data: [
                               @defining(knownHost.getVirusStats()) { virusStats =>
@@ -186,7 +181,7 @@
                              ],
                        element: 'pie-viruscheck',
                        colors: ['#BD4E4E', '#B71717', '#850303', '#E38B8B']
-    	             }); *@
+    	             });
       }
     </script>
     <script>
@@ -225,7 +220,6 @@
           new Rickshaw.Graph.Axis.Y({
               graph: graph,
               tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-//              orientation:'left',
               element: document.getElementById(divId + '-axis')
           });
           

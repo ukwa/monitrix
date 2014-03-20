@@ -53,7 +53,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 		this.ingestSchedule = new CassandraIngestSchedule(db.getSession());
 		this.crawlLogImporter = new CassandraCrawlLogImporter(db.getSession());
 		this.alertLogImporter = new CassandraAlertLogImporter(db.getSession());
-		this.knownHostImporter = new CassandraKnownHostImporter(db.getSession(), this.alertLogImporter);
+		this.knownHostImporter = new CassandraKnownHostImporter(db.getSession(), this.ingestSchedule, this.alertLogImporter);
 		this.crawlStatsImporter = new CassandraCrawlStatsImporter(db.getSession(), ingestSchedule, knownHostImporter, new CassandraVirusLogImporter(db.getSession()));
 	}
 	

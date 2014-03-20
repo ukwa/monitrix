@@ -22,6 +22,7 @@ public class CassandraProperties {
 	public static final String COLLECTION_CRAWL_LOG = "crawl_log";
 	public static final String COLLECTION_INGEST_SCHEDULE = "ingest_schedule";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
+	public static final String COLLECTION_KNOWN_TLDS = "known_tlds";
 	public static final String COLLECTION_CRAWL_STATS = "crawl_stats";
 	public static final String COLLECTION_VIRUS_LOG = "virus_log";
 	
@@ -81,6 +82,9 @@ public class CassandraProperties {
 	public static final String FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE = "redirect_percentage";
 	public static final String FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE = "robots_block_percentage";
 	public static final String FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO = "text_to_nontext_ratio";
+	
+	/** Database field keys (Known TLDs) **/
+	public static final String FIELD_KNOWN_TLDS_TLD = "tld";
 		
 	/** Database field keys (Crawl Stats collection) **/
 	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "stat_ts";

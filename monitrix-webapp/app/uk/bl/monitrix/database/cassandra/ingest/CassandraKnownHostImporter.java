@@ -9,6 +9,7 @@ import com.datastax.driver.core.Session;
 import play.Logger;
 import uk.bl.monitrix.analytics.HostAnalytics;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
+import uk.bl.monitrix.database.cassandra.model.CassandraIngestSchedule;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHost;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHostList;
 
@@ -27,14 +28,16 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	//  private CassandraAlertLogImporter alertLog;
 
-	private PreparedStatement statement;
+	private PreparedStatement statementHosts;
+	
+	private PreparedStatement statementTLD;
 
-	public CassandraKnownHostImporter(Session db, CassandraAlertLogImporter alertLog) {
+	public CassandraKnownHostImporter(Session db, CassandraIngestSchedule ingestSchedule, CassandraAlertLogImporter alertLog) {
 		super(db);
 		
 		// this.alertLog = alertLog;
 		
-		this.statement = session.prepare(
+		this.statementHosts = session.prepare(
 				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS + " (" +
 				CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + ", " +
 				CassandraProperties.FIELD_KNOWN_HOSTS_TLD + ", " +
@@ -54,6 +57,11 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 				CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE + ", " +
 				CassandraProperties.FIELD_KNOWN_HOSTS_TEXT_TO_NONTEXT_RATIO + ") " +
 				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");	
+		
+		this.statementTLD = session.prepare(
+				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_TLDS + " (" +
+				CassandraProperties.FIELD_KNOWN_TLDS_TLD + ") " +
+				"VALUES (?);");
 	}
 		
 	/**
@@ -64,12 +72,15 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	 * @param accessTime the access time
 	 */
 	public CassandraKnownHost addToList(String hostname, String domain, String subdomain, long accessTime) {	
-		BoundStatement boundStatement = new BoundStatement(statement);
+		BoundStatement boundHostStatement = new BoundStatement(statementHosts);
 		String tld = hostname.substring(hostname.lastIndexOf('.') + 1);
-		session.execute(boundStatement.bind(
+		session.execute(boundHostStatement.bind(
 				hostname, tld, domain, subdomain,
 				accessTime, accessTime,
 				"", 0l, 0l, 0.0, 0.0, "", "", "", 0.0, 0.0, 0.0));
+		
+		BoundStatement boundTLDStatement = new BoundStatement(statementTLD);
+		session.execute(boundTLDStatement.bind(tld));
 		
 		return (CassandraKnownHost) getKnownHost(hostname);
 	}

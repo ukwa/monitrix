@@ -168,6 +168,10 @@ public class CassandraDBConnector implements DBConnector {
 					"redirect_percentage double, " + 
 					"robots_block_percentage double, " +
 					"text_to_nontext_ratio double);");
+		
+		session.execute(
+				"CREATE TABLE crawl_uris.known_tlds(" +
+					"tld varchar PRIMARY KEY);");
 
 		session.execute(
 				"CREATE TABLE crawl_uris.crawl_stats(" + 

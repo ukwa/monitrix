@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import play.Logger;
 
 import com.datastax.driver.core.ResultSet;
@@ -24,12 +26,13 @@ import uk.bl.monitrix.model.SearchResultItem;
  */
 public class CassandraKnownHostList implements KnownHostList {
 	
-	private static final String TABLE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS;
+	private static final String TABLE_HOSTS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS;
+	
+	private static final String TABLE_TLDS = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_TLDS;
 	
 	protected Session session;
 	
 	// A simple in-memory buffer for quick host lookups
-	// private Set<String> knownHostsLookupCache = null;
 	protected Map<String, CassandraKnownHost> cache = new HashMap<String, CassandraKnownHost>();
 	
 	public CassandraKnownHostList(Session session) {
@@ -38,13 +41,13 @@ public class CassandraKnownHostList implements KnownHostList {
 	
 	@Override
 	public long count() {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE + " ;");
+		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_HOSTS + " ;");
 		return results.one().getLong("count");
 	}
 	
 	@Override
 	public long countSuccessful() {
-		ResultSet results = session.execute("SELECT " + CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS + " FROM " + TABLE + ";");
+		ResultSet results = session.execute("SELECT " + CassandraProperties.FIELD_KNOWN_HOSTS_SUCCESSFULLY_FETCHED_URLS + " FROM " + TABLE_HOSTS + ";");
 		long total = 0;
 		Iterator<Row> rows = results.iterator();
 		while (rows.hasNext()) {
@@ -58,7 +61,7 @@ public class CassandraKnownHostList implements KnownHostList {
 	
 	@Override
 	public long getMaxFetchDuration() {
-		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE + ";").iterator();
+		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_HOSTS + ";").iterator();
 		double max = 0;
 		while( rows.hasNext() ) {
 			double fd = rows.next().getDouble(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION);
@@ -72,7 +75,7 @@ public class CassandraKnownHostList implements KnownHostList {
 		if (cache.containsKey(hostname))
 			return true;
 		
-		ResultSet results = session.execute("SELECT * FROM " + TABLE + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + hostname + "';");
+		ResultSet results = session.execute("SELECT * FROM " + TABLE_HOSTS + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + hostname + "';");
 		if (results.isExhausted())
 			return false;
 		
@@ -83,7 +86,7 @@ public class CassandraKnownHostList implements KnownHostList {
 	public KnownHost getKnownHost(String hostname) {
 		CassandraKnownHost knownHost = cache.get(hostname);
 		if (knownHost == null) {
-			ResultSet results = session.execute("SELECT * FROM " + TABLE + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + hostname + "';");
+			ResultSet results = session.execute("SELECT * FROM " + TABLE_HOSTS + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + hostname + "';");
 			if (!results.isExhausted()) {
 				knownHost = new CassandraKnownHost(results.one());
 				cache.put(hostname, knownHost);
@@ -107,12 +110,12 @@ public class CassandraKnownHostList implements KnownHostList {
 	
 	@Override
 	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset) {
-// 		ResultSet results = session.execute("SELECT * FROM " + TABLE + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + 
-// 				" > " + min + " AND " + CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + " <= " + max);
-//		DBObject query = new BasicDBObject(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, 
-//				new BasicDBObject("$gt", min).append("$lte", max));
-//		return search(null, query, limit, offset);
-		return null;
+ 		ResultSet results = session.execute(
+ 				"SELECT * FROM " + TABLE_HOSTS + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + 
+ 				" > " + min + " AND " + CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + " < " + max +
+ 				" AND " + CassandraProperties.FIELD_KNOWN_HOSTS_TLD + " IN ('" + StringUtils.join(getTopLevelDomains(), ",") + "');");
+ 		
+		return search(null, results.iterator(), limit, offset);
 	}
 	
 	@Override
@@ -208,15 +211,14 @@ public class CassandraKnownHostList implements KnownHostList {
 
 	@Override
 	public List<String> getTopLevelDomains() {
-		List<String> tlds = new ArrayList<String>();
-		/*
-		Iterator<Row> rows = session.execute("SELECT tld from crawl_uris.known_tlds;").iterator();
+		Iterator<Row> results =
+				session.execute("SELECT " + CassandraProperties.FIELD_KNOWN_TLDS_TLD + " from " + TABLE_TLDS + ";").iterator();
 		
-		// Loop over other tlds:
-		while( rows.hasNext() ) {
-			String tld = rows.next().getString("tld");
+		List<String> tlds = new ArrayList<String>();
+		while (results.hasNext()) {
+			String tld = results.next().getString(CassandraProperties.FIELD_KNOWN_TLDS_TLD);
 			tlds.add(tld);
-		}*/
+		}
 		return tlds;
 	}
 	

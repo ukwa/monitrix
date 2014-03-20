@@ -107,6 +107,8 @@ public class CassandraKnownHostList implements KnownHostList {
 	
 	@Override
 	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset) {
+// 		ResultSet results = session.execute("SELECT * FROM " + TABLE + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + 
+// 				" > " + min + " AND " + CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + " <= " + max);
 //		DBObject query = new BasicDBObject(CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION, 
 //				new BasicDBObject("$gt", min).append("$lte", max));
 //		return search(null, query, limit, offset);

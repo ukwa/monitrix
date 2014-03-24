@@ -187,7 +187,6 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute(
 				"CREATE TABLE crawl_uris.alert_log(" +
 					"timestamp bigint, " +
-					"crawl_id varchar, " +
 					"offending_host varchar, " +
 					"alert_type varchar, " +
 					"alert_description varchar, " +

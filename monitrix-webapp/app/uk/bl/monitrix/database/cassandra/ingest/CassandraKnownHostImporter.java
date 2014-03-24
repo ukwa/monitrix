@@ -12,6 +12,8 @@ import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraIngestSchedule;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHost;
 import uk.bl.monitrix.database.cassandra.model.CassandraKnownHostList;
+import uk.bl.monitrix.heritrix.LogFileEntry.DefaultAlert;
+import uk.bl.monitrix.model.Alert.AlertType;
 
 /**
  * An extended version of {@link CassandraKnownHostList} that adds insert/update capability.
@@ -24,9 +26,9 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	
 	// private static final String ALERT_MSG_TOO_MANY_SUBDOMAINS = "The host %s has a suspiciously high number of subdomains (%s)";
 	
-	// private static final String ALERT_MSG_TXT_TO_NONTEXT_RATIO = "The host %s serves a suspiciously high ratio of text vs. non-text resources";
+	private static final String ALERT_MSG_TXT_TO_NONTEXT_RATIO = "The host %s serves a suspiciously high ratio of text vs. non-text resources";
 	
-	//  private CassandraAlertLogImporter alertLog;
+	private CassandraAlertLogImporter alertLog;
 	
 	private CassandraKnownTLDImporter knownTLDs;
 
@@ -37,7 +39,7 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	public CassandraKnownHostImporter(Session db, CassandraIngestSchedule ingestSchedule, CassandraAlertLogImporter alertLog) {
 		super(db);
 		
-		// this.alertLog = alertLog;
+		this.alertLog = alertLog;
 		
 		this.knownTLDs = new CassandraKnownTLDImporter(db);
 		
@@ -204,7 +206,37 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			knownHost.save(session);
 		}
 		
+		// Compute host-level alerts
+		// Note: we only need to consider hosts that were added in this batch - i.e. those in the cache!
+		// FIXME: Moving to the host-wise model means we've lost the alerts.
+		Logger.info("Computing host-level alerts");
+		for (CassandraKnownHost host : cache.values()) {
+			/* Subdomain limit
+			int subdomains = 1; //host.getSubdomain().size();
+			if (subdomains > 100) {
+				CassandraAlert alert = new MongoAlert(new BasicDBObject());
+				alert.setTimestamp(host.getLastAccess());
+				alert.setOffendingHost(host.getHostname());
+				alert.setAlertType(AlertType.TOO_MANY_SUBDOMAINS);
+				alert.setAlertDescription(String.format(ALERT_MSG_TOO_MANY_SUBDOMAINS, host.getHostname(), Integer.toString(subdomains)));
+				alertLog.insert(alert);
+			}
+			*/
+
+			// Text-to-Nontext content type ratio limit
+			if (host.getTextToNoneTextRatio() > 0.9) {
+				DefaultAlert a = new DefaultAlert(
+						host.getLastAccess(), 
+						host.getHostname(), 
+						AlertType.TXT_TO_NONTEXT_RATIO, 
+						String.format(ALERT_MSG_TXT_TO_NONTEXT_RATIO, host.getHostname()));
+				
+				alertLog.insert(a);
+			}
+		}
+		
 		knownTLDs.commit();
+		cache.clear();
 	}
 
 }

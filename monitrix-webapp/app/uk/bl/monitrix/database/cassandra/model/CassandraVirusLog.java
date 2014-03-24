@@ -22,8 +22,9 @@ public class CassandraVirusLog implements VirusLog {
 	
 	@Override
 	public VirusRecord getRecordForVirus(String virusName) {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_VIRUS + " WHERE " + CassandraProperties.FIELD_VIRUS_LOG_NAME + 
-				"='" + virusName + "';");
+		// TODO it may make sense to cache this
+		ResultSet results =
+				session.execute("SELECT * FROM " + TABLE_VIRUS + " WHERE " + CassandraProperties.FIELD_VIRUS_LOG_NAME +	"='" + virusName + "';");
 		
 		if (results.isExhausted())
 			return null;

@@ -22,26 +22,24 @@ class CassandraAlertLogImporter extends CassandraAlertLog {
 		this.statement = session.prepare(
 				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_ALERT_LOG + " (" +
 				CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP + ", " +
-				CassandraProperties.FIELD_ALERT_LOG_CRAWL_ID + ", " +
 			    CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + ", " +
 			    CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + ", " + 
 				CassandraProperties.FIELD_ALERT_LOG_DESCRIPTION + ") " +
 				"VALUES (?, ?, ?, ?, ?);");
 	}
 	
-	public void insert(String crawlId, DefaultAlert alert) {
+	public void insert(DefaultAlert alert) {
 		BoundStatement boundStatement = new BoundStatement(statement);
 		session.execute(boundStatement.bind(
 				alert.getTimestamp(),
-				crawlId,
 				alert.getOffendingHost(),
 				alert.getAlertType().name(),
 				alert.getAlertDescription()));		
 	}
 	
-	public void insert(String crawlId, List<DefaultAlert> alerts) {
+	public void insert(List<DefaultAlert> alerts) {
 		for (DefaultAlert alert : alerts)
-			insert(crawlId, alert);
+			insert(alert);
 	}
 
 }

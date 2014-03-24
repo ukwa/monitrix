@@ -113,7 +113,7 @@ public class CassandraDBIngestConnector implements DBIngestConnector {
 			crawlLogImporter.updateCrawlInfo(crawlerId, timeOfFirstLogEntryInBatch, timeOfLastLogEntryInPatch );
 
 			Logger.info("Inserting alerts");
-			alertLogImporter.insert(logId, alertBatch);
+			alertLogImporter.insert(alertBatch);
 			alertBatch.clear();
 			
 			Logger.info("Committing crawl stats");

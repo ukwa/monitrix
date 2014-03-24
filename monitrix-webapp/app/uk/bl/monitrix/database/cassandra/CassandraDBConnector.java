@@ -211,6 +211,7 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute("CREATE INDEX log_path on crawl_uris.ingest_schedule(log_path);");
 		
 		// Known host table indexes
+		session.execute("CREATE INDEX tld on crawl_uris.known_hosts(tld);");
 		session.execute("CREATE INDEX avg_fetch_duration on crawl_uris.known_hosts(avg_fetch_duration);");
 		session.execute("CREATE INDEX avg_retry_rate on crawl_uris.known_hosts(avg_retry_rate);");
 		session.execute("CREATE INDEX robots_block_percentage on crawl_uris.known_hosts(robots_block_percentage);");

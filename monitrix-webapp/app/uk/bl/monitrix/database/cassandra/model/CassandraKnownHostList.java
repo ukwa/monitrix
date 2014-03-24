@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-
 import play.Logger;
 
 import com.datastax.driver.core.ResultSet;
@@ -98,8 +96,16 @@ public class CassandraKnownHostList implements KnownHostList {
 
 	@Override
 	public SearchResult searchHosts(String query, int limit, int offset) {		
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.known_hosts WHERE host='"+query+"';");
-		return search(query, results.iterator(), limit, offset);
+		Iterator<Row> results = session.execute(
+				"SELECT * FROM " + TABLE_HOSTS + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_HOSTNAME + "='" + query + "' LIMIT " + (limit + offset) + ";")
+				.iterator();
+		
+		for (int i=0; i<offset; i++) {
+			if (results.hasNext())
+				results.next();
+		}
+		
+		return search(query, results, limit, offset);
 	}
 	
 	@Override
@@ -108,19 +114,42 @@ public class CassandraKnownHostList implements KnownHostList {
 		return search(tld, results.iterator(), limit, offset);
 	}
 	
-	@Override
-	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset) {
- 		ResultSet results = session.execute(
- 				"SELECT * FROM " + TABLE_HOSTS + " WHERE " + CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + 
- 				" > " + min + " AND " + CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION + " < " + max +
- 				" AND " + CassandraProperties.FIELD_KNOWN_HOSTS_TLD + " IN ('" + StringUtils.join(getTopLevelDomains(), ",") + "');");
- 		
-		return search(null, results.iterator(), limit, offset);
+	   
+	private SearchResult searchByRange(double min, double max, int limit, int offset, String property) {		
+		List<Row> concatenated = new ArrayList<Row>();		
+		for (String tld : getTopLevelDomains()) {
+			String q = "SELECT * FROM " + TABLE_HOSTS + " WHERE " + property + " > " + min + " AND " + property + " < " + max +
+					" AND " + CassandraProperties.FIELD_KNOWN_HOSTS_TLD + " ='" + tld + "'";
+				
+			if (limit > 0 && offset > 0) {
+				q += " LIMIT " + (limit + offset) + " ALLOW FILTERING ;";
+			} else {
+				q+= " ALLOW FILTERING ;";
+			}
+			
+			Iterator<Row> results = session.execute(q).iterator();
+			for (int i=0; i<offset; i++) {
+				if (results.hasNext())
+					results.next();
+			}
+			
+			while (results.hasNext())
+				concatenated.add(results.next());
+		}
+		
+		return search(null, concatenated.iterator(), limit, offset);
 	}
 	
 	@Override
-	public SearchResult searchByAverageRetries(final int min, final int max, int limit, int offset) {
-		// Attempting a clever inline iterator:
+	public SearchResult searchByAverageFetchDuration(long min, long max, int limit, int offset) {
+		return searchByRange(min, max, limit, offset, CassandraProperties.FIELD_KNOWN_HOSTS_AVG_FETCH_DURATION);
+	}
+	
+	@Override
+	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset) {
+		return searchByRange(min, max, limit, offset, CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE);
+		
+		/* Attempting a clever inline iterator:
 		Iterator<Row> multirows = new Iterator<Row>() {
 			
 			private Iterator<Row> cursor = null;
@@ -130,7 +159,6 @@ public class CassandraKnownHostList implements KnownHostList {
 			
 			@Override
 			public boolean hasNext() {
-				Logger.warn("hasNext...");
 				while( cursor == null || (cur < hi && !cursor.hasNext())) {
 					cur = cur + rounder_step;
 					String cql = "SELECT * from crawl_uris.known_hosts where avg_retry_rate = "+cur+";";
@@ -154,22 +182,18 @@ public class CassandraKnownHostList implements KnownHostList {
 			}
 		};
 		return search(null, multirows, limit, offset);
+		*/
 	}
 	
 	@Override
 	public SearchResult searchByRobotsBlockPercentage(double min, double max, int limit, int offset) {
-//		DBObject query = new BasicDBObject(CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE,
-//				new BasicDBObject("$gte", min).append("$lt", max));
-//		return search(null, query, limit, offset);
-		return null;
-	}
+		return searchByRange(min, max, limit, offset, CassandraProperties.FIELD_KNOWN_HOSTS_ROBOTS_BLOCK_PERCENTAGE);
+	}	
+	
 
 	@Override
 	public SearchResult searchByRedirectPercentage(double min, double max, int limit, int offset) {
-//		DBObject query = new BasicDBObject(CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE,
-//				new BasicDBObject("$gte", min).append("$lt", max));
-//		return search(null, query, limit, offset);
-		return null;
+		return searchByRange(min, max, limit, offset, CassandraProperties.FIELD_KNOWN_HOSTS_REDIRECT_PERCENTAGE);
 	}
 	
 	private SearchResult search(String queryString, Iterator<Row> cursor, int limit, int offset) {
@@ -179,7 +203,7 @@ public class CassandraKnownHostList implements KnownHostList {
 		List<SearchResultItem> hostnames = new ArrayList<SearchResultItem>();
 		
 		// Right now the number of URLs per host are packed into the 'description field' - not ideal!
-		// TODO we need to find a better way to handle 'search result metadata' 
+		// TODO we need to find a better way to handle 'search result metadata'
 		while (cursor.hasNext()) {
 			KnownHost host = new CassandraKnownHost(cursor.next());
 			hostnames.add(new SearchResultItem(host.getHostname(), Long.toString(host.getCrawledURLs())));

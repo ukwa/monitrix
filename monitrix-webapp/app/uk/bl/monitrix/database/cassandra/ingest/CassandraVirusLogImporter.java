@@ -2,6 +2,7 @@ package uk.bl.monitrix.database.cassandra.ingest;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.datastax.driver.core.PreparedStatement;
@@ -29,9 +30,14 @@ public class CassandraVirusLogImporter extends CassandraVirusLog {
 	}
 
 	public void recordOccurence(String virusName, String hostname) {		
+		Map<String, Integer> occurrences;
+		
 		// In this case we know it's a safe cast
 		VirusRecord record = (VirusRecord) getRecordForVirus(virusName);
-		Map<String, Integer> occurrences = record.getOccurences();
+		if (record == null)
+			occurrences = new HashMap<String, Integer>();
+		else
+			occurrences = record.getOccurences();
 		
 		Integer count = occurrences.get(hostname);
 		if (count == null) {

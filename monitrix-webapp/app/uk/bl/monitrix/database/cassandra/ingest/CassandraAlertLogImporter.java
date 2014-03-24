@@ -25,7 +25,7 @@ class CassandraAlertLogImporter extends CassandraAlertLog {
 			    CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + ", " +
 			    CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + ", " + 
 				CassandraProperties.FIELD_ALERT_LOG_DESCRIPTION + ") " +
-				"VALUES (?, ?, ?, ?, ?);");
+				"VALUES (?, ?, ?, ?);");
 	}
 	
 	public void insert(DefaultAlert alert) {

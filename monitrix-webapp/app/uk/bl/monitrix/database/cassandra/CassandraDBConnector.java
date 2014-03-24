@@ -190,7 +190,7 @@ public class CassandraDBConnector implements DBConnector {
 					"offending_host varchar, " +
 					"alert_type varchar, " +
 					"alert_description varchar, " +
-					"PRIMARY KEY (crawl_id, timestamp) );");
+					"PRIMARY KEY (offending_host, timestamp) );");
 		
 		session.execute(
 				"CREATE TABLE crawl_uris.virus_log(" +
@@ -215,9 +215,6 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute("CREATE INDEX avg_retry_rate on crawl_uris.known_hosts(avg_retry_rate);");
 		session.execute("CREATE INDEX robots_block_percentage on crawl_uris.known_hosts(robots_block_percentage);");
 		session.execute("CREATE INDEX redirect_percentage on crawl_uris.known_hosts(redirect_percentage);");
-		
-		// Alert log indexes
-		session.execute("CREATE INDEX offending_host on crawl_uris.alert_log(offending_host);");
 	}
 	
 	public void dropSchema() {

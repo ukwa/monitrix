@@ -1,39 +1,46 @@
 package uk.bl.monitrix.database.cassandra.model;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.datastax.driver.core.Row;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.VirusRecord;
 
 public class CassandraVirusRecord implements VirusRecord {
 	
-	private Row row;
+	private String virusName;
 	
+	private Map<String, Integer> occurrences;
+	
+	@SuppressWarnings("unchecked")
 	public CassandraVirusRecord(Row row) {
-		this.row = row;
+		this.virusName = row.getString(CassandraProperties.FIELD_VIRUS_LOG_NAME);
+		
+		try {
+			this.occurrences = new ObjectMapper().readValue(row.getString(CassandraProperties.FIELD_VIRUS_LOG_OCCURENCES), HashMap.class);
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
 	public String getName() {
-		return row.getString(CassandraProperties.FIELD_VIRUS_LOG_NAME);
+		return virusName;
 	}
 	
 	@Override
 	public Map<String, Integer> getOccurences() {
-		Map<String, Integer> occurences = row.getMap(CassandraProperties.FIELD_VIRUS_LOG_OCCURENCES, String.class, Integer.class);
-		if (occurences == null)
-			return new HashMap<String, Integer>();
-		
-		Map<String, Integer> unescaped = new HashMap<String, Integer>();
-		for (Entry<String, Integer> entry : ((Map<String, Integer>) occurences).entrySet()) {
-			unescaped.put(entry.getKey().replace("@@@", "."), entry.getValue());			
-		}
-		
-		return unescaped;
+		return occurrences;
 	}
 	
 }

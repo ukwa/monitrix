@@ -195,7 +195,7 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute(
 				"CREATE TABLE crawl_uris.virus_log(" +
 					"virus_name varchar PRIMARY KEY, " +
-					"occurences bigint )" +
+					"occurences varchar )" +
 				"WITH COMPACT STORAGE;");
 		
 		// Crawl log indexes

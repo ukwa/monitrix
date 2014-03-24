@@ -85,6 +85,7 @@ public class CassandraProperties {
 	
 	/** Database field keys (Known TLDs) **/
 	public static final String FIELD_KNOWN_TLDS_TLD = "tld";
+	public static final String FIELD_KNOWN_TLDS_COUNT = "count";
 		
 	/** Database field keys (Crawl Stats collection) **/
 	public static final String FIELD_CRAWL_STATS_TIMESTAMP = "stat_ts";

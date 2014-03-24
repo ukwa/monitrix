@@ -224,8 +224,8 @@ public class CassandraKnownHostList implements KnownHostList {
 	
 	@Override
 	public long countForTopLevelDomain(String tld) {
-		ResultSet results = session.execute("SELECT crawled_urls FROM crawl_uris.known_tlds WHERE tld='"+tld+"';");
-		return results.one().getLong("crawled_urls");
+		ResultSet results = session.execute("SELECT * FROM " +  TABLE_TLDS + " WHERE " + CassandraProperties.FIELD_KNOWN_TLDS_TLD + "='" + tld + "';");
+		return results.one().getLong(CassandraProperties.FIELD_KNOWN_TLDS_COUNT);
 	}
 
 	// FIXME Rounder

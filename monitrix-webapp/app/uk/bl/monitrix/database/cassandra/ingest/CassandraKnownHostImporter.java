@@ -27,6 +27,8 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 	// private static final String ALERT_MSG_TXT_TO_NONTEXT_RATIO = "The host %s serves a suspiciously high ratio of text vs. non-text resources";
 	
 	//  private CassandraAlertLogImporter alertLog;
+	
+	private CassandraKnownTLDImporter knownTLDs;
 
 	private PreparedStatement statementHosts;
 	
@@ -36,6 +38,8 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		super(db);
 		
 		// this.alertLog = alertLog;
+		
+		this.knownTLDs = new CassandraKnownTLDImporter(db);
 		
 		this.statementHosts = session.prepare(
 				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_KNOWN_HOSTS + " (" +
@@ -81,6 +85,8 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 		
 		BoundStatement boundTLDStatement = new BoundStatement(statementTLD);
 		session.execute(boundTLDStatement.bind(tld));
+		
+		knownTLDs.incrementTLDCount(tld);
 		
 		return (CassandraKnownHost) getKnownHost(hostname);
 	}
@@ -197,6 +203,8 @@ class CassandraKnownHostImporter extends CassandraKnownHostList {
 			knownHost.setTextToNoneTextRatio(HostAnalytics.computeTextToNonTextRatio(knownHost));			
 			knownHost.save(session);
 		}
+		
+		knownTLDs.commit();
 	}
 
 }

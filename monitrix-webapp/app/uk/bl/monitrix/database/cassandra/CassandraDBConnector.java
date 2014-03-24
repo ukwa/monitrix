@@ -171,7 +171,8 @@ public class CassandraDBConnector implements DBConnector {
 		
 		session.execute(
 				"CREATE TABLE crawl_uris.known_tlds(" +
-					"tld varchar PRIMARY KEY);");
+					"tld varchar PRIMARY KEY," + 
+					"count bigint);");
 
 		session.execute(
 				"CREATE TABLE crawl_uris.crawl_stats(" + 

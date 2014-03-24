@@ -1,22 +1,21 @@
 package uk.bl.monitrix.database.cassandra.ingest;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Map;
 
-
-
 import com.datastax.driver.core.PreparedStatement;
-// import com.datastax.driver.core.BoundStatement;
-// import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Session;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.database.cassandra.model.CassandraVirusLog;
 import uk.bl.monitrix.model.VirusRecord;
 
 public class CassandraVirusLogImporter extends CassandraVirusLog {
-	
-	private static final String TABLE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_VIRUS_LOG;
 
 	private PreparedStatement statement = null;
 
@@ -32,23 +31,28 @@ public class CassandraVirusLogImporter extends CassandraVirusLog {
 	public void recordOccurence(String virusName, String hostname) {		
 		// In this case we know it's a safe cast
 		VirusRecord record = (VirusRecord) getRecordForVirus(virusName);
+		Map<String, Integer> occurrences = record.getOccurences();
 		
-		Map<String, Integer> occurences = null;
-		if (record == null) {
-			occurences = new HashMap<String,Integer>();
+		Integer count = occurrences.get(hostname);
+		if (count == null) {
+			count = 1;
 		} else {
-			occurences = record.getOccurences();
+			count = count + 1;
 		}
+		occurrences.put(hostname, count);
 		
-		if (occurences.containsKey(hostname)) {
-			int count = occurences.get(hostname);
-			occurences.put(hostname, count + 1);
-		} else {
-			occurences.put(hostname, 1);
+		try {
+			BoundStatement boundStatement = new BoundStatement(statement);
+			session.execute(boundStatement.bind(virusName, toJson(occurrences)));
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		// BoundStatement boundStatement = new BoundStatement(statement);
-		// session.execute(boundStatement.bind(virusName, occurences));		
+	}
+	
+	private String toJson(Map<String, Integer> occurrences) throws JsonGenerationException, JsonMappingException, IOException {
+		StringWriter writer = new StringWriter();
+		new ObjectMapper().writeValue(writer, occurrences);
+		return writer.toString().replace("'", "''");
 	}
 
 }

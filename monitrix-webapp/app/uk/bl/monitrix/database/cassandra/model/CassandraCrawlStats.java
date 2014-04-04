@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -56,8 +57,27 @@ public class CassandraCrawlStats implements CrawlStats {
 		        " IN ('" + StringUtils.join(logs, ",") + "') ORDER BY " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";")
 				.iterator();
 		
+		/*
+		return new Iterator<CrawlStatsUnit>() {
+			@Override
+			public boolean hasNext() {
+				return cursor.hasNext();
+			}
+
+			@Override
+			public CrawlStatsUnit next() {
+				return new CassandraCrawlStatsUnit(cursor.next());
+			}
+
+			@Override
+			public void remove() {
+				cursor.remove();	
+			}
+		};
+		*/
+		
 		// This re-implementation of Scala's .groupBy function is also quite sad :-(
-		Map<Long, List<CrawlStatsUnit>> groupedByTimestamp = new HashMap<Long, List<CrawlStatsUnit>>();
+		Map<Long, List<CrawlStatsUnit>> groupedByTimestamp = new TreeMap<Long, List<CrawlStatsUnit>>();
 		while (cursor.hasNext()) {
 			CrawlStatsUnit u = new CassandraCrawlStatsUnit(cursor.next());
 			List<CrawlStatsUnit> unitsFromIndividualCrawls = groupedByTimestamp.get(u.getTimestamp());

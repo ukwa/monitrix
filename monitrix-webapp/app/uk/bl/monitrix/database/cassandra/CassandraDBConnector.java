@@ -89,9 +89,9 @@ public class CassandraDBConnector implements DBConnector {
 		
 		this.ingestSchedule = new CassandraIngestSchedule(session);
 		this.crawlLog = new CassandraCrawlLog(session);
-		this.crawlStats = new CassandraCrawlStats(session, this.ingestSchedule);
+		this.crawlStats = new CassandraCrawlStats(session, ingestSchedule);
 		this.knownHosts = new CassandraKnownHostList(session);
-		this.alertLog = new CassandraAlertLog(session);
+		this.alertLog = new CassandraAlertLog(session, crawlLog);
 		this.virusLog = new CassandraVirusLog(session);
 	}
 	
@@ -187,10 +187,11 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute(
 				"CREATE TABLE crawl_uris.alert_log(" +
 					"timestamp bigint, " +
+					"timestamp_hour bigint, " +
 					"offending_host varchar, " +
 					"alert_type varchar, " +
 					"alert_description varchar, " +
-					"PRIMARY KEY (offending_host, timestamp) );");
+					"PRIMARY KEY (offending_host, timestamp_hour, timestamp) );");
 		
 		session.execute(
 				"CREATE TABLE crawl_uris.virus_log(" +
@@ -215,6 +216,9 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute("CREATE INDEX avg_retry_rate on crawl_uris.known_hosts(avg_retry_rate);");
 		session.execute("CREATE INDEX robots_block_percentage on crawl_uris.known_hosts(robots_block_percentage);");
 		session.execute("CREATE INDEX redirect_percentage on crawl_uris.known_hosts(redirect_percentage);");
+		
+		// Alert log indexes
+		session.execute("CREATE INDEX alert_type on crawl_uris.alert_log(alert_type);");
 	}
 	
 	public void dropSchema() {

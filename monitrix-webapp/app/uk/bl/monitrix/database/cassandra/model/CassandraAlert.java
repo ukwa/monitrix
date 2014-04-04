@@ -19,7 +19,7 @@ public class CassandraAlert implements Alert {
 	
 	@Override
 	public long getTimestamp() {
-		return row.getDate(CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP).getTime();
+		return row.getLong(CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP);
 	}
 	
 	@Override

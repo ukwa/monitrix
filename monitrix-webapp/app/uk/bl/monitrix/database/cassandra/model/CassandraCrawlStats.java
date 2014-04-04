@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -42,36 +43,83 @@ public class CassandraCrawlStats implements CrawlStats {
 	
 	@Override
 	public Iterator<CrawlStatsUnit> getCrawlStats() {
-		Logger.info("Getting crawl stats");
+		Logger.info("Getting crawl stats");		
 		
 		// This is ridiculous
 		List<String> logs = new ArrayList<String>();
 		for (IngestedLog l : ingestSchedule.getLogs()) {
 			logs.add(l.getId());
 		}
-
-		// TODO conflate stats from different crawls
+		
 		final Iterator<Row> cursor =
 				session.execute("SELECT * FROM " + TABLE_STATS + " WHERE " + CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID +
 		        " IN ('" + StringUtils.join(logs, ",") + "') ORDER BY " + CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ";")
 				.iterator();
 		
-		return new Iterator<CrawlStatsUnit>() {
-			@Override
-			public boolean hasNext() {
-				return cursor.hasNext();
-			}
+		// This re-implementation of Scala's .groupBy function is also quite sad :-(
+		Map<Long, List<CrawlStatsUnit>> groupedByTimestamp = new HashMap<Long, List<CrawlStatsUnit>>();
+		while (cursor.hasNext()) {
+			CrawlStatsUnit u = new CassandraCrawlStatsUnit(cursor.next());
+			List<CrawlStatsUnit> unitsFromIndividualCrawls = groupedByTimestamp.get(u.getTimestamp());
+			if (unitsFromIndividualCrawls == null)
+				unitsFromIndividualCrawls = new ArrayList<CrawlStatsUnit>();
+			
+			unitsFromIndividualCrawls.add(u);
+			groupedByTimestamp.put(u.getTimestamp(), unitsFromIndividualCrawls);
+		}
+		
+		List<CrawlStatsUnit> conflated = new ArrayList<CrawlStatsUnit>();
+		for (final Entry<Long, List<CrawlStatsUnit>> entry : groupedByTimestamp.entrySet()) {
+			final List<CrawlStatsUnit> units = entry.getValue();
+			conflated.add(new CrawlStatsUnit() {
+				@Override
+				public long getTimestamp() {
+					return entry.getKey();
+				}
+				
+				@Override
+				public long getNumberOfURLsCrawled() {
+					long urls = 0;
 
-			@Override
-			public CrawlStatsUnit next() {
-				return new CassandraCrawlStatsUnit(cursor.next());
-			}
+					for (CrawlStatsUnit u: units)
+						urls += u.getNumberOfURLsCrawled();
+					
+					return urls;
+				}
+				
+				@Override
+				public long getNumberOfNewHostsCrawled() {
+					long hosts = 0;
 
-			@Override
-			public void remove() {
-				cursor.remove();	
-			}
-		};
+					for (CrawlStatsUnit u: units)
+						hosts += u.getNumberOfNewHostsCrawled();
+					
+					return hosts;
+				}
+				
+				@Override
+				public long getDownloadVolume() {
+					long volume = 0;
+
+					for (CrawlStatsUnit u: units)
+						volume += u.getDownloadVolume();
+					
+					return volume;
+				}
+				
+				@Override
+				public long countCompletedHosts() {
+					long hosts = 0;
+
+					for (CrawlStatsUnit u: units)
+						hosts += u.countCompletedHosts();
+					
+					return hosts;
+				}
+			});
+		}
+		
+		return conflated.iterator();
 	}
 
 	@Override

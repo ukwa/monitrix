@@ -78,10 +78,8 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			fetch_ts.getTime(),
 			l.getSHA1Hash(),
 			l.getAnnotations(),
-			"192.0.0.1",
+			l.getAnnotations(),
 			l.toString()));
-
-		// FIXME Also increment url-level counters?
 	}
 	
 }

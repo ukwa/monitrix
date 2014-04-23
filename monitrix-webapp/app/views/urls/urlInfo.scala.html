@@ -15,7 +15,7 @@
    
     <table>
       <tr>
-        @defining(uk.bl.monitrix.Global.getBackend.getIngestSchedule.getLog(entry.getLogId)) { log =>
+        @defining(uk.bl.monitrix.Global.getBackend.getIngestSchedule.getLogForPath(entry.getLogId)) { log =>
           <td class="monitrix-hostinfo-label">Crawler ID</td>
           <td>@log.getCrawlerId</td>
         }

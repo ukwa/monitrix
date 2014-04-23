@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
@@ -20,6 +21,9 @@ public class URLs extends AbstractController {
 	
 	public static Result getURLInfo(String url) {
 		List<CrawlLogEntry> entries = crawlLog.getEntriesForURL(url);
+		for (CrawlLogEntry e : entries) {
+			Logger.info("Crawl ID: " + e.getLogId());
+		}
 		return ok(views.html.urls.urlInfo.render(entries));
 	}
 	

@@ -136,15 +136,9 @@ public class CassandraCrawlLog extends CrawlLog {
 	}
 	
 	@Override
-	public List<CrawlLogEntry> getEntriesForURL(String url) {
-		Logger.info("Looking up " + url);
-		
+	public List<CrawlLogEntry> getEntriesForURL(String url) {		
 		ResultSet results = session.execute("SELECT * FROM " + TABLE_CRAWL_LOG +
 		        " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_URL + " = '" + url + "';");
-		
-		Logger.info("Got " + results); 
-		
-		// Map from URI Table Results to Crawl Log Results		
 		return toLogEntries(results);
 	}
 	

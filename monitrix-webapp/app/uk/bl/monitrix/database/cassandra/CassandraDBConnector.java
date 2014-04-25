@@ -135,6 +135,7 @@ public class CassandraDBConnector implements DBConnector {
 					"hash varchar, " + 
 					"annotations varchar, " + 
 					"ip_address varchar, " + 
+					"compressability double, " + 
 					"line varchar, " + 
 					"PRIMARY KEY (hash, timestamp) ); ");
 		
@@ -206,6 +207,7 @@ public class CassandraDBConnector implements DBConnector {
 		session.execute("CREATE INDEX uri on crawl_uris.crawl_log(uri);");
 		session.execute("CREATE INDEX host on crawl_uris.crawl_log(host);");
 		session.execute("CREATE INDEX annotations on crawl_uris.crawl_log(annotations);");
+		session.execute("CREATE INDEX compressability on crawl_uris.crawl_log(compressability);");
 		
 		// Ingest schedule indexes
 		session.execute("CREATE INDEX log_path on crawl_uris.ingest_schedule(log_path);");

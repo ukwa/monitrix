@@ -111,6 +111,14 @@ public abstract class CrawlLog {
 	public abstract SearchResult searchByAnnotation(String annotation, int limit, int offset);
 	
 	/**
+	 * Returns the number of log entries that fall within a specified compressability bracket
+	 * @param from compressability value, lower bound
+	 * @param to compressability value, upper bound
+	 * @return the number of log entries in the compressability bracket
+	 */
+	public abstract long countByCompressability(double from, double to);
+	
+	/**
 	 * Returns the log entries that fall within a specified compressability bracket
 	 * @param from compressability value, lower bound
 	 * @param to compressability value, upper bound

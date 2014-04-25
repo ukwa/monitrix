@@ -127,6 +127,16 @@ public class CassandraCrawlLog extends CrawlLog {
 		}
 		return collection;
 	}
+	
+	private List<String> listLogPaths() {
+		ResultSet results = session.execute("SELECT " + CassandraProperties.FIELD_INGEST_CRAWLER_PATH + " FROM " + TABLE_INGEST_SCHEDULE + ";");
+		List<String> collection = new ArrayList<String>();
+		Iterator<Row> rows = results.iterator();
+		while (rows.hasNext()) {
+			collection.add(rows.next().getString(CassandraProperties.FIELD_INGEST_CRAWLER_PATH));
+		}
+		return collection;
+	}
 
 	@Override
 	public long countEntriesForLog(String logId) {
@@ -149,27 +159,6 @@ public class CassandraCrawlLog extends CrawlLog {
 		}
 		return entries;
 	}
-	
-	/*
-	private ResultSet getEntriesForTimestamp(Date timestamp) {
-		Date coarse_ts = this.getCoarseTimestamp(timestamp);
-		ResultSet results = session.execute("SELECT * FROM crawl_uris.log " +
-		        "WHERE coarse_ts = '"+coarse_ts.getTime()+"' AND log_ts = '"+timestamp.getTime()+"' ;");
-		return results;
-	}
-	
-	
-	private CrawlLogEntry getLogEntryForUriResult(String uri, Row ur) {
-		ResultSet results = this.getEntriesForTimestamp(ur.getDate("log_ts"));
-		Iterator<Row> rows = results.iterator();
-		while( rows.hasNext() ) {
-			Row r = rows.next();
-			if(uri.equals(r.getString("uri")))
-				return new CassandraCrawlLogEntry(r);
-		}
-		return null;
-	}
-	*/
 
 	// TODO eliminate code duplication
 	@Override
@@ -229,23 +218,63 @@ public class CassandraCrawlLog extends CrawlLog {
 		Logger.debug("Searching by compressability");
 		long startTime = System.currentTimeMillis();
 		
-		//DBObject query = new BasicDBObject(CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY, 
-		//		new BasicDBObject("$gte", from).append("$lt", to));
-		
-		long total = 0; //collection.count(query);
-		
-		List<SearchResultItem> urls = new ArrayList<SearchResultItem>();
-		
-//		if (limit > 0) {
-//			DBCursor cursor = collection.find(query).skip(offset).limit(limit);
-//			while (cursor.hasNext()) {
-//				CrawlLogEntry entry = new CassandraCrawlLogEntry(cursor.next());
-//				urls.add(new SearchResultItem(entry.getURL(), entry.toString()));
-//			}
-//		}
-//		
+		List<SearchResultItem> concatenated = new ArrayList<SearchResultItem>();	
+		Long total = 0l;
+		for (String logPath : listLogPaths()) {
+			// Count total
+			String count = "SELECT COUNT(*) FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY + " > " + from +
+					" AND " + CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY + " < " + to + " AND " +
+					CassandraProperties.FIELD_CRAWL_LOG_LOG_ID + " = '" + logPath + "' ALLOW FILTERING ;";
+
+			ResultSet totalResults = session.execute(count);
+			total += totalResults.one().getLong("count");
+			
+			String query = "SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY + " > " + from +
+					" AND " + CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY + " < " + to + " AND " +
+					CassandraProperties.FIELD_CRAWL_LOG_LOG_ID + " = '" + logPath + "'";
+			
+			if (limit > 0 && offset > 0) {
+				query += " LIMIT " + (limit + offset) + " ALLOW FILTERING ;";
+			} else {
+				query += " ALLOW FILTERING ;";
+			}
+
+			Iterator<Row> results = session.execute(query).iterator();
+			for (int i=0; i<offset; i++) {
+				if (results.hasNext())
+					results.next();
+			}
+			
+			while (results.hasNext()) {
+				CrawlLogEntry entry = new CassandraCrawlLogEntry(results.next());
+				concatenated.add(new SearchResultItem(entry.getURL(), entry.toString()));
+			}
+		}
+
 		Logger.debug("Done - took " + (System.currentTimeMillis() - startTime));
-		return new SearchResult(null, total, urls, limit, offset, System.currentTimeMillis() - startTime);
+		return new SearchResult(null, total, concatenated, limit, offset, System.currentTimeMillis() - startTime);
+	}
+	
+	@Override
+	public long countByCompressability(double from, double to) {
+		Logger.debug("Counting by compressability");
+		long startTime = System.currentTimeMillis();
+		
+		long total = 0l;
+		for (String logPath : listLogPaths()) {
+			// Count total
+			String count = "SELECT COUNT(*) FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY + " > " + from +
+					" AND " + CassandraProperties.FIELD_CRAWL_LOG_COMPRESSABILITY + " < " + to + " AND " +
+					CassandraProperties.FIELD_CRAWL_LOG_LOG_ID + " = '" + logPath + "' ALLOW FILTERING ;";
+			
+			Logger.debug(count);
+			
+			ResultSet totalResults = session.execute(count);
+			total += totalResults.one().getLong("count");
+		}
+
+		Logger.debug("Done. Got " + total + " results - took " + (System.currentTimeMillis() - startTime));
+		return total;
 	}
 	
 	@Override

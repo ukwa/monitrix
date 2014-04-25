@@ -54,6 +54,7 @@ public class CassandraProperties {
 	public static final String FIELD_CRAWL_LOG_ANNOTATIONS_TOKENIZED = "annotations_tokenized";
 	public static final String FIELD_CRAWL_LOG_IP = "ip_address";
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
+	public static final String FIELD_CRAWL_LOG_COMPRESSABILITY = "compressability";
 	
     /** Database field keys (Ingest schedule) **/
 	public static final String FIELD_INGEST_CRAWLER_PATH = "log_path";

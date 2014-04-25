@@ -35,7 +35,7 @@ public class URLs extends AbstractController {
 		for (int i=0; i<intervals; i++) {
 			double from = i * increment;
 			double to = from + increment;
-			histogram.add(new Point2D.Double(from, crawlLog.searchByCompressability(from, to, 0, 0).totalResults()));
+			histogram.add(new Point2D.Double(from, crawlLog.countByCompressability(from, to)));
 		}
 		
 		return ok(Json.toJson(histogram));

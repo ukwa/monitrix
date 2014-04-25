@@ -166,6 +166,11 @@ public class MongoCrawlLog extends CrawlLog {
 	}
 	
 	@Override
+	public long countByCompressability(double from, double to) {
+		return searchByCompressability(from, to, 0, 0).totalResults();
+	}
+	
+	@Override
 	public long countEntriesForHost(String hostname) {
 		return collection.count(new BasicDBObject(MongoProperties.FIELD_CRAWL_LOG_HOST, hostname));
 	}

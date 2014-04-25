@@ -29,8 +29,8 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 				"INSERT INTO crawl_uris.crawl_log (" +
 			    "log_id, timestamp, long_timestamp, coarse_timestamp, status_code, downloaded_bytes, uri, host, " + 
 			    "discovery_path, referer, content_type, worker_thread, fetch_ts, hash, annotations, ip_address, " + 
-			    "line) " +
-			    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");	
+			    "compressability, line) " +
+			    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");	
 	}
 	
 	public void updateCrawlInfo(String crawl_id, long timeOfFirstLogEntryInPatch, long timeOfLastLogEntryInPatch ) {
@@ -79,6 +79,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			l.getSHA1Hash(),
 			l.getAnnotations(),
 			l.getAnnotations(),
+			l.getCompressability(),
 			l.toString()));
 	}
 	

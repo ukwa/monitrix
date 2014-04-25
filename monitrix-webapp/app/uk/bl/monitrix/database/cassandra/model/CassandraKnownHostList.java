@@ -148,41 +148,6 @@ public class CassandraKnownHostList implements KnownHostList {
 	@Override
 	public SearchResult searchByAverageRetries(int min, int max, int limit, int offset) {
 		return searchByRange(min, max, limit, offset, CassandraProperties.FIELD_KNOWN_HOSTS_AVG_RETRY_RATE);
-		
-		/* Attempting a clever inline iterator:
-		Iterator<Row> multirows = new Iterator<Row>() {
-			
-			private Iterator<Row> cursor = null;
-			double lo = rounder(min);
-			double hi = rounder(max) - rounder_step; // Emulate less-than-or-equal-to.
-			double cur = lo - rounder_step;
-			
-			@Override
-			public boolean hasNext() {
-				while( cursor == null || (cur < hi && !cursor.hasNext())) {
-					cur = cur + rounder_step;
-					String cql = "SELECT * from crawl_uris.known_hosts where avg_retry_rate = "+cur+";";
-					ResultSet results  = session.execute(cql);
-					cursor = results.iterator();
-					if( cursor.hasNext() ) {
-				        Logger.info("CQL: "+cql);
-					}
-				}
-				return cursor.hasNext();
-			}
-
-			@Override
-			public Row next() {
-				return cursor.next();
-			}
-
-			@Override
-			public void remove() {
-				// No-op
-			}
-		};
-		return search(null, multirows, limit, offset);
-		*/
 	}
 	
 	@Override

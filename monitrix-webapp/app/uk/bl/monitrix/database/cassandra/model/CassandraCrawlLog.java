@@ -27,8 +27,9 @@ public class CassandraCrawlLog extends CrawlLog {
 	
 	protected Session session;
 	
-	private final String TABLE_CRAWL_LOG = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_LOG;
-	private final String TABLE_INGEST_SCHEDULE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
+	protected final String TABLE_CRAWL_LOG = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_LOG;
+	protected final String TABLE_COMPRESSABILITY_HISTOGRAM = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_COMPRESSABILITY_HISTOGRAM;
+	protected final String TABLE_INGEST_SCHEDULE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
 	
 	public CassandraCrawlLog(Session session) {
 		this.session = session;
@@ -259,7 +260,18 @@ public class CassandraCrawlLog extends CrawlLog {
 	public long countByCompressability(double from, double to) {
 		Logger.debug("Counting by compressability");
 		long startTime = System.currentTimeMillis();
+
+		long totalCount = 0l;
+		double currentBucket = ((double) Math.round(from * 1000)) / 1000;
+		while (currentBucket < to) {
+			String query = "SELECT * FROM " + TABLE_COMPRESSABILITY_HISTOGRAM + " WHERE " + 
+					CassandraProperties.FIELD_COMPRESSABILITY_BUCKET + " = " + currentBucket;
+			
+			Row r = session.execute(query).one();
+			totalCount += r.getLong(CassandraProperties.FIELD_COMPRESSABILITY_COUNT);
+		}
 		
+		/*
 		long total = 0l;
 		for (String logPath : listLogPaths()) {
 			// Count total
@@ -272,9 +284,10 @@ public class CassandraCrawlLog extends CrawlLog {
 			ResultSet totalResults = session.execute(count);
 			total += totalResults.one().getLong("count");
 		}
+		*/
 
-		Logger.debug("Done. Got " + total + " results - took " + (System.currentTimeMillis() - startTime));
-		return total;
+		Logger.debug("Done. Got " + totalCount + " - took " + (System.currentTimeMillis() - startTime));
+		return totalCount;
 	}
 	
 	@Override

@@ -5,9 +5,11 @@ import java.util.HashMap;
 
 import play.Logger;
 
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Metadata;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
@@ -139,6 +141,8 @@ public class CassandraDBConnector implements DBConnector {
 					"line varchar, " + 
 					"PRIMARY KEY (hash, timestamp) ); ");
 		
+		buildCompressabilityHistogram();
+		
 		session.execute(
 				"CREATE TABLE crawl_uris.ingest_schedule(" + 
 					"crawl_id varchar PRIMARY KEY, " +
@@ -221,6 +225,25 @@ public class CassandraDBConnector implements DBConnector {
 		
 		// Alert log indexes
 		session.execute("CREATE INDEX alert_type on crawl_uris.alert_log(alert_type);");
+	}
+	
+	private void buildCompressabilityHistogram() {
+		session.execute(
+				"CREATE TABLE crawl_uris.compressability_histogram(" +
+				    "bucket double PRIMARY KEY," +
+					"url_count bigint) " +
+				"WITH COMPACT STORAGE;");
+		
+		PreparedStatement insertHistogramBucket = session.prepare(
+				"INSERT INTO crawl_uris.compressability_histogram (" +
+			        "bucket, url_count) VALUES (?, ?);");
+		
+		double bucket = 0.0;
+		while (bucket < 2) {
+			BoundStatement boundStatement = new BoundStatement(insertHistogramBucket);
+			session.execute(boundStatement.bind(0, 0));
+			bucket += 0.001;
+		}
 	}
 	
 	public void dropSchema() {

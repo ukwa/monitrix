@@ -17,8 +17,6 @@ import uk.bl.monitrix.heritrix.LogFileEntry;
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 class CassandraCrawlLogImporter extends CassandraCrawlLog {
-	
-	private static final String TABLE_INGEST_SCHEDULE = CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_INGEST_SCHEDULE;
 
 	private PreparedStatement crawlLogStatement = null;
 	
@@ -30,7 +28,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			    "log_id, timestamp, long_timestamp, coarse_timestamp, status_code, downloaded_bytes, uri, host, " + 
 			    "discovery_path, referer, content_type, worker_thread, fetch_ts, hash, annotations, ip_address, " + 
 			    "compressability, line) " +
-			    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");	
+			    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 	}
 	
 	public void updateCrawlInfo(String crawl_id, long timeOfFirstLogEntryInPatch, long timeOfLastLogEntryInPatch ) {
@@ -81,6 +79,14 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			l.getAnnotations(),
 			l.getCompressability(),
 			l.toString()));
+		
+		// Update URL compressability histogram
+		double compressabilityBucket = ((double) Math.round(l.getCompressability() * 1000)) / 1000;
+		String query = "SELECT * FROM " + TABLE_COMPRESSABILITY_HISTOGRAM + " WHERE " + CassandraProperties.FIELD_COMPRESSABILITY_BUCKET + "=" + compressabilityBucket  + ";";
+		Row r = session.execute(query).one();
+		long count = r.getLong(CassandraProperties.FIELD_COMPRESSABILITY_COUNT);
+		session.execute("UPDATE " + TABLE_COMPRESSABILITY_HISTOGRAM + " SET " + CassandraProperties.FIELD_COMPRESSABILITY_COUNT + "=" + (count + 1) + 
+				" WHERE " + CassandraProperties.FIELD_COMPRESSABILITY_BUCKET + "=" + compressabilityBucket + ";");
 	}
 	
 }

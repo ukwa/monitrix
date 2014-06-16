@@ -20,6 +20,7 @@ public class CassandraProperties {
 	/** Database collection names **/
 	public static final String COLLECTION_ALERT_LOG = "alert_log";
 	public static final String COLLECTION_CRAWL_LOG = "crawl_log";
+	public static final String COLLECTION_COMPRESSABILITY_HISTOGRAM = "compressability_histogram";
 	public static final String COLLECTION_INGEST_SCHEDULE = "ingest_schedule";
 	public static final String COLLECTION_KNOWN_HOSTS = "known_hosts";
 	public static final String COLLECTION_KNOWN_TLDS = "known_tlds";
@@ -55,6 +56,9 @@ public class CassandraProperties {
 	public static final String FIELD_CRAWL_LOG_IP = "ip_address";
 	public static final String FIELD_CRAWL_LOG_LINE = "line";
 	public static final String FIELD_CRAWL_LOG_COMPRESSABILITY = "compressability";
+	
+	public static final String FIELD_COMPRESSABILITY_BUCKET = "bucket";
+	public static final String FIELD_COMPRESSABILITY_COUNT = "url_count";
 	
     /** Database field keys (Ingest schedule) **/
 	public static final String FIELD_INGEST_CRAWLER_PATH = "log_path";

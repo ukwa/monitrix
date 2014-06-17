@@ -1,6 +1,8 @@
 package uk.bl.monitrix.database.cassandra.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +26,19 @@ import uk.bl.monitrix.model.SearchResultItem;
  *
  */
 public class CassandraCrawlLog extends CrawlLog {
+	
+	public class Tuple {
+		
+		Tuple(int _1, int _2) {
+			this._1 = _1;
+			this._2 = _2;
+		}
+	
+		public int _1;
+		
+		public int _2;
+		
+	}
 	
 	protected Session session;
 	
@@ -256,13 +271,33 @@ public class CassandraCrawlLog extends CrawlLog {
 		return new SearchResult(null, total, concatenated, limit, offset, System.currentTimeMillis() - startTime);
 	}
 	
+	public List<Tuple> getCompressabilityHistogram() {
+		Logger.debug("Retrieving entire compressability histogram");
+		String query = "SELECT * FROM " + TABLE_COMPRESSABILITY_HISTOGRAM + " LIMIT 2000 ;";
+		List<Row> result = session.execute(query).all();
+		
+		List<Tuple> tuples = new ArrayList<Tuple>(); 
+		for (Row r : result) {
+			tuples.add(new Tuple(r.getInt(CassandraProperties.FIELD_COMPRESSABILITY_BUCKET), (int) r.getLong(CassandraProperties.FIELD_COMPRESSABILITY_COUNT)));
+		}
+		
+		Collections.sort(tuples, new Comparator<Tuple>() {
+			@Override
+			public int compare(Tuple o1, Tuple o2) {
+				return o1._1 - o2._1;
+			}
+		});
+ 		
+		return tuples;		
+	}
+	
 	@Override
 	public long countByCompressability(double from, double to) {
 		Logger.debug("Counting by compressability");
 		long startTime = System.currentTimeMillis();
 
 		long totalCount = 0l;
-		double currentBucket = ((double) Math.round(from * 1000)) / 1000;
+		int currentBucket = (int) Math.round(from * 1000);
 		while (currentBucket < to) {
 			String query = "SELECT * FROM " + TABLE_COMPRESSABILITY_HISTOGRAM + " WHERE " + 
 					CassandraProperties.FIELD_COMPRESSABILITY_BUCKET + " = " + currentBucket;

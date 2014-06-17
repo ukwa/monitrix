@@ -228,9 +228,11 @@ public class CassandraDBConnector implements DBConnector {
 	}
 	
 	private void buildCompressabilityHistogram() {
+		// Note: for some reason, doubles don't properly work as primary keys
+		// So we use an integer as bucket, where key = compressability * 1000
 		session.execute(
 				"CREATE TABLE crawl_uris.compressability_histogram(" +
-				    "bucket double PRIMARY KEY," +
+				    "bucket int PRIMARY KEY," +
 					"url_count bigint) " +
 				"WITH COMPACT STORAGE;");
 		
@@ -238,12 +240,14 @@ public class CassandraDBConnector implements DBConnector {
 				"INSERT INTO crawl_uris.compressability_histogram (" +
 			        "bucket, url_count) VALUES (?, ?);");
 		
-		double bucket = 0.0;
-		while (bucket < 2) {
+		int bucket = 0;
+		Logger.info("Initializing URL compressability histogram");
+		while (bucket < 2000) {
 			BoundStatement boundStatement = new BoundStatement(insertHistogramBucket);
-			session.execute(boundStatement.bind(0, 0));
-			bucket += 0.001;
+			session.execute(boundStatement.bind(bucket, 0l));
+			bucket += 1;
 		}
+		Logger.info("Done.");
 	}
 	
 	public void dropSchema() {

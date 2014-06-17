@@ -8,12 +8,13 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import uk.bl.monitrix.Global;
-import uk.bl.monitrix.model.CrawlLog;
+import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLog;
+import uk.bl.monitrix.database.cassandra.model.CassandraCrawlLog.Tuple;
 import uk.bl.monitrix.model.CrawlLogEntry;
 
 public class URLs extends AbstractController {
 	
-	private static CrawlLog crawlLog  = Global.getBackend().getCrawlLog();
+	private static CassandraCrawlLog crawlLog  = (CassandraCrawlLog) Global.getBackend().getCrawlLog();
 	
 	public static Result index() {
 		return ok(views.html.urls.index.render(crawlLog));
@@ -29,13 +30,27 @@ public class URLs extends AbstractController {
 	
 	public static Result getCompressability() {
 		int intervals = getQueryParamAsInt("intervals", 50);
-		double increment = 2.0 / intervals;
+		
+		// All counts, in native resolution
+		List<Tuple> tuples = crawlLog.getCompressabilityHistogram();
+		Logger.info("Got histogram from DB (" + tuples.size() + " buckets in original resolution)");
+		
+		// Now resample...
+		int ctr = 0;
+		int step = tuples.size() / intervals;
+		Logger.info("Resampling to " + intervals + " intervals (" + step  + " stepsize)");
 		
 		List<Point2D> histogram = new ArrayList<Point2D>();
-		for (int i=0; i<intervals; i++) {
-			double from = i * increment;
-			double to = from + increment;
-			histogram.add(new Point2D.Double(from, crawlLog.countByCompressability(from, to)));
+		while (ctr < tuples.size()) {
+			double bucketSec = ((double) ctr) / 1000;
+			int aggregated = 0;
+			for (int i=0; i<step; i++) {
+				if (ctr < tuples.size())
+					aggregated += tuples.get(ctr)._2;
+				ctr++;
+			}
+			Logger.info("Resampled value: " + bucketSec + " -> " + aggregated);
+			histogram.add(new Point2D.Double(bucketSec, aggregated));
 		}
 		
 		return ok(Json.toJson(histogram));

@@ -56,7 +56,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 		Date fetch_ts = l.getFetchTimestamp();
 		if (fetch_ts == null)
 			fetch_ts = log_ts;
-
+	
 		Date coarse_ts = getCoarseTimestamp(log_ts);
 		
 		BoundStatement boundStatement = new BoundStatement(crawlLogStatement);
@@ -81,7 +81,7 @@ class CassandraCrawlLogImporter extends CassandraCrawlLog {
 			l.toString()));
 		
 		// Update URL compressability histogram
-		double compressabilityBucket = ((double) Math.round(l.getCompressability() * 1000)) / 1000;
+		int compressabilityBucket = (int) Math.round(l.getCompressability() * 1000);
 		String query = "SELECT * FROM " + TABLE_COMPRESSABILITY_HISTOGRAM + " WHERE " + CassandraProperties.FIELD_COMPRESSABILITY_BUCKET + "=" + compressabilityBucket  + ";";
 		Row r = session.execute(query).one();
 		long count = r.getLong(CassandraProperties.FIELD_COMPRESSABILITY_COUNT);

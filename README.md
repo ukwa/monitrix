@@ -33,13 +33,4 @@ located in the /test folder of the project:
 * ``uk.bl.monitrix.util.IncrementalLogProcessor`` will load a log file into the database, and then continue
   to monitor that file (and incrementally sync the DB) until it is terminated forcefully. 
 
-## MongoDB Cheat Sheet
-
-* Use the ``mongod`` command to start MongoDB (hint: ``mongod --help``)
-* The MongoDB admin dashboard is at  [http://localhost:28017](http://localhost:28017). Make sure
-  you start MongoDB with the ``--rest`` option (when in dev mode) to enable full dashboard functionality. (Note: on my system
-  ``sudo mongod --dbpath /var/lib/mongodb --rest`` works fine.)
-* Use ``mongo monitrix --eval "db.dropDatabase()"`` to drop the monitrix DB (replacing 'monitrix' with your database
-  name, if needed.) 
-* MongoDB REST interface docs are [here](http://www.mongodb.org/display/DOCS/Http+Interface#HttpInterface-SimpleRESTInterface).
 

@@ -1,26 +1,26 @@
 @import tags.navbar
 
 @main("Monitrix - Database Not Connected") {
-   @navbar("")
+@navbar("")
 }{
-  <div class="row">
+<div class="row">
     <div class="span7">
-      <h1>Sorry.</h1>
-      <p>Monitrix could not connect to the database. I tried these settings:</p>
+        <h1>Database Not Connected</h1>
+        <p>Monitrix is currently not connect to the database. The following settings are used:</p>
     </div>
-  </div>
-  <div class="row">
+</div>
+<div class="row">
     <div class="span3">
-      <table class="table table-condensed">
-        <tr><td>DB host</td><td><strong>@{play.Play.application().configuration().getString("mongo.host");}</strong></td></tr>
-        <tr><td>DB port</td><td><strong>@{play.Play.application().configuration().getString("mongo.port");}</strong></td></tr>
-        <tr><td>DB name</td><td><strong>@{play.Play.application().configuration().getString("mongo.db.name");}</strong></td></tr>
-      </table>
+        <table class="table table-condensed">
+            <tr><td>DB host</td><td><strong>@{play.Play.application().configuration().getString("cassandra.host");}</strong></td></tr>
+            <tr><td>DB port</td><td><strong>@{play.Play.application().configuration().getString("cassandra.port");}</strong></td></tr>
+            <tr><td>DB keyspace</td><td><strong>@{play.Play.application().configuration().getString("cassandra.keyspace");}</strong></td></tr>
+        </table>
     </div>
-  </div>
-  <div class="row">
-    <div class="span7">  
-      <p>Please verify your settings and make sure that MongoDB is running!</p>
+</div>
+<div class="row">
+    <div class="span7">
+        <p>Please verify your settings and make sure that the database is running!</p>
     </div>
-  </div>
+</div>
 }

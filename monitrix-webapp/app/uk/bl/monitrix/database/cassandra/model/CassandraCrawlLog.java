@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import play.Logger;
 
 import com.datastax.driver.core.ResultSet;
@@ -57,115 +58,154 @@ public class CassandraCrawlLog extends CrawlLog {
 	@Override
 	public long getCrawlStartTime() {
 		long crawlStartTime = Long.MAX_VALUE;
-		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
-		
-		while (rows.hasNext()) {
-			Row r = rows.next();
-			long start_ts = r.getLong(CassandraProperties.FIELD_INGEST_START_TS);
-			if (start_ts < crawlStartTime)
-				crawlStartTime = start_ts;
-		}
-		Logger.info("Crawl start time: " + crawlStartTime);
-		
-		if (crawlStartTime == 0)
-			return -1;
-		
+        try {
+            Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
+
+            while (rows.hasNext()) {
+                Row r = rows.next();
+                long start_ts = r.getLong(CassandraProperties.FIELD_INGEST_START_TS);
+                if (start_ts < crawlStartTime)
+                    crawlStartTime = start_ts;
+            }
+            Logger.info("Crawl start time: " + crawlStartTime);
+
+            if (crawlStartTime == 0)
+                return -1;
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
 		return crawlStartTime;
 	}
 
 	@Override
 	public long getTimeOfLastCrawlActivity() {
 		long lastCrawlActivity = 0;
-		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
-		
-		while (rows.hasNext()) {
-			Row r = rows.next();
-			long end_ts = r.getLong(CassandraProperties.FIELD_INGEST_END_TS);
-			if (end_ts > lastCrawlActivity)
-				lastCrawlActivity = end_ts;
-		}		
-		Logger.info("Last crawl activity: " + lastCrawlActivity);
-		
-		if (lastCrawlActivity == 0)
-			return -1;
-		
+        try {
+            Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
+
+            while (rows.hasNext()) {
+                Row r = rows.next();
+                long end_ts = r.getLong(CassandraProperties.FIELD_INGEST_END_TS);
+                if (end_ts > lastCrawlActivity)
+                    lastCrawlActivity = end_ts;
+            }
+            Logger.info("Last crawl activity: " + lastCrawlActivity);
+
+            if (lastCrawlActivity == 0)
+                return -1;
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
 		return lastCrawlActivity;
 	}
 
 	@Override
 	public List<CrawlLogEntry> getMostRecentEntries(int n) {
-		long startTime = getTimeOfLastCrawlActivity();
+		long startTime = 0L;
+        List<CrawlLogEntry> recent = new ArrayList<CrawlLogEntry>();
+        try {
+            startTime = getTimeOfLastCrawlActivity();
 		
-		// Round the time down:
-		Date coarse_ts = this.getCoarseTimestamp(new Date(startTime));
-		
-		// Search based on KEY, and range (TODO?)
-		Iterator<Row> cursor =
-				session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_COARSE_TIMESTAMP + "=" + coarse_ts.getTime() + " LIMIT 100;")
-			    .iterator();
-		
-		List<CrawlLogEntry> recent = new ArrayList<CrawlLogEntry>();
-		while(cursor.hasNext())
-			recent.add(new CassandraCrawlLogEntry(cursor.next()));
+            // Round the time down:
+            Date coarse_ts = this.getCoarseTimestamp(new Date(startTime));
 
+            // Search based on KEY, and range (TODO?)
+            Iterator<Row> cursor =
+                    session.execute("SELECT * FROM " + TABLE_CRAWL_LOG + " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_COARSE_TIMESTAMP + "=" + coarse_ts.getTime() + " LIMIT 100;")
+                    .iterator();
+
+            while(cursor.hasNext())
+                recent.add(new CassandraCrawlLogEntry(cursor.next()));
+
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
 		return recent;
 	}
 	
 	@Override
 	public long countEntries() {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
-		long grand_total = 0;
-		Iterator<Row> rows = results.iterator();
-		while( rows.hasNext() ) {
-			grand_total += rows.next().getLong(CassandraProperties.FIELD_INGEST_INGESTED_LINES);
-		}
+        long grand_total = 0;
+        try {
+            ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
+            Iterator<Row> rows = results.iterator();
+            while( rows.hasNext() ) {
+                grand_total += rows.next().getLong(CassandraProperties.FIELD_INGEST_INGESTED_LINES);
+            }
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
 		return grand_total;
 	}
 	
 	@Override
 	public long countRevisits() {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
-		long grand_total = 0;
-		Iterator<Row> rows = results.iterator();
-		while( rows.hasNext() ) {
-			grand_total += rows.next().getLong(CassandraProperties.FIELD_INGEST_REVISIT_RECORDS);
-		}
+        long grand_total = 0;
+        try {
+            ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
+            Iterator<Row> rows = results.iterator();
+            while( rows.hasNext() ) {
+                grand_total += rows.next().getLong(CassandraProperties.FIELD_INGEST_REVISIT_RECORDS);
+            }
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
 		return grand_total;
 	}
 	
 	@Override
 	public List<String> listLogIds() {
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
-		List<String> collection = new ArrayList<String>();
-		Iterator<Row> rows = results.iterator();
-		while (rows.hasNext()) {
-			collection.add(rows.next().getString(CassandraProperties.FIELD_INGEST_CRAWL_ID));
-		}
+        List<String> collection = new ArrayList<String>();
+        try {
+            ResultSet results = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";");
+            Iterator<Row> rows = results.iterator();
+            while (rows.hasNext()) {
+                collection.add(rows.next().getString(CassandraProperties.FIELD_INGEST_CRAWL_ID));
+            }
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
 		return collection;
 	}
 	
 	private List<String> listLogPaths() {
-		ResultSet results = session.execute("SELECT " + CassandraProperties.FIELD_INGEST_CRAWLER_PATH + " FROM " + TABLE_INGEST_SCHEDULE + ";");
-		List<String> collection = new ArrayList<String>();
-		Iterator<Row> rows = results.iterator();
-		while (rows.hasNext()) {
-			collection.add(rows.next().getString(CassandraProperties.FIELD_INGEST_CRAWLER_PATH));
-		}
+        List<String> collection = new ArrayList<String>();
+        try {
+            ResultSet results = session.execute("SELECT " + CassandraProperties.FIELD_INGEST_CRAWLER_PATH + " FROM " + TABLE_INGEST_SCHEDULE + ";");
+            Iterator<Row> rows = results.iterator();
+            while (rows.hasNext()) {
+                collection.add(rows.next().getString(CassandraProperties.FIELD_INGEST_CRAWLER_PATH));
+            }
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
 		return collection;
 	}
 
 	@Override
 	public long countEntriesForLog(String logId) {
-		ResultSet results =
+        long count = 0L;
+        try {
+		    ResultSet results =
 				session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + logId + "';");
-		return results.one().getLong(CassandraProperties.FIELD_INGEST_INGESTED_LINES);
+            count = results.one().getLong(CassandraProperties.FIELD_INGEST_INGESTED_LINES);
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+        return count;
 	}
 	
 	@Override
-	public List<CrawlLogEntry> getEntriesForURL(String url) {		
-		ResultSet results = session.execute("SELECT * FROM " + TABLE_CRAWL_LOG +
-		        " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_URL + " = '" + url + "';");
-		return toLogEntries(results);
+	public List<CrawlLogEntry> getEntriesForURL(String url) {
+        List<CrawlLogEntry> entries = null;
+        try {
+            ResultSet results = session.execute("SELECT * FROM " + TABLE_CRAWL_LOG +
+                    " WHERE " + CassandraProperties.FIELD_CRAWL_LOG_URL + " = '" + url + "';");
+            entries = toLogEntries(results);
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+		return entries;
 	}
 	
 	private List<CrawlLogEntry> toLogEntries(ResultSet results) {

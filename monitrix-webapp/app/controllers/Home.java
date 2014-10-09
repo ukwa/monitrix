@@ -33,7 +33,11 @@ public class Home extends Controller {
 	
 	// TODO not sure where to put this API method...
 	public static Result getMostRecentLogEntries() {
-		return ok(Json.toJson(CrawlLogEntryMapper.map(log.getMostRecentEntries(100))));
+        if(backend == null) {
+            return ok(views.html.error.dbConnectError.render());
+        } else {
+            return ok(Json.toJson(CrawlLogEntryMapper.map(log.getMostRecentEntries(100))));
+        }
 	}
 	
 	// TODO not sure where to put this API method...

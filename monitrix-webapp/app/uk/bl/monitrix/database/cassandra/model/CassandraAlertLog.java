@@ -40,10 +40,16 @@ public class CassandraAlertLog implements AlertLog {
 	}
 
 	@Override
-	public long countAll() {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + ";");
-		return results.one().getLong("count");
-	}
+    public long countAll() {
+        long count = 0L;
+        try {
+            ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + ";");
+            count = results.one().getLong("count");
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+        return count;
+    }
 
 	@Override
 	public Iterator<Alert> listAll() {

@@ -73,6 +73,7 @@ public class CassandraCrawlLog extends CrawlLog {
                 return -1;
         } catch(NoHostAvailableException ex) {
             Logger.warn("No hosts available ...");
+            crawlStartTime = 0;
         }
 		return crawlStartTime;
 	}

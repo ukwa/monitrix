@@ -80,7 +80,7 @@ public class CassandraAlertLog implements AlertLog {
         } catch (NoHostAvailableException ex) {
             Logger.warn("No hosts available ...");
         }
-        if (alerts.size() < limit) {
+        if (alerts.size() != 0 && alerts.size() < limit) {
             long crawlStart = (crawlLog.getCrawlStartTime() / HOUR_IN_MILLIS) * HOUR_IN_MILLIS;
             long previousHour = hour - HOUR_IN_MILLIS;
 

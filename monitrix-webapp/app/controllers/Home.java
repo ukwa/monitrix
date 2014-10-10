@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.List;
 
+import com.datastax.driver.core.Host;
 import controllers.mapping.CrawlLogEntryMapper;
 import controllers.mapping.CrawlStatsUnitMapper;
 import play.libs.Json;
@@ -33,7 +34,7 @@ public class Home extends Controller {
 	
 	// TODO not sure where to put this API method...
 	public static Result getMostRecentLogEntries() {
-        if(backend == null) {
+        if(backend == null || !backend.isAvailable()) {
             return ok(views.html.error.dbConnectError.render());
         } else {
             return ok(Json.toJson(CrawlLogEntryMapper.map(log.getMostRecentEntries(100))));

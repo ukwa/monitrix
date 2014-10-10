@@ -1,5 +1,6 @@
 package uk.bl.monitrix.database;
 
+import com.datastax.driver.core.Session;
 import uk.bl.monitrix.model.AlertLog;
 import uk.bl.monitrix.model.CrawlLog;
 import uk.bl.monitrix.model.CrawlStats;
@@ -12,6 +13,8 @@ import uk.bl.monitrix.model.VirusLog;
  * @author Rainer Simon <rainer.simon@ait.ac.at>
  */
 public interface DBConnector {
+
+    public boolean isAvailable();
 	
 	/**
 	 * Returns the DB-backed ingest schedule.

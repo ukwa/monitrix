@@ -96,6 +96,15 @@ public class CassandraDBConnector implements DBConnector {
 		this.alertLog = new CassandraAlertLog(session, crawlLog);
 		this.virusLog = new CassandraVirusLog(session);
 	}
+
+    public boolean isAvailable() {
+        boolean anyHostUp = false;
+        for (Host host : this.getSession().getCluster().getMetadata().getAllHosts()) {
+            if(host.isUp()) anyHostUp = true;
+            if(anyHostUp) continue;
+        }
+        return anyHostUp;
+    }
 	
 	private boolean schemaExists() {
 		Logger.info("Checking if schema exists...");

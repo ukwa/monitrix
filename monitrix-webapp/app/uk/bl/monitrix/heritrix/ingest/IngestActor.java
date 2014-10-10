@@ -73,7 +73,9 @@ public class IngestActor extends UntypedActor {
 				IngestStatus status = entry.getValue();
 				if (status.phase.equals(IngestStatus.Phase.CATCHING_UP)) {
 					WatchedLog log = newLogs.get(entry.getKey());
-					status.progress = (int) ((100 * log.getReader().getNumberOfLinesRead()) / log.getEstimatedLineCount());
+                    if(log != null) {
+                        status.progress = (int) ((100 * log.getReader().getNumberOfLinesRead()) / log.getEstimatedLineCount());
+                    }
 				}
 			}
 

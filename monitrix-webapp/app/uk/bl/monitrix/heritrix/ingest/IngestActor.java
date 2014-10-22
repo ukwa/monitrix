@@ -41,6 +41,13 @@ public class IngestActor extends UntypedActor {
 	private ActorSystem system;
 	
 	private static long sleepInterval = 2000;
+
+    /**
+     * The startup interval is the time for initial log file synchronization. After this time interval has elapsed,
+     * unavailable log files will be flagged as 'unavailable' and it will be continuously checked if they become
+     * available again.
+     */
+    private long startUpInterval;
 	
 	private Map<String, WatchedLog> newLogs = new HashMap<String, WatchedLog>();
 	
@@ -166,6 +173,8 @@ public class IngestActor extends UntypedActor {
 			@Override
 			public Void call() throws Exception {
 				Logger.info("Starting log synchronization loop, " + keepRunning + ", " + newLogs.size());
+                // initial startup interval time
+                startUpInterval = 10 * sleepInterval;
 				IngestSchedule schedule = db.getIngestSchedule();
 				
 				while (keepRunning) {
@@ -173,7 +182,7 @@ public class IngestActor extends UntypedActor {
 					List<WatchedLog> toAdd = new ArrayList<WatchedLog>();
 					for (WatchedLog watchedLog : newLogs.values())
 						toAdd.add(watchedLog);
-					
+
 					for (WatchedLog log : toAdd) {
 						//Logger.info("Checking "+log.getLogInfo());
 						// TODO performance improvement
@@ -184,31 +193,68 @@ public class IngestActor extends UntypedActor {
 							newLogs.remove(log.getLogInfo().getId());
 						}
 					}
+
+
+
 					
 					// Sync all other logs
 					for (WatchedLog log : watchedLogs.values()) {
 						// TODO performance improvement
-						if (schedule.isMonitoringEnabled(log.getLogInfo().getId())) {
-							Logger.debug("Synchronizing log: " + log.getLogInfo().getPath());
-							
-							// Check if file was renamed in the mean time
+                        String logId = log.getLogInfo().getId();
+                        String logPath = log.getLogInfo().getPath();
+						if (schedule.isMonitoringEnabled(logId)) {
+							// Check if file was renamed in the mean time.
+                            // Remove file from currently watched log files if it was moved or renamed
 							if(log.getReader().isRenamed()) {
-								Logger.info("Detected log rename");
-								log.setReader(new IncrementalLogfileReader(log.getLogInfo().getPath()));
-							}
+								Logger.debug("Log file "+logId+" registered at " +log.getLogInfo().getPath()+" was renamed or moved (status becomes 'Unavailable'");
+								//log.setReader(new IncrementalLogfileReader(log.getLogInfo().getPath()));
+                                IngestStatus status = statusList.get(log.getLogInfo().getId());
+                                status.phase = Phase.UNAVAILABLE;
+                                Logger.info("Setting status to: "+status.phase.name());
+							} else {
+                                Logger.debug("Synchronizing log: " + logPath);
+                                synchronizeWithLog(log);
+                            }
 							
-							synchronizeWithLog(log);
+
 						}
 					}
 					
 					// Add new Logs to synchroniziation loop
 					for (WatchedLog log : toAdd)
 						watchedLogs.put(log.getLogInfo().getId(), log);
+
+
+                    // If the startup interval has elapsed, unavailable log files will be flagged as 'unavailable' and
+                    // it will be continuously checked if they become available again.
+                    if(startUpInterval < 0 && watchedLogs.size() < db.getIngestSchedule().getLogs().size()) {
+                        Logger.warn("There are registered log files not available in the file system");
+                        for (IngestedLog log : db.getIngestSchedule().getLogs()) {
+                            String id = log.getId();
+                            if (!watchedLogs.containsKey(id) && !newLogs.containsKey(id)) {
+                                IngestStatus status = statusList.get(log.getId());
+                                if(!(new File(log.getPath()).exists())) {
+                                    Logger.info("Registered log file not available at " + log.getPath());
+                                    status.phase = Phase.UNAVAILABLE;
+                                    Logger.info("Setting status to: "+status.phase.name());
+                                } else {
+                                    Logger.info("Adding a WatchedLog for  " + log.getPath());
+                                    WatchedLog watchedLog = new WatchedLog(log, new IncrementalLogfileReader(log.getPath()));
+                                    status.phase = Phase.CATCHING_UP;
+                                    catchUpWithLog(watchedLog);
+                                    watchedLogs.put(id,watchedLog);
+                                }
+
+                            }
+                        }
+                    }
 					
-					// Go to sleep
+					// startup interval is decreased after each pass
+                    startUpInterval -= sleepInterval;
+                    // Go to sleep
 					Thread.sleep(sleepInterval);
 				}
-			
+
 				Logger.info("Stopping synchronization loop");
 				return null;
 			}
@@ -241,7 +287,7 @@ public class IngestActor extends UntypedActor {
 		try {
 			IngestStatus status = statusList.get(log.getLogInfo().getId());
 			status.phase = IngestStatus.Phase.SYNCHRONIZING;
-			db.insert(log.getLogInfo().getId(), log.getReader().newIterator());		
+			db.insert(log.getLogInfo().getId(), log.getReader().newIterator());
 			status.phase = IngestStatus.Phase.IDLE;
 		} catch (Throwable t) {
 			t.printStackTrace();

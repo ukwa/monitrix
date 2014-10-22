@@ -179,6 +179,10 @@
     		
     	if (phase == 'SYNCHRONIZING')
     		return '<span class="circle" style="background-color:#ff7d40;"></span>';
+
+        if (phase == 'UNAVAILABLE')
+    		return '<span class="circle" style="background-color:#ff0000;"></span>';
+
     		
     	return '';
     }
@@ -196,7 +200,10 @@
     		
     	if (phase == 'SYNCHRONIZING')
     		return 'SYNCHRONIZING';
-    		
+
+    	if(phase == 'UNAVAILABLE')
+    	    return 'UNAVAILABLE';
+
     	return '';
     }
     pollStatusInfo();

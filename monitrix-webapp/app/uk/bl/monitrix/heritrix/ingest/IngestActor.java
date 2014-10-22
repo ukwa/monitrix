@@ -174,7 +174,7 @@ public class IngestActor extends UntypedActor {
 			public Void call() throws Exception {
 				Logger.info("Starting log synchronization loop, " + keepRunning + ", " + newLogs.size());
                 // initial startup interval time
-                startUpInterval = 10 * sleepInterval;
+                startUpInterval = 60 * sleepInterval;
 				IngestSchedule schedule = db.getIngestSchedule();
 				
 				while (keepRunning) {

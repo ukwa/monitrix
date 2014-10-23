@@ -73,7 +73,7 @@ public class MongoDBConnector implements DBConnector {
 		this.alertLog = new MongoAlertLog(db);
 		this.virusLog = new MongoVirusLog(db);
 	}
-	
+
 	@Override
 	public IngestSchedule getIngestSchedule() {
 		return ingestSchedule;
@@ -108,6 +108,15 @@ public class MongoDBConnector implements DBConnector {
 	public void close() {
 		this.mongo.close();
 	}
+
+    /**
+     * Dummy method just implements interface method and always returns true for now.
+     * TODO: Implement for mongoDB
+     * @return boolean true if DB is up
+     */
+    public boolean isAvailable() {
+        return true;
+    }
 
 	@Override
 	@SuppressWarnings("unchecked")

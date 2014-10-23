@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import play.Logger;
 
 import com.datastax.driver.core.BoundStatement;
@@ -54,24 +55,30 @@ public class CassandraIngestSchedule extends IngestSchedule {
 	
 	@Override
 	public List<IngestedLog> getLogs() {
-		Iterator<Row> cursor = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
-
-		List<IngestedLog> logs = new ArrayList<IngestedLog>();		
-		while(cursor.hasNext()) {
-			logs.add(new CassandraIngestedLog(cursor.next()));
-		}
-		
+        List<IngestedLog> logs = new ArrayList<IngestedLog>();
+        try {
+            Iterator<Row> cursor = session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + ";").iterator();
+            while (cursor.hasNext()) {
+                logs.add(new CassandraIngestedLog(cursor.next()));
+            }
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
 		return logs;
 	}
 	
 	@Override
 	public IngestedLog getLog(String id) {
-		ResultSet results = 
-				session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + id + "';");
-		if (results.isExhausted())
-			return null;
-		
-		return new CassandraIngestedLog(results.one());
+        try {
+            ResultSet results =
+                    session.execute("SELECT * FROM " + TABLE_INGEST_SCHEDULE + " WHERE " + CassandraProperties.FIELD_INGEST_CRAWL_ID + "='" + id + "';");
+            if (results.isExhausted())
+                return null;
+            return new CassandraIngestedLog(results.one());
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+        return null;
 	}
 	
 	@Override

@@ -32,19 +32,32 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		
 		this.knownHosts = knownHosts;
 		this.virusLog = virusLog;
-		
-		this.statement = session.prepare(
-				"INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS + " (" +
-				CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID + ", " +
-				CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ", " +
-				CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME + ", " + 
-				CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED + ", " +
-				CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED + ", " + 
-				CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS + ") " +
-				"VALUES (?, ?, ?, ?, ?, ?);");		
+
+        prepareNewCrawlStatsLine();
 	}
-	
-	/**
+
+    private void prepareNewCrawlStatsLine() {
+        this.statement = session.prepare(
+                "INSERT INTO " + CassandraProperties.KEYSPACE + "." + CassandraProperties.COLLECTION_CRAWL_STATS + " (" +
+                        CassandraProperties.FIELD_CRAWL_STATS_CRAWL_ID + ", " +
+                        CassandraProperties.FIELD_CRAWL_STATS_TIMESTAMP + ", " +
+                        CassandraProperties.FIELD_CRAWL_STATS_DOWNLOAD_VOLUME + ", " +
+                        CassandraProperties.FIELD_CRAWL_STATS_NUMBER_OF_URLS_CRAWLED + ", " +
+                        CassandraProperties.FIELD_CRAWL_STATS_NEW_HOSTS_CRAWLED + ", " +
+                        CassandraProperties.FIELD_CRAWL_STATS_COMPLETED_HOSTS + ") " +
+                        "VALUES (?, ?, ?, ?, ?, ?);");
+    }
+
+    private void insertNewCrawlStatsLine(String crawl_id, long timeslot, CrawlLogEntry entry) {
+        BoundStatement boundStatement = new BoundStatement(statement);
+        session.execute(boundStatement.bind(
+                crawl_id,
+                timeslot,
+                entry.getDownloadSize(),
+                1l, 0l, 0l));
+    }
+
+    /**
 	 * Updates the crawl stats with a single log entry. Note that this method ONLY writes to
 	 * the in-memory cache to avoid excessive DB transactions! To write to the DB, execute the
 	 * .commit() method after your updates are done.
@@ -57,12 +70,8 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 		// Step 2 - update data for this timeslot
 		CassandraCrawlStatsUnit currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot, crawl_id);
 		if (currentUnit == null) {
-			BoundStatement boundStatement = new BoundStatement(statement);
-			session.execute(boundStatement.bind(
-					crawl_id,
-					timeslot,
-					entry.getDownloadSize(),
-					1l, 0l, 0l));
+
+			insertNewCrawlStatsLine(crawl_id, timeslot, entry);
 			
 			// This also ensures we got the unit in the cache now
 			currentUnit = (CassandraCrawlStatsUnit) getStatsForTimestamp(timeslot, crawl_id);
@@ -80,7 +89,13 @@ class CassandraCrawlStatsImporter extends CassandraCrawlStats {
 			long lastRecordedAccess = host.getLastAccess();
 			if (lastRecordedAccess < timeslot) {
 				CassandraCrawlStatsUnit unitToModify = (CassandraCrawlStatsUnit) getStatsForTimestamp(toTimeslot(lastRecordedAccess), crawl_id);
-				unitToModify.setCompletedHosts(unitToModify.countCompletedHosts() - 1);
+                // create crawl stats table for the current time slot if it does not exist
+                if(unitToModify == null) {
+                    prepareNewCrawlStatsLine();
+                    insertNewCrawlStatsLine(crawl_id, timeslot, entry);
+                } else {
+                    unitToModify.setCompletedHosts(unitToModify.countCompletedHosts() - 1);
+                }
 				currentUnit.setCompletedHosts(currentUnit.countCompletedHosts() + 1);
 			}
 			

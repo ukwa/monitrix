@@ -12,6 +12,8 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import play.Logger;
 import uk.bl.monitrix.database.cassandra.CassandraProperties;
 import uk.bl.monitrix.model.Alert;
 import uk.bl.monitrix.model.Alert.AlertType;
@@ -38,10 +40,16 @@ public class CassandraAlertLog implements AlertLog {
 	}
 
 	@Override
-	public long countAll() {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + ";");
-		return results.one().getLong("count");
-	}
+    public long countAll() {
+        long count = 0L;
+        try {
+            ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + ";");
+            count = results.one().getLong("count");
+        } catch(NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+        return count;
+    }
 
 	@Override
 	public Iterator<Alert> listAll() {
@@ -50,38 +58,40 @@ public class CassandraAlertLog implements AlertLog {
 	
 	
 	private List<Alert> appendAlertsUntil(List<Alert> alerts, int limit, long hour) {
-		Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_ALERTS + " WHERE " + CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP_HR + "=" + 
-				hour + " ALLOW FILTERING ;").iterator();
-		
-		List<Alert> alertsForThisHour = new ArrayList<Alert>();
-		while (rows.hasNext())
-			alertsForThisHour.add(new CassandraAlert(rows.next()));
-		
-		Collections.sort(alertsForThisHour, new Comparator<Alert>() {
-			@Override
-			public int compare(Alert a, Alert b) {
-				return (int) (a.getTimestamp() - b.getTimestamp());
-			}
-		});
-		
-		int counter = 0;
-		while(alerts.size() < limit && counter < alertsForThisHour.size()) {
-			alerts.add(alertsForThisHour.get(counter));
-			counter++;
-		}
-		
-		if (alerts.size() < limit) {
-			long crawlStart = (crawlLog.getCrawlStartTime() / HOUR_IN_MILLIS) * HOUR_IN_MILLIS;
-			long previousHour = hour - HOUR_IN_MILLIS;
-			
-			if (previousHour >= crawlStart)
-				return appendAlertsUntil(alerts, limit, previousHour);
-			else
-				return alerts;
-		} else {
-			return alerts;
-		}
-	}
+        List<Alert> alertsForThisHour = new ArrayList<Alert>();
+        try {
+            Iterator<Row> rows = session.execute("SELECT * FROM " + TABLE_ALERTS + " WHERE " + CassandraProperties.FIELD_ALERT_LOG_TIMESTAMP_HR + "=" +
+                    hour + " ALLOW FILTERING ;").iterator();
+            while (rows.hasNext())
+                alertsForThisHour.add(new CassandraAlert(rows.next()));
+
+            Collections.sort(alertsForThisHour, new Comparator<Alert>() {
+                @Override
+                public int compare(Alert a, Alert b) {
+                    return (int) (a.getTimestamp() - b.getTimestamp());
+                }
+            });
+
+            int counter = 0;
+            while (alerts.size() < limit && counter < alertsForThisHour.size()) {
+                alerts.add(alertsForThisHour.get(counter));
+                counter++;
+            }
+        } catch (NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+        if (alerts.size() != 0 && alerts.size() < limit) {
+            long crawlStart = (crawlLog.getCrawlStartTime() / HOUR_IN_MILLIS) * HOUR_IN_MILLIS;
+            long previousHour = hour - HOUR_IN_MILLIS;
+
+            if (previousHour >= crawlStart)
+                return appendAlertsUntil(alerts, limit, previousHour);
+            else
+                return alerts;
+        } else {
+            return alerts;
+        }
+    }
 	
 	
 	@Override
@@ -92,48 +102,67 @@ public class CassandraAlertLog implements AlertLog {
 
 	@Override
 	public List<String> getOffendingHosts() {
-		Iterator<Row> rows = session.execute("SELECT " + CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + " FROM " + 
-				TABLE_ALERTS +";").iterator();
-		
-		Set<String> hosts = new HashSet<String>();
-		while (rows.hasNext()) {
-			hosts.add(rows.next().getString(CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST));
-		}
-		List<String> hostList = new ArrayList<String>();
-		hostList.addAll(hosts);
-		return hostList;
-	}
+        List<String> hostList = new ArrayList<String>();
+        try {
+            Iterator<Row> rows = session.execute("SELECT " + CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + " FROM " +
+                    TABLE_ALERTS + ";").iterator();
+
+            Set<String> hosts = new HashSet<String>();
+            while (rows.hasNext()) {
+                hosts.add(rows.next().getString(CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST));
+            }
+
+            hostList.addAll(hosts);
+        } catch (NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+        return hostList;
+    }
 
 	@Override
 	public long countAlertsForHost(String hostname) {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + " WHERE " + 
+        long count = 0L;
+        try {
+		    ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + " WHERE " +
 				CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "';");
-		return results.one().getLong("count");
+            count = results.one().getLong("count");
+        } catch (NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+		return count;
 	}
 	
 	@Override
 	public long countAlertsForHost(String hostname, AlertType type) {
-		ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + " WHERE " + 
-				CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "' AND " + 
-				CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + "='" + type.name() + "' ALLOW FILTERING;");
-		
-		return results.one().getLong("count");
-	}
+        long count = 0L;
+        try {
+            ResultSet results = session.execute("SELECT COUNT(*) FROM " + TABLE_ALERTS + " WHERE " +
+                    CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "' AND " +
+                    CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + "='" + type.name() + "' ALLOW FILTERING;");
+            count = results.one().getLong("count");
+        } catch (NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+        return count;
+    }
 	
 	@Override
 	public List<AlertType> getAlertTypesForHost(String hostname) {
-		Iterator<Row> rows = session.execute("SELECT " + CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + " FROM " +
-				TABLE_ALERTS + " WHERE " + CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "';").iterator();
-		
-		Set<AlertType> set = new HashSet<AlertType>();
-		while (rows.hasNext()) {
-			set.add(AlertType.valueOf(rows.next().getString(CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE)));
-		}
-		
-		List<AlertType> list = new ArrayList<AlertType>();
-		list.addAll(set);
-		return list;
-	}
+        List<AlertType> list = new ArrayList<AlertType>();
+        try {
+            Iterator<Row> rows = session.execute("SELECT " + CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE + " FROM " +
+                    TABLE_ALERTS + " WHERE " + CassandraProperties.FIELD_ALERT_LOG_OFFENDING_HOST + "='" + hostname + "';").iterator();
+
+            Set<AlertType> set = new HashSet<AlertType>();
+            while (rows.hasNext()) {
+                set.add(AlertType.valueOf(rows.next().getString(CassandraProperties.FIELD_ALERT_LOG_ALERT_TYPE)));
+            }
+            list.addAll(set);
+        } catch (NoHostAvailableException ex) {
+            Logger.warn("No hosts available ...");
+        }
+        return list;
+    }
 
 	@Override
 	public Iterator<Alert> listAlertsForHost(String hostname) {

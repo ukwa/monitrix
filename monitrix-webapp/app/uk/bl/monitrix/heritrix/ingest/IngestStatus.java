@@ -37,6 +37,9 @@ public class IngestStatus {
 		
 		/** The ingestor has terminated **/
 		TERMINATED,
+
+        /** The source of the actor is not available */
+        UNAVAILABLE,
 		
 		/** Unknown status (may be caused by different error situations - consult application logs! **/
 		UNKNOWN

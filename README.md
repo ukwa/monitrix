@@ -1,7 +1,13 @@
-# monitrix
+# Monitrix
 
-monitrix is a monitoring/analytics frontend for the Heritrix 3 Web crawler. Visit the [Wiki](http://github.com/ukwa/monitrix/wiki) 
-for information about: 
+Monitrix is a monitoring/analytics frontend for the Heritrix 3 Web crawler. There are two prototypes:
+
+* Prototype 1: A dedicated web application.
+* Prototype 2: A version built on the generic log visualisation platform, Kibana.
+
+Visit the [Wiki](http://github.com/ukwa/monitrix/wiki) for more information.
+
+# About The Dedicated Web Application
 
 * [installing monitrix](http://github.com/ukwa/monitrix/wiki/Installation)
 * [using monitrix](http://github.com/ukwa/monitrix/wiki/A-Guided-Tour-of-monitrix)

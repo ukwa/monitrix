@@ -38,12 +38,3 @@ located in the /test folder of the project:
 * ``uk.bl.monitrix.util.BatchLogProcessor`` will load a log file into the database in one go and then terminate.
 * ``uk.bl.monitrix.util.IncrementalLogProcessor`` will load a log file into the database, and then continue
   to monitor that file (and incrementally sync the DB) until it is terminated forcefully. 
-
-
-## Ideas
-
-It may be possible to do pretty much all of this just using Kibana?
-
-* https://github.com/arcus-io/docker-logstash
-* https://github.com/dockerfile/elasticsearch
-* https://github.com/balsamiq/docker-kibana

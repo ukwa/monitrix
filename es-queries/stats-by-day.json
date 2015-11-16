@@ -1,0 +1,22 @@
+{
+    "aggs" : {
+        "by_day" : {
+            "date_histogram" : {
+                "field" : "log_timestamp",
+                "interval" : "1m"
+            },
+            "aggs": {
+                  "total_bytes": {
+                     "sum": {
+                        "field": "resource_size"
+                     }
+                  },
+                  "total_status_codes" : {
+                    "terms" : { 
+                      "field": "fetch_status_code"
+                      }
+                  }
+            }
+        }
+    }
+}

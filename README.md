@@ -5,6 +5,10 @@ Monitrix is a monitoring/analytics frontend for the Heritrix 3 Web crawler. Ther
 * Prototype 1: A dedicated web application.
 * Prototype 2: A version built on the generic log visualisation platform, Kibana.
 
+We are moving towards exclusively using the Kibana version. It is based on 
+[this ELK Docker image](http://elk-docker.readthedocs.org/), but we add configuration 
+so Logstash knows how to parse and store Heritrix logs.
+
 Visit the [Wiki](http://github.com/ukwa/monitrix/wiki) for more information.
 
 # About The Dedicated Web Application

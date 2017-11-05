@@ -1,4 +1,4 @@
-FROM sebp/elk:es220_l220_k440
+FROM sebp/elk:562
 
 RUN \
   /opt/logstash/bin/plugin update logstash-input-beats
